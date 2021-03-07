@@ -14,7 +14,7 @@
 static FILE *logFP;
 
 bool checkLogFilename() {
-    char* logFile = getenv("LOG_FILENAME");
+    char* logFile = getenv("LOG_FILENAME"); // creat env varaivel LOG_FILENAME "export LOG_FILENAME=./trace.txt" 
 
     if(logFile == NULL) {
         fprintf(stderr, "WARNING: variable LOG_FILENAME not defined.\n");
@@ -26,6 +26,7 @@ bool checkLogFilename() {
         return false;
     }
 
+    fprintf(logFP,"%s\n",logFile);
     return true;
 }
 
