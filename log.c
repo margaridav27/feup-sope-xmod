@@ -1,4 +1,3 @@
-//control with things relationated to log file
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -18,10 +17,9 @@ bool check_log_filename(){
 
     if((logFile = getenv("LOG_FILENAME")) != NULL){
         logFileFD = open(logFile,O_WRONLY | O_CREAT | O_TRUNC);
-        write(logFileFD,logFile,strlen(logFile));
         return true;
     }
 
-    fprintf(stderr, "WARNING variavel LOG_FILENAME not defined.\n");
+    fprintf(stderr, "WARNING: variable LOG_FILENAME not defined.\n");
     return false;
 }

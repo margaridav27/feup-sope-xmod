@@ -10,14 +10,11 @@
 #include <string.h>
 #include "log.h"
 
-//file2 & file1 to test -R flag
-//define environment variavel "export LOG_FILENAME="./trace.txt""
+static bool logFileAvailable;
 
 int main(int argc, char const *argv[])
 {
-    bool logFile = check_log_filename();
-    if(logFile)
-        printf("Ola");
+    logFileAvailable = check_log_filename();
 
     return 0;
 }

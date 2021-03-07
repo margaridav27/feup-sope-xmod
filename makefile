@@ -4,11 +4,14 @@
 
 all: xmod log
 
-xmod: xmod.c log
-	gcc -o xmod.o -Wall -Werror xmod.c 
+xmod: xmod.o log.o
+	gcc xmod.o log.o -o exec
 
-log: log.c
-	gcc -o log.o -Wall -Werror log.c
+xmod.o: xmod.c
+	gcc -c xmod.c -Wall -Werror 
+
+log.o: log.c
+	gcc -c log.c -Wall -Werror
 
 clean:
 	rm -f xmod.o log.o
