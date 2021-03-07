@@ -2,17 +2,20 @@
 #    xmod
 #
 
-all: xmod log
+all: project
 
-xmod: xmod.o log.o
-	gcc xmod.o log.o -o exec
+project: xmod.o log.o time_ctrl.o 
+	gcc xmod.o log.o time_ctrl.o -o exec
 
-xmod.o: xmod.c
+xmod.o: xmod.c log.c time_ctrl.c
 	gcc -c xmod.c -Wall -Werror 
 
-log.o: log.c
+log.o: log.c time_ctrl.c
 	gcc -c log.c -Wall -Werror
 
+time_ctrl.o: time_ctrl.c
+	gcc -c time_ctrl.c -Wall -Werror
+
 clean:
-	rm -f xmod.o log.o
+	rm -f *.o
 
