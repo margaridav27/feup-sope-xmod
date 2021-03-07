@@ -1,6 +1,8 @@
 #ifndef PARSE
 #define PARSE
 
+#include <stdbool.h>
+
 typedef struct {
     bool verbose;
     bool changes;
@@ -12,7 +14,7 @@ typedef struct {
 
     int permissions;
 
-    char* path;
+    char *path;
 } command_t;
 
 int parseCommand(int argc, char *argv[]);
