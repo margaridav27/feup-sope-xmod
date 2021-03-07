@@ -3,14 +3,15 @@
 
 #include <stdbool.h>
 
-typedef struct {
+typedef struct
+{
     bool verbose;
     bool changes;
     bool recursive;
 
     int user;
 
-    int op;
+    char op;
 
     int permissions;
 
