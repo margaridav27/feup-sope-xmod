@@ -14,6 +14,8 @@ typedef struct
     char op;
 
     int permissions;
+    
+    int octalNumber;
 
     char *path;
 } command_t;

@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <errno.h>
+#include <stdlib.h>
 
 #include "parse.h"
 
@@ -30,16 +32,17 @@ int parseCommand(int argc, char *argv[])
         }
     }
 
+
     char *modeStr = argv[argc - 2];
 
-    for (int j = 0; j < strlen(modeStr); j++)
-    {
-        if (j == 0)
-        {
-            switch (modeStr[j])
-            {
+    //OCTAL NUMBER HANDLER
+    if(modeStr[0] == '0'){
+            cmd.octalNumber = strtol(&modeStr[0],'\0',10);
+            printf("octal number = %d\n", cmd.octalNumber);
+    }
+    else { //MODE "normal" HANDLER
+        switch (modeStr[0]){ // define user
             case 'u':
-                printf("here1\n");
                 cmd.user = 1;
                 break;
             case 'g':
@@ -52,13 +55,43 @@ int parseCommand(int argc, char *argv[])
                 cmd.user = 4;
                 break;
             default:
+                fprintf(stderr, "Error no user defined\n");
                 break;
-            }
         }
-        if (j == 1)
+
+        switch (modeStr[1]){ // define operation
+            case '=':
+                cmd.op = '=';
+                break;
+            case '+':
+                cmd.op = '+';
+                break;
+            case '-':
+                cmd.op = '-';
+                break;
+            default:
+                fprintf(stderr, "Error no operator defined\n");
+                break;
+        }
+        for (int j = 2; j < strlen(modeStr); j++) // definde permisions changes
         {
-                }
-        //COMBACK:
-        //return 0;
+            /*switch (modeStr[1]){
+                case 'r':
+                    cmd.op = '=';
+                    break;
+                case 'w':
+                    cmd.op = '+';
+                    break;
+                case 'x':
+                    cmd.op = '-';
+                    break;
+                default:
+                    fprintf(stderr, "Error no operator defined\n");
+                    break;
+            }*/
+        }
     }
+    
+
+    cmd.path = argv[argc - 1];
 }
