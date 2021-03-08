@@ -3,23 +3,20 @@
 
 #include <stdbool.h>
 
-typedef struct
-{
+typedef enum {
+    ACTION_REMOVE, ACTION_ADD, ACTION_SET
+} action_t;
+
+typedef struct {
     bool verbose;
     bool changes;
     bool recursive;
 
-    int user;
-
-    char op;
-
-    int permissions;
-    
-    int octalNumber;
-
-    char *path;
+    action_t action;
+    mode_t mode;
+    const char *path;
 } command_t;
 
-int parseCommand(int argc, char *argv[]);
+int parseCommand(int argc, char *argv[], command_t *result);
 
 #endif
