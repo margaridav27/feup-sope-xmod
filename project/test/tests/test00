@@ -1,0 +1,66 @@
+#!/bin/bash
+if [ -z $executable ]; then
+  echo "Could not find executable. Aborting."
+  exit
+fi
+
+echo "================================================================================================="
+echo "Testing command-line argument validation..."
+
+test_name "A" "No Arguments"
+ARGS=""
+EXPECTED_RET="1"
+xmod "$EXPECTED_RET" "$ARGS"
+
+test_name "B" "Excess Arguments"
+ARGS="-c 777 . excess1 excess2"
+EXPECTED_RET="1"
+xmod "$EXPECTED_RET" "$ARGS"
+
+test_name "C" "Invalid Flags"
+ARGS="-d 777 ."
+EXPECTED_RET="1"
+xmod "$EXPECTED_RET" "$ARGS"
+
+test_name "D" "Invalid octal mode"
+ARGS="999 ."
+EXPECTED_RET="1"
+xmod "$EXPECTED_RET" "$ARGS"
+
+test_name "E" "Invalid user specification"
+ARGS="x+r ."
+EXPECTED_RET="1"
+xmod "$EXPECTED_RET" "$ARGS"
+
+test_name "F" "Invalid change specification"
+ARGS="u<r ."
+EXPECTED_RET="1"
+xmod "$EXPECTED_RET" "$ARGS"
+
+test_name "G" "Invalid permission specification"
+ARGS="u+k ."
+EXPECTED_RET="1"
+xmod "$EXPECTED_RET" "$ARGS"
+
+test_name "H" "Valid octal command with flags"
+ARGS="-cvR 777 ."
+EXPECTED_RET="0"
+xmod "$EXPECTED_RET" "$ARGS"
+
+test_name "H" "Valid octal command without flags"
+ARGS="511 ."
+EXPECTED_RET="0"
+xmod "$EXPECTED_RET" "$ARGS"
+
+test_name "I" "Valid human-readable command with flags"
+ARGS="-cvR u+rxw ."
+EXPECTED_RET="0"
+xmod "$EXPECTED_RET" "$ARGS"
+
+test_name "I" "Valid human-readable command without flags"
+ARGS="g-r ."
+EXPECTED_RET="0"
+xmod "$EXPECTED_RET" "$ARGS"
+
+echo "================================================================================================="
+exit $no_failed
