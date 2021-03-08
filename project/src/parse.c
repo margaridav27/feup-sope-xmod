@@ -31,8 +31,12 @@ int parseCommand(int argc, char *argv[], command_t *result) {
 
     const char *mode_string = argv[optind]; // After processing options, this is the first argument
     if (strlen(mode_string) < 3) return 1; //Mode has less than three characters: command is invalid
-    long int mode = strtol(mode_string, NULL, 8);
-    if (mode != 0) result->action = ACTION_SET;
+
+    const char *string_end = mode_string + strlen(mode_string);
+    char *process_end;
+    long int mode = strtol(mode_string, &process_end, 8);
+
+    if (process_end == string_end) result->action = ACTION_SET;
     else { // Conversion was unsuccessful: parse the string
         char user = mode_string[0], change = mode_string[1];
 
