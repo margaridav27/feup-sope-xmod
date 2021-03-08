@@ -17,6 +17,8 @@ int main(int argc, char *argv[]) {
 
     command_t result;
     if (parseCommand(argc, argv, &result)) return 1;
-    changeMode(&result);
+    printRetainMessage(&result);
+    printChangeMessage(455,&result); //455 = 0707
+    //changeMode(&result);
     return 0;
 }
