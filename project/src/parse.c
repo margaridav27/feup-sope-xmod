@@ -27,6 +27,7 @@ int parseCommand(int argc, char *argv[], command_t *result) {
                 return 1; // Unknown option: command is invalid
         }
     }
+
     if (argc - optind < 2) return 1; // Not enough arguments after flags: command is invalid
 
     const char *mode_string = argv[optind]; // After processing options, this is the first argument
@@ -47,15 +48,16 @@ int parseCommand(int argc, char *argv[], command_t *result) {
 
         const char *permissions_string = mode_string + 2;
         for (int i = 0; i < strlen(permissions_string); ++i) {
-            if (permissions_string[i] == 'r') mode |= (1 << 2);
-            else if (permissions_string[i] == 'w') mode |= (1 << 1);
-            else if (permissions_string[i] == 'x') mode |= (1 << 0);
+            if (permissions_string[i] == 'r') mode |= BIT(READ_BIT);
+            else if (permissions_string[i] == 'w') mode |= BIT(WRITE_BIT);
+            else if (permissions_string[i] == 'x') mode |= BIT(EXECUTE_BIT);
             else return 1;
         }
 
-        if (user == 'u') mode <<= 6;
-        else if (user == 'g') mode <<= 3;
-        else if (user == 'a') mode |= (mode << 6) | (mode << 3);
+        // Default mode is in the "others position"
+        if (user == 'u') mode <<= USER_POSITION;
+        else if (user == 'g') mode <<= GROUP_POSITION;
+        else if (user == 'a') mode |= (mode << USER_POSITION) | (mode << GROUP_POSITION);
         else if (user != 'o') return 1;
     }
     result->mode = (mode_t) mode;

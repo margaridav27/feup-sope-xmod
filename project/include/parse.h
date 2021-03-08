@@ -1,6 +1,20 @@
 #ifndef PARSE
 #define PARSE
 
+/*
+ * A file's mode is of the form: - RWX RWX RWX
+                                    U   G   O
+*/
+
+#define GROUP_POSITION 3
+#define USER_POSITION 6
+
+#define EXECUTE_BIT 0
+#define WRITE_BIT 1
+#define READ_BIT 2
+
+#define BIT(n) (1<<(n))
+
 #include <stdbool.h>
 
 typedef enum {
