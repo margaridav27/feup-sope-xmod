@@ -10,12 +10,9 @@
 #include <unistd.h>
 #include <dirent.h>
 
+#include "xmod.h"
 #include "log.h"
 #include "time_ctrl.h"
-#include "parse.h"
-
-static bool logFileAvailable;
-int changeMode(command_t *command);
 
 int changeFileMode(command_t *command) {
     struct stat buf;
@@ -81,17 +78,4 @@ int changeMode(command_t *command) {
 
     if (S_ISDIR(buf.st_mode)) return changeFileMode(command) && changeFolderMode(command);
     else return changeFileMode(command);
-}
-
-int main(int argc, char *argv[]) {
-    setBegin();
-
-    logFileAvailable = checkLogFilename();
-    if (logFileAvailable) registerEvent(getpid(), FILE_MODF, "some additional info");
-    else printf("File not available. Could not register event.\n");
-
-    command_t result;
-    if (parseCommand(argc, argv, &result)) return 1;
-    changeMode(&result);
-    return 0;
 }

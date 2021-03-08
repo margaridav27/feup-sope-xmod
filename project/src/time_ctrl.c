@@ -12,4 +12,3 @@ int getElapsed() {
     clock_t now = clock();
     return (int)((now - begin) / (CLOCKS_PER_SEC / 1000));
 }
-

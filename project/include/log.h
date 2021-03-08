@@ -1,12 +1,11 @@
 #ifndef LOG
 #define LOG
 
+#include <sys/types.h>
+#include <unistd.h>
+
 typedef enum {
-    PROC_CREAT,
-    PROC_EXIT,
-    SIGNAL_RECV,
-    SIGNAL_SENT,
-    FILE_MODF
+    PROC_CREAT, PROC_EXIT, SIGNAL_RECV, SIGNAL_SENT, FILE_MODF
 } event_t;
 
 /**

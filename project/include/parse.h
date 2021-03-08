@@ -3,7 +3,7 @@
 
 /*
  * A file's mode is of the form: - RWX RWX RWX
-                                    U   G   O
+ *                                  U   G   O
 */
 
 #define GROUP_POSITION 3
@@ -16,6 +16,7 @@
 #define BIT(n) (1<<(n))
 
 #include <stdbool.h>
+#include <fcntl.h>          
 
 typedef enum {
     ACTION_REMOVE, ACTION_ADD, ACTION_SET
