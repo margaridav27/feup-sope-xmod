@@ -13,19 +13,10 @@ int parseCommand(int argc, char *argv[], command_t *result) {
     // Parse command line arguments for options
     int opt;
     while ((opt = getopt(argc, argv, "vcR")) != -1) {
-        switch (opt) {
-            case 'v':
-                result->verbose = true;
-                break;
-            case 'c':
-                result->changes = true;
-                break;
-            case 'R':
-                result->recursive = true;
-                break;
-            case '?':
-                return 1; // Unknown option: command is invalid
-        }
+        if (opt == 'v') result->verbose = true;
+        else if (opt == 'c') result->changes = true;
+        else if (opt == 'R') result->recursive = true;
+        else return 1;
     }
 
     if (argc - optind < 2) return 1; // Not enough arguments after flags: command is invalid
