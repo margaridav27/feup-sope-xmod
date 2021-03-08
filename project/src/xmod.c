@@ -11,21 +11,22 @@
 
 #include "log.h"
 #include "time_ctrl.h"
+#include "parse.h"
 
 static bool logFileAvailable;
 
-int main(int argc, char const *argv[])
-{
-    setBegin();;
-    
+int main(int argc, char *argv[]) {
+    setBegin();
+
     logFileAvailable = checkLogFilename();
 
-    if (logFileAvailable) { 
+    if (logFileAvailable) {
         registerEvent(getpid(), FILE_MODF, "some additional info");
+    } else {
+        printf("File not available. Could not register event.\n");
     }
-    else { 
-        printf("File not available. Could not register event.\n"); 
-    } 
-    
+    command_t r;
+    if (parseCommand(argc, argv, &r)) return 1;
+
     return 0;
 }
