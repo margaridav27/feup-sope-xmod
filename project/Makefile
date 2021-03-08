@@ -27,12 +27,14 @@ INCLUDE_FLAGS := $(addprefix -I, $(INCLUDE_DIRECTORIES))
 CPPFLAGS := $(INCLUDE_FLAGS) -MMD -MP
 
 # Compiler flags
-CFLAGS := -Wall -Werror
+#CFLAGS := -Wall -Werror
 
 # Linker flags
 # LDFLAGS := 
 
-.DEFAULT_TARGET: 
+.DEFAULT_TARGET: all
+all: $(BUILD_DIRECTORY)/$(TARGET_EXECUTABLE)
+
 $(BUILD_DIRECTORY)/%.c.o: %.c
 	@echo "Building: " $< 
 	@mkdir -p $(dir $@)
