@@ -32,7 +32,9 @@ CPPFLAGS := $(INCLUDE_FLAGS) -MMD -MP
 # Linker flags
 # LDFLAGS := 
 
-.DEFAULT_TARGET: 
+.DEFAULT_TARGET: all
+all: $(BUILD_DIRECTORY)/$(TARGET_EXECUTABLE)
+
 $(BUILD_DIRECTORY)/%.c.o: %.c
 	@echo "Building: " $< 
 	@mkdir -p $(dir $@)
