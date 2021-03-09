@@ -13,13 +13,15 @@
 #define WRITE_BIT 1
 #define READ_BIT 2
 
-#define BIT(n) (1<<(n))
+#define BIT(n) (1 << (n))
 
+#include <fcntl.h>
 #include <stdbool.h>
-#include <fcntl.h>          
 
 typedef enum {
-    ACTION_REMOVE, ACTION_ADD, ACTION_SET
+    ACTION_REMOVE,
+    ACTION_ADD,
+    ACTION_SET
 } action_t;
 
 typedef struct {

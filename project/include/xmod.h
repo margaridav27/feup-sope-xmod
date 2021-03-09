@@ -13,6 +13,6 @@ int printRetainMessage(command_t *command);
 
 int printChangeMessage(mode_t lastMode, command_t *command);
 
-int parseModeToString(mode_t mode, char* str);
+int parseModeToString(mode_t mode, char *str);
 
 #endif
