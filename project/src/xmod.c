@@ -26,7 +26,8 @@ int changeFileMode(command_t *command) {
     mode_t mode = buf.st_mode;
     mode_t persistent_bits = __S_IFMT & mode;
 
-    if (command->action == ACTION_REMOVE) mode &= ~(command->mode); // Remove the relevant bits, keeping others
+    if (command->action == ACTION_REMOVE)
+        mode &= ~(command->mode); // Remove the relevant bits, keeping others
     else if (command->action == ACTION_ADD)
         mode |= command->mode; // Add the relevant bits, keeping others
     else if (command->action == ACTION_SET)
@@ -92,7 +93,7 @@ int changeMode(command_t *command) {
         return 1;
     }
 
-    if (S_ISDIR(buf.st_mode)) return changeFileMode(command) && changeFolderMode(command);
+    if (S_ISDIR(buf.st_mode) && command->recursive) return changeFileMode(command) && changeFolderMode(command);
     else
         return changeFileMode(command);
 }
@@ -141,7 +142,7 @@ int main(int argc, char *argv[]) {
     if (parseCommand(argc, argv, &result)) return 1;
 
     logFileAvailable = checkLogFilename();
-    if (logFileAvailable) {
+    if (logFileAvailable)
         registerEvent(getpid(), FILE_MODF, "some additional info");
     else
         fprintf(stderr, "File not available. Could not register event.\n");
