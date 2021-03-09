@@ -1,5 +1,5 @@
-#ifndef LOG
-#define LOG
+#ifndef PROJECT_INCLUDE_LOG_H_
+#define PROJECT_INCLUDE_LOG_H_
 
 #include <stdbool.h>
 #include <sys/types.h>
@@ -38,4 +38,4 @@ void registerEvent(pid_t pid, event_t event, char *info);
  */
 int closeLogfile();
 
-#endif
+#endif  // PROJECT_INCLUDE_LOG_H_

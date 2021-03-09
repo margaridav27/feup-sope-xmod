@@ -1,5 +1,5 @@
-#include "log.h"
-#include "time_ctrl.h"
+#include "../include/log.h"
+
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -11,10 +11,13 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "../include/time_ctrl.h"
+
 static FILE *logFP;
 
 bool checkLogFilename() {
-    char *logFile = getenv("LOG_FILENAME"); // create env variable LOG_FILENAME "export LOG_FILENAME=./trace.txt"
+    // create env variable LOG_FILENAME "export LOG_FILENAME=./trace.txt"
+    char *logFile = getenv("LOG_FILENAME");
 
     if (logFile == NULL) {
         fprintf(stderr, "WARNING: variable LOG_FILENAME not defined.\n");

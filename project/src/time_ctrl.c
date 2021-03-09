@@ -1,6 +1,6 @@
 #include <time.h>
 
-#include "time_ctrl.h"
+#include "../include/time_ctrl.h"
 
 static clock_t begin;
 

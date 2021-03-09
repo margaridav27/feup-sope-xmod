@@ -1,5 +1,5 @@
-#ifndef TIME_CTRL
-#define TIME_CTRL
+#ifndef PROJECT_INCLUDE_TIME_CTRL_H_
+#define PROJECT_INCLUDE_TIME_CTRL_H_
 
 /**
  * @brief Marks the beginning of the program execution
@@ -14,4 +14,4 @@ void setBegin();
  */
 int getElapsed();
 
-#endif
+#endif  // PROJECT_INCLUDE_TIME_CTRL_H_

@@ -1,5 +1,5 @@
-#ifndef PARSE
-#define PARSE
+#ifndef PROJECT_INCLUDE_PARSE_H_
+#define PROJECT_INCLUDE_PARSE_H_
 
 /*
  * A file's mode is of the form: - RWX RWX RWX
@@ -9,7 +9,6 @@
 #include <sys/stat.h>
 
 #include <fcntl.h>
-#include <stdbool.h>
 
 #define GROUP_POSITION 3
 #define USER_POSITION 6
@@ -37,4 +36,4 @@ typedef struct {
 
 int parseCommand(int argc, char *argv[], command_t *result);
 
-#endif
+#endif  // PROJECT_INCLUDE_PARSE_H_

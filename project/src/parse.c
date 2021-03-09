@@ -1,13 +1,14 @@
+#include "../include/parse.h"
+
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
-#include "parse.h"
 
 int parseCommand(int argc, char *argv[], command_t *result) {
-    memset(result, 0, sizeof(command_t)); // Clear all information
+    memset(result, 0, sizeof(command_t));  // Clear all information
 
     // Parse command line arguments for options
     int opt;
@@ -21,52 +22,59 @@ int parseCommand(int argc, char *argv[], command_t *result) {
             return 1;
     }
 
-    if (argc < 3 || argc - optind < 2) { // Not enough arguments after flags: command is invalid
+    // Not enough arguments after flags: command is invalid
+    if (argc < 3 || argc - optind < 2) {
         fprintf(stderr, "xmod: missing operand\n");
         return 1;
     }
 
-    const char *mode_string = argv[optind]; // After processing options, this is the first argument
-    if (strlen(mode_string) < 3) return 1;  //Mode has less than three characters: command is invalid
+    // After processing options, this is the first argument
+    const char *mode_string = argv[optind];
+    // Mode has less than three characters: command is invalid
+    if (strlen(mode_string) < 3) return 1;
 
     const char *string_end = mode_string + strlen(mode_string);
     char *process_end;
     long int mode = strtol(mode_string, &process_end, 8);
 
-    if (process_end == string_end) result->action = ACTION_SET;
-    else { // Conversion was unsuccessful: parse the string
+    if (process_end == string_end) {
+        result->action = ACTION_SET;
+    } else {  // Conversion was unsuccessful: parse the string
         char user = mode_string[0], change = mode_string[1];
 
-        if (change == '-') result->action = ACTION_REMOVE;
-        else if (change == '+')
+        if (change == '-') {
+            result->action = ACTION_REMOVE;
+        } else if (change == '+') {
             result->action = ACTION_ADD;
-        else if (change == '=')
+        } else if (change == '=') {
             result->action = ACTION_SET;
-        else {
+        } else {
             fprintf(stderr, "xmod: invalid mode: '%s'\n", mode_string);
             return 1;
         }
 
         const char *permissions_string = mode_string + 2;
         for (int i = 0; i < strlen(permissions_string); ++i) {
-            if (permissions_string[i] == 'r') mode |= READ_BIT;
-            else if (permissions_string[i] == 'w')
+            if (permissions_string[i] == 'r') {
+                mode |= READ_BIT;
+            } else if (permissions_string[i] == 'w') {
                 mode |= WRITE_BIT;
-            else if (permissions_string[i] == 'x')
+            } else if (permissions_string[i] == 'x') {
                 mode |= EXECUTE_BIT;
-            else {
+            } else {
                 fprintf(stderr, "xmod: invalid mode: '%s'\n", mode_string);
                 return 1;
             }
         }
 
         // Default mode is in the "others position"
-        if (user == 'u') mode <<= USER_POSITION;
-        else if (user == 'g')
+        if (user == 'u') {
+            mode <<= USER_POSITION;
+        } else if (user == 'g') {
             mode <<= GROUP_POSITION;
-        else if (user == 'a')
+        } else if (user == 'a') {
             mode |= (mode << USER_POSITION) | (mode << GROUP_POSITION);
-        else if (user != 'o') {
+        } else if (user != 'o') {
             fprintf(stderr, "xmod: invalid mode: '%s'\n", mode_string);
             return 1;
         }
