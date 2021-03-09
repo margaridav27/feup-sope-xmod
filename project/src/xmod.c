@@ -72,14 +72,17 @@ int changeFolderMode(command_t *command) {
             strcmp(de->d_name, "..") == 0)
             continue;
         command_t c = *command;
-        char n[strlen(command->path) + strlen(de->d_name) + 1];
+        // COMBACK: WTF
+        char *n = malloc(strlen(command->path) + strlen(de->d_name) + 1);
+        if (n == NULL) continue;  // COMBACK: Insert very special error message
         // memset(n, '\0', sizeof(n));
-        strcpy(n, command->path);
-        strcat(n, "/");
-        strcat(n, de->d_name);
+        strncpy(n, command->path, strlen(n));
+        strncat(n, "/", strlen("/") + 1);
+        strncat(n, de->d_name, strlen(de->d_name) + 1);
 
         c.path = n;
         changeMode(&c);
+        free(n);
     }
     closedir(d);
 
