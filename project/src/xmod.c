@@ -85,20 +85,19 @@ int changeMode(command_t *command) {
         return changeFileMode(command);
 }
 
-int printChangeMessage(mode_t lastMode, command_t *command) {
-    char str[] = "---------", lastModeStr[] = "---------";
-    parseModeToString(command->mode, str);
-    parseModeToString(lastMode, lastModeStr);
-    printf("mode of '%s' changed from 0%o (%s) to 0%o (%s)\n", command->path, lastMode, lastModeStr, command->mode,
-           str);
+int printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode) {
+    char new_mode_str[] = "---------", previous_mode_str[] = "---------";
+    parseModeToString(new_mode, new_mode_str);
+    parseModeToString(previous_mode, previous_mode_str);
+    printf("mode of '%s' changed from 0%o (%s) to 0%o (%s)\n", path, previous_mode, previous_mode_str, new_mode, new_mode_str);
     fflush(stdout);
     return 0;
 }
 
-int printRetainMessage(command_t *command) {
-    char str[] = "---------";
-    parseModeToString(command->mode, str);
-    printf("mode of '%s' retained as 0%o (%s)\n", command->path, command->mode, str);
+int printRetainMessage(const char *path, mode_t mode) {
+    char mode_str[] = "---------";
+    parseModeToString(mode, mode_str);
+    printf("mode of '%s' retained as 0%o (%s)\n", path, mode, mode_str);
     fflush(stdout);
     return 0;
 }
@@ -116,8 +115,8 @@ int parseModeToString(mode_t mode, char *str) {
     return 0;
 }
 
-int printNoPermissionMessage(command_t *command){
-    printf("xmod: changing permissions of '%s': Operation not permitted", command->path);
+int printNoPermissionMessage(const char *path) {
+    fprintf(stderr, "xmod: changing permissions of '%s': Operation not permitted", path);
     fflush(stdout);
     return 0;
 }
