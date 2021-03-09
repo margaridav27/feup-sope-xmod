@@ -88,7 +88,7 @@ int printChangeMessage(mode_t lastMode, command_t *command) {
     char str[] = "---------", lastModeStr[] = "---------";
     parseModeToString(command->mode, str);
     parseModeToString(lastMode, lastModeStr);
-    printf("mode of '%s' changed from %#o (%s) to %#o (%s)\n", command->path, lastMode, lastModeStr, command->mode,
+    printf("mode of '%s' changed from 0%o (%s) to 0%o (%s)\n", command->path, lastMode, lastModeStr, command->mode,
            str);
     fflush(stdout);
     return 0;
@@ -97,25 +97,25 @@ int printChangeMessage(mode_t lastMode, command_t *command) {
 int printRetainMessage(command_t *command) {
     char str[] = "---------";
     parseModeToString(command->mode, str);
-    printf("mode of '%s' retained as %#o (%s)\n", command->path, command->mode, str);
+    printf("mode of '%s' retained as 0%o (%s)\n", command->path, command->mode, str);
     fflush(stdout);
     return 0;
 }
 
 int parseModeToString(mode_t mode, char *str) {
-    if (mode & S_IXOTH) str[8] = 'x';
-    if (mode & S_IWOTH) str[7] = 'w';
-    if (mode & S_IROTH) str[6] = 'r';
-    if (mode & S_IXGRP) str[5] = 'x';
-    if (mode & S_IWGRP) str[4] = 'w';
-    if (mode & S_IRGRP) str[3] = 'r';
-    if (mode & S_IXUSR) str[2] = 'x';
-    if (mode & S_IWUSR) str[1] = 'w';
-    if (mode & S_IRUSR) str[0] = 'r';
+    if (mode & 1) str[8] = 'x';
+    if (mode >> 1 & 1) str[7] = 'w';
+    if (mode >> 2 & 1) str[6] = 'r';
+    if (mode >> 3 & 1) str[5] = 'x';
+    if (mode >> 4 & 1) str[4] = 'w';
+    if (mode >> 5 & 1) str[3] = 'r';
+    if (mode >> 6 & 1) str[2] = 'x';
+    if (mode >> 7 & 1) str[1] = 'w';
+    if (mode >> 8 & 1) str[0] = 'r';
     return 0;
 }
 
-int printNoPermissionMessage(command_t *command) {
+int printNoPermissionMessage(command_t *command){
     printf("xmod: changing permissions of '%s': Operation not permitted", command->path);
     fflush(stdout);
     return 0;
@@ -134,6 +134,5 @@ int main(int argc, char *argv[]) {
     } else {
         printf("File not available. Could not register event.\n");
     }
-
     return 0;
 }
