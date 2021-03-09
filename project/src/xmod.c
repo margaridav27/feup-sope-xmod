@@ -24,12 +24,13 @@ int changeFileMode(command_t *command) {
     }
 
     mode_t mode = buf.st_mode;
+    mode_t persistent_bits = __S_IFMT & mode;
 
     if (command->action == ACTION_REMOVE) mode &= ~(command->mode); // Remove the relevant bits, keeping others
     else if (command->action == ACTION_ADD)
         mode |= command->mode; // Add the relevant bits, keeping others
     else if (command->action == ACTION_SET)
-        mode = command->mode; // Set only the relevant bits
+        mode = persistent_bits & command->mode; // Set only the relevant bits
 
     if (chmod(command->path, mode) == -1) {
         perror("");
