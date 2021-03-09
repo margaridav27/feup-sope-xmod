@@ -1,6 +1,10 @@
 #ifndef LOG
 #define LOG
 
+#include "log.h"
+#include <stdbool.h>
+#include <sys/types.h>
+
 typedef enum {
     PROC_CREAT,
     PROC_EXIT,
