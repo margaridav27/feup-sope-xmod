@@ -24,7 +24,7 @@ bool checkLogFilename();
  * @param event type of event to be registered
  * @param info additional info associated with the event
  */
-void registerEvent(pid_t pid, event_t event, char* info);
+void registerEvent(pid_t pid, event_t event, char *info);
 
 /**
  * @brief Closes logfile
