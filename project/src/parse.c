@@ -7,7 +7,6 @@
 #include "parse.h"
 
 int parseCommand(int argc, char *argv[], command_t *result) {
-    if (argc < 3) return 1;               // Mandatory arguments: program_name (octal)mode file/dir
     memset(result, 0, sizeof(command_t)); // Clear all information
 
     // Parse command line arguments for options
@@ -22,7 +21,10 @@ int parseCommand(int argc, char *argv[], command_t *result) {
             return 1;
     }
 
-    if (argc - optind < 2) return 1; // Not enough arguments after flags: command is invalid
+    if (argc < 3 || argc - optind < 2) { // Not enough arguments after flags: command is invalid
+        fprintf(stderr, "xmod: missing operand\n");
+        return 1;
+    }
 
     const char *mode_string = argv[optind]; // After processing options, this is the first argument
     if (strlen(mode_string) < 3) return 1;  //Mode has less than three characters: command is invalid
@@ -40,8 +42,10 @@ int parseCommand(int argc, char *argv[], command_t *result) {
             result->action = ACTION_ADD;
         else if (change == '=')
             result->action = ACTION_SET;
-        else
+        else {
+            fprintf(stderr, "xmod: invalid mode: '%s'\n", mode_string);
             return 1;
+        }
 
         const char *permissions_string = mode_string + 2;
         for (int i = 0; i < strlen(permissions_string); ++i) {
@@ -50,8 +54,10 @@ int parseCommand(int argc, char *argv[], command_t *result) {
                 mode |= WRITE_BIT;
             else if (permissions_string[i] == 'x')
                 mode |= EXECUTE_BIT;
-            else
+            else {
+                fprintf(stderr, "xmod: invalid mode: '%s'\n", mode_string);
                 return 1;
+            }
         }
 
         // Default mode is in the "others position"
@@ -60,8 +66,10 @@ int parseCommand(int argc, char *argv[], command_t *result) {
             mode <<= GROUP_POSITION;
         else if (user == 'a')
             mode |= (mode << USER_POSITION) | (mode << GROUP_POSITION);
-        else if (user != 'o')
+        else if (user != 'o') {
+            fprintf(stderr, "xmod: invalid mode: '%s'\n", mode_string);
             return 1;
+        }
     }
     result->mode = (mode_t) mode;
     result->path = argv[optind + 1];
