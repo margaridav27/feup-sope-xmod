@@ -1,6 +1,7 @@
 #ifndef LOG
 #define LOG
 
+#include <stdbool.h>
 #include <sys/types.h>
 #include <unistd.h>
 
