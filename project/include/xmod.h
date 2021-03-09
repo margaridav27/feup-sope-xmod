@@ -15,4 +15,6 @@ int printChangeMessage(mode_t lastMode, command_t *command);
 
 int parseModeToString(mode_t mode, char *str);
 
+int printNoPermissionMessage(command_t *command);
+
 #endif

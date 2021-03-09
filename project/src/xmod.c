@@ -115,6 +115,12 @@ int parseModeToString(mode_t mode, char *str) {
     return 0;
 }
 
+int printNoPermissionMessage(command_t *command){
+    printf("xmod: changing permissions of '%s': Operation not permitted", command->path);
+    fflush(stdout);
+    return 0;
+}
+
 static bool logFileAvailable;
 int main(int argc, char *argv[]) {
     setBegin();
