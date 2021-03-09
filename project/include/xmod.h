@@ -1,7 +1,7 @@
-#ifndef XMOD
-#define XMOD
+#ifndef PROJECT_INCLUDE_XMOD_H_
+#define PROJECT_INCLUDE_XMOD_H_
 
-#include "parse.h"
+#include "../include/parse.h"
 
 int changeMode(command_t *command);
 
@@ -17,4 +17,4 @@ int parseModeToString(mode_t mode, char *str);
 
 int printNoPermissionMessage(const char *path);
 
-#endif
+#endif  // PROJECT_INCLUDE_XMOD_H_
