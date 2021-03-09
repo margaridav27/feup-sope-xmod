@@ -36,6 +36,18 @@ int changeFileMode(command_t *command) {
         perror("");
         return 1;
     }
+
+    // Remove additional bits for printing
+    buf.st_mode &= ~persistent_bits;
+    mode &= ~persistent_bits;
+
+    if (command->verbose) {
+        if (mode == buf.st_mode)
+            printRetainMessage(command->path, mode);
+        else
+            printChangeMessage(command->path, buf.st_mode, mode);
+    } else if (command->changes && mode != buf.st_mode)
+        printChangeMessage(command->path, buf.st_mode, mode);
     return 0;
 }
 
