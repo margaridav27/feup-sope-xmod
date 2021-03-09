@@ -76,6 +76,7 @@ int changeFolderMode(command_t *command) {
         c.path = n;
         changeMode(&c);
     }
+    closedir(d);
 
     if (errno != 0) {
         perror("");
