@@ -48,7 +48,8 @@ void registerEvent(int pid, event_t event, char *info) {
         case FILE_MODF:
             action = "FILE_MODF";
             break;
-        default: break;
+        default:
+            break;
     }
 
     fprintf(logFP, "%d ; %d ; %s ; %s\n", getElapsed(), pid, action, info);
