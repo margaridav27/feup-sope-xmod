@@ -5,18 +5,19 @@
  * A file's mode is of the form: - RWX RWX RWX
  *                                  U   G   O
 */
+#include <stdbool.h>
+#include <sys/stat.h>
+
+#include <fcntl.h>
+#include <stdbool.h>
 
 #define GROUP_POSITION 3
 #define USER_POSITION 6
 
-#define EXECUTE_BIT 0
-#define WRITE_BIT 1
-#define READ_BIT 2
+#define EXECUTE_BIT S_IXOTH
+#define WRITE_BIT S_IWOTH
+#define READ_BIT S_IROTH
 
-#define BIT(n) (1 << (n))
-
-#include <fcntl.h>
-#include <stdbool.h>
 
 typedef enum {
     ACTION_REMOVE,

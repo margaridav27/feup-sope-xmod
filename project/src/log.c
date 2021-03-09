@@ -51,7 +51,6 @@ void registerEvent(int pid, event_t event, char *info) {
         default:
             break;
     }
-
     fprintf(logFP, "%d ; %d ; %s ; %s\n", getElapsed(), pid, action, info);
 }
 

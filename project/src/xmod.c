@@ -112,21 +112,21 @@ int parseModeToString(mode_t mode, char *str) {
     if (mode >> 6 & 1) str[2] = 'x';
     if (mode >> 7 & 1) str[1] = 'w';
     if (mode >> 8 & 1) str[0] = 'r';
-return 0;}
+    return 0;
+}
 
 static bool logFileAvailable;
 int main(int argc, char *argv[]) {
     setBegin();
 
-    logFileAvailable = checkLogFilename();
+    command_t result;
+    if (parseCommand(argc, argv, &result)) return 1;
 
+    logFileAvailable = checkLogFilename();
     if (logFileAvailable) {
         registerEvent(getpid(), FILE_MODF, "some additional info");
     } else {
         printf("File not available. Could not register event.\n");
     }
-    command_t r;
-    if (parseCommand(argc, argv, &r)) return 1;
-
     return 0;
 }

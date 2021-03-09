@@ -13,8 +13,6 @@ typedef enum {
     FILE_MODF
 } event_t;
 
-#include <stdbool.h>
-#include <sys/types.h>
 
 /**
  * @brief Checks LOG_FILENAME variable content  
