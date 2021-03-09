@@ -143,8 +143,9 @@ int main(int argc, char *argv[]) {
     logFileAvailable = checkLogFilename();
     if (logFileAvailable) {
         registerEvent(getpid(), FILE_MODF, "some additional info");
-    } else {
-        printf("File not available. Could not register event.\n");
-    }
+    else
+        fprintf(stderr, "File not available. Could not register event.\n");
+
+    changeFileMode(&result);
     return 0;
 }
