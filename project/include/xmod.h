@@ -9,12 +9,12 @@ int changeFileMode(command_t *command);
 
 int changeFolderMode(command_t *command);
 
-int printRetainMessage(command_t *command);
+int printRetainMessage(const char *path, mode_t mode);
 
-int printChangeMessage(mode_t lastMode, command_t *command);
+int printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode);
 
 int parseModeToString(mode_t mode, char *str);
 
-int printNoPermissionMessage(command_t *command);
+int printNoPermissionMessage(const char *path);
 
 #endif

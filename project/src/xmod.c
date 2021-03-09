@@ -24,17 +24,31 @@ int changeFileMode(command_t *command) {
     }
 
     mode_t mode = buf.st_mode;
+    mode_t persistent_bits = __S_IFMT & mode;
 
-    if (command->action == ACTION_REMOVE) mode &= ~(command->mode); // Remove the relevant bits, keeping others
+    if (command->action == ACTION_REMOVE)
+        mode &= ~(command->mode); // Remove the relevant bits, keeping others
     else if (command->action == ACTION_ADD)
         mode |= command->mode; // Add the relevant bits, keeping others
     else if (command->action == ACTION_SET)
-        mode = command->mode; // Set only the relevant bits
+        mode = persistent_bits & command->mode; // Set only the relevant bits
 
     if (chmod(command->path, mode) == -1) {
         perror("");
         return 1;
     }
+
+    // Remove additional bits for printing
+    buf.st_mode &= ~persistent_bits;
+    mode &= ~persistent_bits;
+
+    if (command->verbose) {
+        if (mode == buf.st_mode)
+            printRetainMessage(command->path, mode);
+        else
+            printChangeMessage(command->path, buf.st_mode, mode);
+    } else if (command->changes && mode != buf.st_mode)
+        printChangeMessage(command->path, buf.st_mode, mode);
     return 0;
 }
 
@@ -79,44 +93,43 @@ int changeMode(command_t *command) {
         return 1;
     }
 
-    if (S_ISDIR(buf.st_mode)) return changeFileMode(command) && changeFolderMode(command);
+    if (S_ISDIR(buf.st_mode) && command->recursive) return changeFileMode(command) && changeFolderMode(command);
     else
         return changeFileMode(command);
 }
 
-int printChangeMessage(mode_t lastMode, command_t *command) {
-    char str[] = "---------", lastModeStr[] = "---------";
-    parseModeToString(command->mode, str);
-    parseModeToString(lastMode, lastModeStr);
-    printf("mode of '%s' changed from 0%o (%s) to 0%o (%s)\n", command->path, lastMode, lastModeStr, command->mode,
-           str);
+int printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode) {
+    char new_mode_str[] = "---------", previous_mode_str[] = "---------";
+    parseModeToString(new_mode, new_mode_str);
+    parseModeToString(previous_mode, previous_mode_str);
+    printf("mode of '%s' changed from 0%o (%s) to 0%o (%s)\n", path, previous_mode, previous_mode_str, new_mode, new_mode_str);
     fflush(stdout);
     return 0;
 }
 
-int printRetainMessage(command_t *command) {
-    char str[] = "---------";
-    parseModeToString(command->mode, str);
-    printf("mode of '%s' retained as 0%o (%s)\n", command->path, command->mode, str);
+int printRetainMessage(const char *path, mode_t mode) {
+    char mode_str[] = "---------";
+    parseModeToString(mode, mode_str);
+    printf("mode of '%s' retained as 0%o (%s)\n", path, mode, mode_str);
     fflush(stdout);
     return 0;
 }
 
 int parseModeToString(mode_t mode, char *str) {
-    if (mode & 1) str[8] = 'x';
-    if (mode >> 1 & 1) str[7] = 'w';
-    if (mode >> 2 & 1) str[6] = 'r';
-    if (mode >> 3 & 1) str[5] = 'x';
-    if (mode >> 4 & 1) str[4] = 'w';
-    if (mode >> 5 & 1) str[3] = 'r';
-    if (mode >> 6 & 1) str[2] = 'x';
-    if (mode >> 7 & 1) str[1] = 'w';
-    if (mode >> 8 & 1) str[0] = 'r';
+    if (mode & S_IXOTH) str[8] = 'x';
+    if (mode & S_IWOTH) str[7] = 'w';
+    if (mode & S_IROTH) str[6] = 'r';
+    if (mode & S_IXGRP) str[5] = 'x';
+    if (mode & S_IWGRP) str[4] = 'w';
+    if (mode & S_IRGRP) str[3] = 'r';
+    if (mode & S_IXUSR) str[2] = 'x';
+    if (mode & S_IWUSR) str[1] = 'w';
+    if (mode & S_IRUSR) str[0] = 'r';
     return 0;
 }
 
-int printNoPermissionMessage(command_t *command){
-    printf("xmod: changing permissions of '%s': Operation not permitted", command->path);
+int printNoPermissionMessage(const char *path) {
+    fprintf(stderr, "xmod: changing permissions of '%s': Operation not permitted", path);
     fflush(stdout);
     return 0;
 }
@@ -129,10 +142,11 @@ int main(int argc, char *argv[]) {
     if (parseCommand(argc, argv, &result)) return 1;
 
     logFileAvailable = checkLogFilename();
-    if (logFileAvailable) {
+    if (logFileAvailable)
         registerEvent(getpid(), FILE_MODF, "some additional info");
-    } else {
-        printf("File not available. Could not register event.\n");
-    }
+    else
+        fprintf(stderr, "File not available. Could not register event.\n");
+
+    changeFileMode(&result);
     return 0;
 }
