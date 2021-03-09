@@ -103,15 +103,15 @@ int printRetainMessage(command_t *command) {
 }
 
 int parseModeToString(mode_t mode, char *str) {
-    if (mode & 1) str[8] = 'x';
-    if (mode >> 1 & 1) str[7] = 'w';
-    if (mode >> 2 & 1) str[6] = 'r';
-    if (mode >> 3 & 1) str[5] = 'x';
-    if (mode >> 4 & 1) str[4] = 'w';
-    if (mode >> 5 & 1) str[3] = 'r';
-    if (mode >> 6 & 1) str[2] = 'x';
-    if (mode >> 7 & 1) str[1] = 'w';
-    if (mode >> 8 & 1) str[0] = 'r';
+    if (mode & S_IXOTH) str[8] = 'x';
+    if (mode & S_IWOTH) str[7] = 'w';
+    if (mode & S_IROTH) str[6] = 'r';
+    if (mode & S_IXGRP) str[5] = 'x';
+    if (mode & S_IWGRP) str[4] = 'w';
+    if (mode & S_IRGRP) str[3] = 'r';
+    if (mode & S_IXUSR) str[2] = 'x';
+    if (mode & S_IWUSR) str[1] = 'w';
+    if (mode & S_IRUSR) str[0] = 'r';
     return 0;
 }
 
