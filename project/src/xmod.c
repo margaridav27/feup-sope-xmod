@@ -73,7 +73,7 @@ int changeFolderMode(command_t *command) {
         if (strcmp(de->d_name, ".") == 0 ||
             strcmp(de->d_name, "..") == 0)
             continue;
-            
+
         command_t c = *command;
         // COMBACK: WTF
         char *n = malloc(strlen(command->path) + strlen(de->d_name) + 1);
@@ -114,7 +114,7 @@ int changeMode(command_t *command) {
             return changeFolderMode(command);
         default: // Parent process
             changeFileMode(command);
-            wait(NULL);
+            wait(NULL); // Waiting for the child process to finish processing the subfolder 
             return 0;
         }
     } else {
