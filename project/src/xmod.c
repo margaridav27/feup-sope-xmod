@@ -78,7 +78,7 @@ int changeMode(command_t *command, int argc, char *argv[]) {
 
         struct dirent *de;
         errno = 0;
-        
+        //S_ISLNK
         while ((de = readdir(d)) != NULL) {
             if (strcmp(de->d_name, ".") == 0 || strcmp(de->d_name, "..") == 0) continue;
 
@@ -160,8 +160,14 @@ int parseModeToString(mode_t mode, char *str) {
 
 int printNoPermissionMessage(const char *path) {
     fprintf(stderr,
-            "xmod: changing permissions of '%s': Operation not permitted",
+            "xmod: changing permissions of '%s': Operation not permitted\n",
             path);
+    fflush(stdout);
+    return 0;
+}
+
+int printSymbolicMessage(const char *path){
+    printf("neither symbolic link '%s' nor referent has been changed\n",path);
     fflush(stdout);
     return 0;
 }
@@ -179,7 +185,10 @@ int main(int argc, char *argv[]) {
     }*/
 
     command_t result;
-    if (parseCommand(argc, argv, &result)) return 1;
+    if (parseCommand(argc, argv, &result)){
+        fprintf(stderr, "Could not parse command\n");
+        return 1;
+    }
     changeMode(&result, argc, argv);
     return 0;
 }
