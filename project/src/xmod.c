@@ -122,12 +122,11 @@ int changeMode(command_t *command) {
     }
 }
 
-int
-printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode) {
+int printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode) {
     char new_mode_str[] = "---------", previous_mode_str[] = "---------";
     parseModeToString(new_mode, new_mode_str);
     parseModeToString(previous_mode, previous_mode_str);
-    printf("mode of '%s' changed from 0%o (%s) to 0%o (%s)\n", path,
+    printf("%d - mode of '%s' changed from 0%o (%s) to 0%o (%s)\n", getpid(), path,
            previous_mode, previous_mode_str, new_mode,
            new_mode_str);
     fflush(stdout);
@@ -137,7 +136,7 @@ printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode) {
 int printRetainMessage(const char *path, mode_t mode) {
     char mode_str[] = "---------";
     parseModeToString(mode, mode_str);
-    printf("mode of '%s' retained as 0%o (%s)\n", path, mode, mode_str);
+    printf("%d - mode of '%s' retained as 0%o (%s)\n", getpid(), path, mode, mode_str);
     fflush(stdout);
     return 0;
 }
