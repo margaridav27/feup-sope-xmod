@@ -86,8 +86,7 @@ int changeMode(command_t *command, int argc, char *argv[]) {
                 pid_t pid = fork();
                 
                 if (pid == -1) { // Failed to fork
-                    perror("");
-                    return 1;
+                    perror("Fork Error");
                 }
                 else if (pid == 0) { // Child process
                     strcpy(argv[argc - 1], command->path);
@@ -98,6 +97,9 @@ int changeMode(command_t *command, int argc, char *argv[]) {
                 else { // Parent process
                     int childRetval;
                     wait(&childRetval); // Waiting for the child process to finish processing the subfolder 
+                    if(childRetval != 0){
+                        perror("Invalid value return from child");
+                    }
                 }
             } else {
                 command_t c = *command;
@@ -128,7 +130,7 @@ int printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode) 
     char new_mode_str[] = "---------", previous_mode_str[] = "---------";
     parseModeToString(new_mode, new_mode_str);
     parseModeToString(previous_mode, previous_mode_str);
-    printf("%d - mode of '%s' changed from 0%o (%s) to 0%o (%s)\n",getpid(), path,
+    printf("Mode of '%s' changed from 0%o (%s) to 0%o (%s)\n",getpid(), path,
            previous_mode, previous_mode_str, new_mode,
            new_mode_str);
     fflush(stdout);
@@ -138,7 +140,7 @@ int printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode) 
 int printRetainMessage(const char *path, mode_t mode) {
     char mode_str[] = "---------";
     parseModeToString(mode, mode_str);
-    printf("%d - mode of '%s' retained as 0%o (%s)\n", getpid(), path, mode, mode_str);
+    printf("Mode of '%s' retained as 0%o (%s)\n", getpid(), path, mode, mode_str);
     fflush(stdout);
     return 0;
 }
