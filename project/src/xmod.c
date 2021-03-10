@@ -57,7 +57,7 @@ int changeFileMode(command_t *command) {
     }
     return 0;
 }
-
+/*
 int changeFolderMode(command_t *command) {
     DIR *d = opendir(command->path);
 
@@ -78,7 +78,6 @@ int changeFolderMode(command_t *command) {
         char *n = malloc(strlen(command->path) + strlen(de->d_name) + 1);
         if (n == NULL) continue;  // COMBACK: Insert very special error message
         sprintf(n, "%s/%s", command->path, de->d_name);
-       
         c.path = n;
         changeMode(&c);
         free(n);
@@ -89,44 +88,73 @@ int changeFolderMode(command_t *command) {
         perror("");
         return 1;
     }
-
     return 0;
-}
+}*/
 
-int changeMode(command_t *command) {
+int changeMode(command_t *command, int argc, char *argv[]) {
     struct stat buf;
 
     if (stat(command->path, &buf) == -1) {
         perror("");
         return 1;
     }
+    
 
     if (S_ISDIR(buf.st_mode) && command->recursive) {
-        pid_t pid = fork();
 
-        if (pid == -1) { // Failed to fork
+        DIR *d = opendir(command->path);
+
+        if (d == NULL) {
             perror("");
             return 1;
         }
-        else if (pid == 0) { // Child process
-            changeFileMode(command);
-            changeFolderMode(command);
-            exit(0);
+
+        struct dirent *de;
+
+        while ((de = readdir(d)) != NULL) {
+
+            if (strcmp(de->d_name, ".") == 0 || strcmp(de->d_name, "..") == 0) continue;
+
+            pid_t pid = fork();
+
+            if (pid == -1) { // Failed to fork
+                perror("");
+                return 1;
+            } 
+            else if (pid == 0) { // Child process
+                changeFileMode(command);
+
+                char *n = malloc(strlen(command->path) + strlen(de->d_name) + 1);
+                if (n == NULL) continue; // COMBACK: Insert very special error message
+                sprintf(n, "%s/%s", command->path, de->d_name);
+                argv[argc-1] = n; 
+
+                free(n);
+
+                execv("/build/xmod", argv);
+
+                exit(0);
+            } 
+            else {
+                wait(NULL);
+                return 0;
+            }
+
+            closedir(d);
         }
-        else { // Parent process
-            wait(NULL); // Waiting for the child process to finish processing the subfolder 
-            return 0;
-        }
-    } else {
-        return changeFileMode(command);
+    } 
+    else {
+        changeFileMode(command);
     }
+    
+    return 0;
 }
 
 int printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode) {
     char new_mode_str[] = "---------", previous_mode_str[] = "---------";
     parseModeToString(new_mode, new_mode_str);
     parseModeToString(previous_mode, previous_mode_str);
-    printf("%d - mode of '%s' changed from 0%o (%s) to 0%o (%s)\n", getpid(), path,
+    printf("mode of '%s' changed from 0%o (%s) to 0%o (%s)\n", path,
            previous_mode, previous_mode_str, new_mode,
            new_mode_str);
     fflush(stdout);
@@ -176,6 +204,6 @@ int main(int argc, char *argv[]) {
 
     command_t result;
     if (parseCommand(argc, argv, &result)) return 1;
-    changeMode(&result);
+    changeMode(&result, argc, argv);
     return 0;
 }
