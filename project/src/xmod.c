@@ -57,51 +57,18 @@ int changeFileMode(command_t *command) {
     }
     return 0;
 }
-/*
-int changeFolderMode(command_t *command) {
-    DIR *d = opendir(command->path);
-
-    if (d == NULL) {
-        perror("");
-        return 1;
-    }
-
-    struct dirent *de;
-    errno = 0;
-
-    while ((de = readdir(d)) != NULL) {
-        if (strcmp(de->d_name, ".") == 0 || strcmp(de->d_name, "..") == 0)
-            continue;
-
-        command_t c = *command;
-        // COMBACK: WTF
-        char *n = malloc(strlen(command->path) + strlen(de->d_name) + 1);
-        if (n == NULL) continue;  // COMBACK: Insert very special error message
-        sprintf(n, "%s/%s", command->path, de->d_name);
-        c.path = n;
-        changeMode(&c);
-        free(n);
-    }
-    closedir(d);
-
-    if (errno != 0) {
-        perror("");
-        return 1;
-    }
-    return 0;
-}*/
 
 int changeMode(command_t *command, int argc, char *argv[]) {
-    struct stat buf;
 
+    struct stat buf;
     if (stat(command->path, &buf) == -1) {
         perror("");
         return 1;
     }
     
+    changeFileMode(command);
 
-    if (S_ISDIR(buf.st_mode) && command->recursive) {
-
+    if(S_ISDIR(buf.st_mode)) {
         DIR *d = opendir(command->path);
 
         if (d == NULL) {
@@ -110,43 +77,50 @@ int changeMode(command_t *command, int argc, char *argv[]) {
         }
 
         struct dirent *de;
-
+        errno = 0;
+        
         while ((de = readdir(d)) != NULL) {
-
             if (strcmp(de->d_name, ".") == 0 || strcmp(de->d_name, "..") == 0) continue;
 
-            pid_t pid = fork();
-
-            if (pid == -1) { // Failed to fork
-                perror("");
-                return 1;
-            } 
-            else if (pid == 0) { // Child process
-                changeFileMode(command);
+            if (command->recursive) {
+                pid_t pid = fork();
+                
+                if (pid == -1) { // Failed to fork
+                    perror("");
+                    return 1;
+                }
+                else if (pid == 0) { // Child process
+                    strcpy(argv[argc - 1], command->path);
+                    strcat(argv[argc - 1], "/");
+                    strcat(argv[argc - 1], de->d_name);
+                    execv("./build/xmod", argv); // Not sure that it's bullet proof...
+                }
+                else { // Parent process
+                    int childRetval;
+                    wait(&childRetval); // Waiting for the child process to finish processing the subfolder 
+                }
+            } else {
+                command_t c = *command;
 
                 char *n = malloc(strlen(command->path) + strlen(de->d_name) + 1);
-                if (n == NULL) continue; // COMBACK: Insert very special error message
+                if (n == NULL) continue;  // COMBACK: Insert very special error message
+
                 sprintf(n, "%s/%s", command->path, de->d_name);
-                argv[argc-1] = n; 
+                c.path = n;
 
+                changeFileMode(&c);
+                
                 free(n);
-
-                execv("/build/xmod", argv);
-
-                exit(0);
-            } 
-            else {
-                wait(NULL);
-                return 0;
             }
-
-            closedir(d);
         }
-    } 
-    else {
-        changeFileMode(command);
+        closedir(d);
     }
-    
+
+    if (errno != 0) {
+        perror("");
+        return 1;
+    }
+
     return 0;
 }
 
@@ -154,7 +128,7 @@ int printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode) 
     char new_mode_str[] = "---------", previous_mode_str[] = "---------";
     parseModeToString(new_mode, new_mode_str);
     parseModeToString(previous_mode, previous_mode_str);
-    printf("mode of '%s' changed from 0%o (%s) to 0%o (%s)\n", path,
+    printf("%d - mode of '%s' changed from 0%o (%s) to 0%o (%s)\n",getpid(), path,
            previous_mode, previous_mode_str, new_mode,
            new_mode_str);
     fflush(stdout);
@@ -207,3 +181,4 @@ int main(int argc, char *argv[]) {
     changeMode(&result, argc, argv);
     return 0;
 }
+
