@@ -105,19 +105,20 @@ int changeMode(command_t *command) {
     if (S_ISDIR(buf.st_mode) && command->recursive) {
         pid_t pid = fork();
 
-        switch (pid) {
-        case -1: // Failed to fork
+        if (pid == -1) { // Failed to fork
             perror("");
             return 1;
-            break;
-        case 0: // Child process
-            return changeFolderMode(command);
-        default: // Parent process
+        }
+        else if (pid == 0) { // Child process
             changeFileMode(command);
+            return changeFolderMode(command);
+        }
+        else { // Parent process
             wait(NULL); // Waiting for the child process to finish processing the subfolder 
             return 0;
         }
     } else {
+        printf("\n\nprocess %d entered here\n\n", getpid());
         return changeFileMode(command);
     }
 }
@@ -163,6 +164,7 @@ int printNoPermissionMessage(const char *path) {
 }
 
 //static bool logFileAvailable;
+
 
 int main(int argc, char *argv[]) {
     /*setBegin();
