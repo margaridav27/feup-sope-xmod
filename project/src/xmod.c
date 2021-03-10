@@ -82,7 +82,7 @@ int changeMode(command_t *command, int argc, char *argv[]) {
         while ((de = readdir(d)) != NULL) {
             if (strcmp(de->d_name, ".") == 0 || strcmp(de->d_name, "..") == 0) continue;
 
-            if (command->recursive) {
+            if (command->recursive && de->d_type == DT_DIR) {
                 pid_t pid = fork();
                 
                 if (pid == -1) { // Failed to fork
