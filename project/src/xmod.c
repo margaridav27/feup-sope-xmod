@@ -58,7 +58,7 @@ int changeFileMode(command_t *command) {
     return 0;
 }
 
-int changeFolderMode(command_t *command) {
+/*int changeFolderMode(command_t *command) {
     DIR *d = opendir(command->path);
 
     if (d == NULL) {
@@ -90,42 +90,83 @@ int changeFolderMode(command_t *command) {
         return 1;
     }
     return 0;
-}
+}*/
 
-int changeMode(command_t *command) {
+int changeMode(command_t *command, int argc, char *argv[]) {
+
     struct stat buf;
-
+    //printf("Path 1= %s\n",command->path);
     if (stat(command->path, &buf) == -1) {
-        perror("");
+        perror("1");
         return 1;
     }
 
-    if (S_ISDIR(buf.st_mode) && command->recursive) {
-        pid_t pid = fork();
-
-        if (pid == -1) { // Failed to fork
-            perror("");
-            return 1;
-        }
-        else if (pid == 0) { // Child process
-            changeFileMode(command);
-            changeFolderMode(command);
-            exit(0); // EXIT MUST BE USED INSTEAD OF RETURN BECAUSE BUGS CAN BE GENERATED
-        }
-        else { // Parent process
-            wait(NULL); // Waiting for the child process to finish processing the subfolder 
-            return 0;
-        }
-    } else {
+    if(!S_ISDIR(buf.st_mode)){
         return changeFileMode(command);
     }
+    else{
+        changeFileMode(command);
+        DIR *d = opendir(command->path);
+
+        //printf("Path 2= %s\n",command->path);
+        if (d == NULL) {
+            perror("2");
+            return 1;
+        }
+
+        struct dirent *de;
+        errno = 0;
+        
+        while ((de = readdir(d)) != NULL) {
+            if (strcmp(de->d_name, ".") == 0 ||
+                strcmp(de->d_name, "..") == 0)
+                continue;
+            if (de->d_type == DT_DIR && command->recursive) {
+                pid_t pid = fork();
+                
+                if (pid == -1) { // Failed to fork
+                    perror("3");
+                    return 1;
+                }
+                else if (pid == 0) { // Child process
+                    strcpy(argv[argc -1], command->path);
+                    strcat(argv[argc - 1], "/");
+                    strcat(argv[argc - 1], de->d_name);
+                    execv("./build/xmod", argv); // COMEBACK DONT HAVE CERTEZA
+                }
+                else { // Parent process
+                    int child_ret;
+                    wait(&child_ret); // Waiting for the child process to finish processing the subfolder 
+                    //printf("CHILD %d END WITH %d\n",pid, child_ret);
+                    }
+            } else {
+
+                command_t c = *command;
+                char *n = malloc(strlen(command->path) + strlen(de->d_name) + 1);
+                if (n == NULL) continue;  // COMBACK: Insert very special error message
+                sprintf(n, "%s/%s", command->path, de->d_name);
+                c.path = n;
+                changeFileMode(&c);
+                free(n);
+            }
+        }
+        closedir(d);
+    }
+
+    //printf("Path 4= %s\n",command->path);
+    if (errno != 0) {
+        perror("4");
+        return 1;
+    }
+
+    return 0;
 }
 
 int printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode) {
     char new_mode_str[] = "---------", previous_mode_str[] = "---------";
     parseModeToString(new_mode, new_mode_str);
     parseModeToString(previous_mode, previous_mode_str);
-    printf("mode of '%s' changed from 0%o (%s) to 0%o (%s)\n", path,
+    printf("%d - mode of '%s' changed from 0%o (%s) to 0%o (%s)\n",getpid(), path,
            previous_mode, previous_mode_str, new_mode,
            new_mode_str);
     fflush(stdout);
@@ -176,6 +217,24 @@ int main(int argc, char *argv[]) {
 
     command_t result;
     if (parseCommand(argc, argv, &result)) return 1;
-    changeMode(&result);
+    changeMode(&result, argc, argv);
     return 0;
 }
+
+
+
+
+/*
+folder1 <- muda
+    subFolder1 <- child
+        file2 <- child
+        subsubFolder <- GrandChild
+            file3 <- Grandchild
+        filde3 <- child
+    file <- muda
+    file2 <- muda
+
+
+
+
+*/

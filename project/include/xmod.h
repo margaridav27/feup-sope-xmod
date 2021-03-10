@@ -3,7 +3,7 @@
 
 #include "../include/parse.h"
 
-int changeMode(command_t *command);
+int changeMode(command_t *command, int argc, char *argv[]);
 
 int changeFileMode(command_t *command);
 
