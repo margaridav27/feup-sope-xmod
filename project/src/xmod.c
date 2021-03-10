@@ -70,8 +70,7 @@ int changeFolderMode(command_t *command) {
     errno = 0;
 
     while ((de = readdir(d)) != NULL) {
-        if (strcmp(de->d_name, ".") == 0 ||
-            strcmp(de->d_name, "..") == 0)
+        if (strcmp(de->d_name, ".") == 0 || strcmp(de->d_name, "..") == 0)
             continue;
 
         command_t c = *command;
@@ -111,14 +110,14 @@ int changeMode(command_t *command) {
         }
         else if (pid == 0) { // Child process
             changeFileMode(command);
-            return changeFolderMode(command);
+            changeFolderMode(command);
+            exit(0);
         }
         else { // Parent process
             wait(NULL); // Waiting for the child process to finish processing the subfolder 
             return 0;
         }
     } else {
-        printf("\n\nprocess %d entered here\n\n", getpid());
         return changeFileMode(command);
     }
 }
@@ -164,7 +163,6 @@ int printNoPermissionMessage(const char *path) {
 }
 
 //static bool logFileAvailable;
-
 
 int main(int argc, char *argv[]) {
     /*setBegin();
