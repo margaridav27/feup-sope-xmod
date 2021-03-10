@@ -79,7 +79,6 @@ int changeFolderMode(command_t *command) {
         char *n = malloc(strlen(command->path) + strlen(de->d_name) + 1);
         if (n == NULL) continue;  // COMBACK: Insert very special error message
         sprintf(n, "%s/%s", command->path, de->d_name);
-       
         c.path = n;
         changeMode(&c);
         free(n);
@@ -90,7 +89,6 @@ int changeFolderMode(command_t *command) {
         perror("");
         return 1;
     }
-
     return 0;
 }
 
@@ -111,14 +109,14 @@ int changeMode(command_t *command) {
         }
         else if (pid == 0) { // Child process
             changeFileMode(command);
-            return changeFolderMode(command);
+            changeFolderMode(command);
+            exit(0); // EXIT MUST BE USED INSTEAD OF RETURN BECAUSE BUGS CAN BE GENERATED
         }
         else { // Parent process
             wait(NULL); // Waiting for the child process to finish processing the subfolder 
             return 0;
         }
     } else {
-        printf("\n\nprocess %d entered here\n\n", getpid());
         return changeFileMode(command);
     }
 }
@@ -127,7 +125,7 @@ int printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode) 
     char new_mode_str[] = "---------", previous_mode_str[] = "---------";
     parseModeToString(new_mode, new_mode_str);
     parseModeToString(previous_mode, previous_mode_str);
-    printf("%d - mode of '%s' changed from 0%o (%s) to 0%o (%s)\n", getpid(), path,
+    printf("mode of '%s' changed from 0%o (%s) to 0%o (%s)\n", path,
            previous_mode, previous_mode_str, new_mode,
            new_mode_str);
     fflush(stdout);
