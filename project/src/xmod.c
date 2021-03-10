@@ -3,6 +3,7 @@
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <unistd.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -10,7 +11,8 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #include "../include/log.h"
 #include "../include/parse.h"
@@ -71,15 +73,13 @@ int changeFolderMode(command_t *command) {
         if (strcmp(de->d_name, ".") == 0 ||
             strcmp(de->d_name, "..") == 0)
             continue;
+            
         command_t c = *command;
         // COMBACK: WTF
         char *n = malloc(strlen(command->path) + strlen(de->d_name) + 1);
         if (n == NULL) continue;  // COMBACK: Insert very special error message
-        // memset(n, '\0', sizeof(n));
-        strncpy(n, command->path, strlen(n));
-        strncat(n, "/", strlen("/") + 1);
-        strncat(n, de->d_name, strlen(de->d_name) + 1);
-
+        sprintf(n, "%s/%s", command->path, de->d_name);
+       
         c.path = n;
         changeMode(&c);
         free(n);
@@ -103,7 +103,20 @@ int changeMode(command_t *command) {
     }
 
     if (S_ISDIR(buf.st_mode) && command->recursive) {
-        return changeFileMode(command) && changeFolderMode(command);
+        pid_t pid = fork();
+
+        switch (pid) {
+        case -1: // Failed to fork
+            perror("");
+            return 1;
+            break;
+        case 0: // Child process
+            return changeFolderMode(command);
+        default: // Parent process
+            changeFileMode(command);
+            wait(NULL);
+            return 0;
+        }
     } else {
         return changeFileMode(command);
     }
@@ -150,21 +163,20 @@ int printNoPermissionMessage(const char *path) {
     return 0;
 }
 
-static bool logFileAvailable;
+//static bool logFileAvailable;
 
 int main(int argc, char *argv[]) {
-    setBegin();
-
-    command_t result;
-    if (parseCommand(argc, argv, &result)) return 1;
+    /*setBegin();
 
     logFileAvailable = checkLogFilename();
     if (logFileAvailable) {
         registerEvent(getpid(), FILE_MODF, "some additional info");
     } else {
         fprintf(stderr, "File not available. Could not register event.\n");
-    }
+    }*/
 
-    changeFileMode(&result);
+    command_t result;
+    if (parseCommand(argc, argv, &result)) return 1;
+    changeMode(&result);
     return 0;
 }
