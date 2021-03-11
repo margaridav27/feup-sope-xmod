@@ -42,6 +42,8 @@ int changeFileMode(command_t *command) {
         return 1;
     }
 
+    //registerEvent(getpid(), FILE_MODF, "file's permissions were changed");
+
     // Remove additional bits for printing
     buf.st_mode &= ~persistent_bits;
     mode &= ~persistent_bits;
@@ -141,8 +143,7 @@ int changeMode(command_t *command, int argc, char *argv[]) {
     return 0;
 }
 
-int
-printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode) {
+int printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode) {
     char new_mode_str[] = "---------", previous_mode_str[] = "---------";
     parseModeToString(new_mode, new_mode_str);
     parseModeToString(previous_mode, previous_mode_str);
@@ -188,23 +189,22 @@ int printSymbolicMessage(const char *path) {
     return 0;
 }
 
-//static bool logFileAvailable;
+static bool logFileAvailable;
 
 int main(int argc, char *argv[]) {
-    /*setBegin();
+    setBegin();
 
     logFileAvailable = checkLogFilename();
-    if (logFileAvailable) {
-        registerEvent(getpid(), FILE_MODF, "some additional info");
-    } else {
-        fprintf(stderr, "File not available. Could not register event.\n");
-    }*/
+    if (!logFileAvailable) {
+        fprintf(stderr, "Logfile not available - events won't be registered.\n");
+    }
 
     command_t result;
     if (parseCommand(argc, argv, &result)) {
         fprintf(stderr, "Could not parse command\n");
         return 1;
     }
+
     changeMode(&result, argc, argv);
     return 0;
 }

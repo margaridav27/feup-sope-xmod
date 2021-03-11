@@ -8,10 +8,10 @@
 void setBegin();
 
 /**
- * @brief Calculates the seconds elapsed since the beginning of the program execution
+ * @brief Calculates the milliseconds elapsed since the beginning of the program execution
  * 
  * @return seconds elapsed 
  */
-int getElapsed();
+double getElapsed();
 
 #endif  // PROJECT_INCLUDE_TIME_CTRL_H_
