@@ -22,7 +22,8 @@ int changeFileMode(command_t *command) {
     struct stat buf;
 
     if (stat(command->path, &buf) == -1) {
-        perror("");
+        fprintf(stderr, "xmod: cannot access '%s': %s\n",
+                    command->path, strerror(errno));
         return 1;
     }
 
@@ -72,7 +73,8 @@ int changeMode(command_t *command, int argc, char *argv[]) {
 
     struct stat buf;
     if (stat(command->path, &buf) == -1) {
-        perror("");
+        fprintf(stderr, "xmod: cannot access '%s': %s\n",
+                    command->path, strerror(errno));
         return 1;
     }
 
@@ -141,6 +143,7 @@ int changeMode(command_t *command, int argc, char *argv[]) {
             }
         }
         closedir(d);
+        
     }
 
     if (errno != 0) {
