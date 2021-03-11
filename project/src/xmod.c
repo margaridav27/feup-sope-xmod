@@ -20,7 +20,7 @@
 
 int changeFileMode(command_t *command) {
     struct stat buf;
-
+    errno = 0;
     if (stat(command->path, &buf) == -1) {
         fprintf(stderr, "xmod: cannot access '%s': %s\n",
                     command->path, strerror(errno));
@@ -72,6 +72,7 @@ int changeFileMode(command_t *command) {
 int changeMode(command_t *command, int argc, char *argv[]) {
 
     struct stat buf;
+    errno = 0;
     if (stat(command->path, &buf) == -1) {
         fprintf(stderr, "xmod: cannot access '%s': %s\n",
                     command->path, strerror(errno));
@@ -80,7 +81,8 @@ int changeMode(command_t *command, int argc, char *argv[]) {
 
     changeFileMode(command);
 
-    if (S_ISDIR(buf.st_mode) && command->recursive) {
+    if (S_ISDIR(buf.st_mode) && command->recursive) {   
+        errno = 0;
         DIR *d = opendir(command->path);
 
         if (d == NULL) {
@@ -147,7 +149,8 @@ int changeMode(command_t *command, int argc, char *argv[]) {
     }
 
     if (errno != 0) {
-        perror("");
+        fprintf(stderr, "xmod: error while reading directory '%s': %s\n",
+                    command->path, strerror(errno));
         return 1;
     }
 
