@@ -108,7 +108,7 @@ int changeMode(command_t *command, int argc, char *argv[]) {
                           new_argv); // Not sure that it's bullet proof...
 
                     // free memory
-                    for (int i = 0; i < argc; ++i) free(new_argv[i]);
+                    for (int i = 0; i <= argc; ++i) free(new_argv[i]);
                     free(new_argv);
                 } else { // Parent process
                     int childRetval;
@@ -117,11 +117,9 @@ int changeMode(command_t *command, int argc, char *argv[]) {
                         perror("Invalid value return from child");
                     }
                 }
-            } 
-            else if(de->d_type == DT_LNK){
+            } else if (de->d_type == DT_LNK) {
                 printSymbolicMessage(de->d_name);
-            }
-            else{
+            } else {
                 command_t c = *command;
 
                 char *n = malloc(
