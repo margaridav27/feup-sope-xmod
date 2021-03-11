@@ -117,7 +117,11 @@ int changeMode(command_t *command, int argc, char *argv[]) {
                         perror("Invalid value return from child");
                     }
                 }
-            } else {
+            } 
+            else if(de->d_type == DT_LNK){
+                printSymbolicMessage(de->d_name);
+            }
+            else{
                 command_t c = *command;
 
                 char *n = malloc(
