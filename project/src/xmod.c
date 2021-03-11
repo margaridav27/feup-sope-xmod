@@ -91,34 +91,27 @@ int changeMode(command_t *command, int argc, char *argv[]) {
                 if (pid == -1) { // Failed to fork
                     perror("Fork Error");
                 } else if (pid == 0) { // Child process
-
                     char **new_argv = malloc((argc + 1) * sizeof(*new_argv));
-                    for (int i = 0; i < argc - 1; ++i) {
-                        size_t length = strlen(argv[i]) + 1;
-                        new_argv[i] = malloc(length);
-                        memcpy(new_argv[i], argv[i], length);
-                    }
+                    for (int i = 0; i < argc; ++i)
+                        new_argv[i] = strdup(argv[i]);
                     size_t length =
                             strlen(command->path) + 2 + strlen(de->d_name);
-                    new_argv[argc - 1] = malloc(length);
+                    new_argv[argc - 1] = realloc(new_argv[argc - 1], length);
                     strcpy(new_argv[argc - 1], command->path);
                     strcat(new_argv[argc - 1], "/");
                     strcat(new_argv[argc - 1], de->d_name);
-                    execv(new_argv[0],
-                          new_argv); // Not sure that it's bullet proof...
-
-                    // free memory
+                    new_argv[argc] = NULL;
+                    // Not sure that it's bullet proof...
+                    execv(new_argv[0], new_argv);
                     for (int i = 0; i <= argc; ++i) free(new_argv[i]);
                     free(new_argv);
                 } else { // Parent process
                     int childRetval;
-                    wait(&childRetval); // Waiting for the child process to finish processing the subfolder 
+                    wait(&childRetval); // Waiting for the child process to finish processing the subfolder
                     if (childRetval != 0) {
                         perror("Invalid value return from child");
                     }
                 }
-            } else if (de->d_type == DT_LNK) {
-                printSymbolicMessage(de->d_name);
             } else {
                 command_t c = *command;
 
