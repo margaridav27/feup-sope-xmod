@@ -65,14 +65,15 @@ int changeMode(command_t *command, int argc, char *argv[]) {
         perror("");
         return 1;
     }
-    
+
     changeFileMode(command);
 
-    if(S_ISDIR(buf.st_mode) && command->recursive) {
+    if (S_ISDIR(buf.st_mode) && command->recursive) {
         DIR *d = opendir(command->path);
 
         if (d == NULL) {
-            fprintf(stderr,"xmod: cannot read directry '%s': %s\n",command->path, strerror(errno));
+            fprintf(stderr, "xmod: cannot read directry '%s': %s\n",
+                    command->path, strerror(errno));
             return 1;
         }
 
@@ -80,57 +81,55 @@ int changeMode(command_t *command, int argc, char *argv[]) {
         errno = 0;
         //S_ISLNK
         while ((de = readdir(d)) != NULL) {
-            if (strcmp(de->d_name, ".") == 0 || strcmp(de->d_name, "..") == 0) continue;
+            if (strcmp(de->d_name, ".") == 0 ||
+                strcmp(de->d_name, "..") == 0)
+                continue;
 
             if (de->d_type == DT_DIR) {
                 pid_t pid = fork();
-                
+
                 if (pid == -1) { // Failed to fork
                     perror("Fork Error");
-                }
-                else if (pid == 0) { // Child process
+                } else if (pid == 0) { // Child process
 
-                    char** new_argv = malloc((argc+1) * sizeof(*new_argv));
-                    for(int i = 0; i < argc - 1; ++i)
-                    {
-                        size_t length = strlen(argv[i])+1;
+                    char **new_argv = malloc((argc + 1) * sizeof(*new_argv));
+                    for (int i = 0; i < argc - 1; ++i) {
+                        size_t length = strlen(argv[i]) + 1;
                         new_argv[i] = malloc(length);
                         memcpy(new_argv[i], argv[i], length);
                     }
-                    size_t length = strlen(command->path) + 2 + strlen(de->d_name);
+                    size_t length =
+                            strlen(command->path) + 2 + strlen(de->d_name);
                     new_argv[argc - 1] = malloc(length);
                     strcpy(new_argv[argc - 1], command->path);
                     strcat(new_argv[argc - 1], "/");
                     strcat(new_argv[argc - 1], de->d_name);
-                    new_argv[argc] = NULL;
-
-                    execv(new_argv[0], new_argv); // Not sure that it's bullet proof...
+                    execv(new_argv[0],
+                          new_argv); // Not sure that it's bullet proof...
 
                     // free memory
-                    for(int i = 0; i < argc; ++i)
-                    {
-                        free(new_argv[i]);
-                    }
+                    for (int i = 0; i < argc; ++i) free(new_argv[i]);
                     free(new_argv);
-                }
-                else { // Parent process
+                } else { // Parent process
                     int childRetval;
                     wait(&childRetval); // Waiting for the child process to finish processing the subfolder 
-                    if(childRetval != 0){
+                    if (childRetval != 0) {
                         perror("Invalid value return from child");
                     }
                 }
             } else {
                 command_t c = *command;
 
-                char *n = malloc(strlen(command->path) + strlen(de->d_name) + 1);
-                if (n == NULL) continue;  // COMBACK: Insert very special error message
+                char *n = malloc(
+                        strlen(command->path) + strlen(de->d_name) + 1);
+                if (n == NULL)
+                    continue;  // COMBACK: Insert very special error message
 
                 sprintf(n, "%s/%s", command->path, de->d_name);
                 c.path = n;
 
                 changeFileMode(&c);
-                
+
                 free(n);
             }
         }
@@ -145,7 +144,8 @@ int changeMode(command_t *command, int argc, char *argv[]) {
     return 0;
 }
 
-int printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode) {
+int
+printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode) {
     char new_mode_str[] = "---------", previous_mode_str[] = "---------";
     parseModeToString(new_mode, new_mode_str);
     parseModeToString(previous_mode, previous_mode_str);
@@ -185,8 +185,8 @@ int printNoPermissionMessage(const char *path) {
     return 0;
 }
 
-int printSymbolicMessage(const char *path){
-    printf("neither symbolic link '%s' nor referent has been changed\n",path);
+int printSymbolicMessage(const char *path) {
+    printf("neither symbolic link '%s' nor referent has been changed\n", path);
     fflush(stdout);
     return 0;
 }
@@ -204,7 +204,7 @@ int main(int argc, char *argv[]) {
     }*/
 
     command_t result;
-    if (parseCommand(argc, argv, &result)){
+    if (parseCommand(argc, argv, &result)) {
         fprintf(stderr, "Could not parse command\n");
         return 1;
     }
