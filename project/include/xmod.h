@@ -17,4 +17,6 @@ int parseModeToString(mode_t mode, char *str);
 
 int printNoPermissionMessage(const char *path);
 
+int printSymbolicMessage(const char *path);
+
 #endif  // PROJECT_INCLUDE_XMOD_H_
