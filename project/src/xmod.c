@@ -3,6 +3,7 @@
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <unistd.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -10,7 +11,8 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #include "../include/log.h"
 #include "../include/parse.h"
@@ -56,35 +58,80 @@ int changeFileMode(command_t *command) {
     return 0;
 }
 
-int changeFolderMode(command_t *command) {
-    DIR *d = opendir(command->path);
+int changeMode(command_t *command, int argc, char *argv[]) {
 
-    if (d == NULL) {
+    struct stat buf;
+    if (stat(command->path, &buf) == -1) {
         perror("");
         return 1;
     }
 
-    struct dirent *de;
-    errno = 0;
+    changeFileMode(command);
 
-    while ((de = readdir(d)) != NULL) {
-        if (strcmp(de->d_name, ".") == 0 ||
-            strcmp(de->d_name, "..") == 0)
-            continue;
-        command_t c = *command;
-        // COMBACK: WTF
-        char *n = malloc(strlen(command->path) + strlen(de->d_name) + 1);
-        if (n == NULL) continue;  // COMBACK: Insert very special error message
-        // memset(n, '\0', sizeof(n));
-        strncpy(n, command->path, strlen(n));
-        strncat(n, "/", strlen("/") + 1);
-        strncat(n, de->d_name, strlen(de->d_name) + 1);
+    if (S_ISDIR(buf.st_mode) && command->recursive) {
+        DIR *d = opendir(command->path);
 
-        c.path = n;
-        changeMode(&c);
-        free(n);
+        if (d == NULL) {
+            fprintf(stderr, "xmod: cannot read directry '%s': %s\n",
+                    command->path, strerror(errno));
+            return 1;
+        }
+
+        struct dirent *de;
+        errno = 0;
+        //S_ISLNK
+        while ((de = readdir(d)) != NULL) {
+            if (strcmp(de->d_name, ".") == 0 ||
+                strcmp(de->d_name, "..") == 0)
+                continue;
+
+            if (de->d_type == DT_DIR) {
+                pid_t pid = fork();
+
+                if (pid == -1) { // Failed to fork
+                    perror("Fork Error");
+                } else if (pid == 0) { // Child process
+                    char **new_argv = malloc((argc + 1) * sizeof(*new_argv));
+                    for (int i = 0; i < argc; ++i)
+                        new_argv[i] = strdup(argv[i]);
+                    size_t length =
+                            strlen(command->path) + 2 + strlen(de->d_name);
+                    new_argv[argc - 1] = realloc(new_argv[argc - 1], length);
+                    strcpy(new_argv[argc - 1], command->path);
+                    strcat(new_argv[argc - 1], "/");
+                    strcat(new_argv[argc - 1], de->d_name);
+                    new_argv[argc] = NULL;
+                    // Not sure that it's bullet proof...
+                    execv(new_argv[0], new_argv);
+                    for (int i = 0; i <= argc; ++i) free(new_argv[i]);
+                    free(new_argv);
+                } else { // Parent process
+                    int childRetval;
+                    wait(&childRetval); // Waiting for the child process to finish processing the subfolder
+                    if (childRetval != 0) {
+                        perror("Invalid value return from child");
+                    }
+                }
+            } else if (de->d_type == DT_LNK) {
+                printSymbolicMessage(de->d_name);
+            } else {
+                command_t c = *command;
+
+                char *n = malloc(
+                        strlen(command->path) + strlen(de->d_name) + 1);
+                if (n == NULL)
+                    continue;  // COMBACK: Insert very special error message
+
+                sprintf(n, "%s/%s", command->path, de->d_name);
+                c.path = n;
+
+                changeFileMode(&c);
+
+                free(n);
+            }
+        }
+        closedir(d);
     }
-    closedir(d);
 
     if (errno != 0) {
         perror("");
@@ -94,27 +141,12 @@ int changeFolderMode(command_t *command) {
     return 0;
 }
 
-int changeMode(command_t *command) {
-    struct stat buf;
-
-    if (stat(command->path, &buf) == -1) {
-        perror("");
-        return 1;
-    }
-
-    if (S_ISDIR(buf.st_mode) && command->recursive) {
-        return changeFileMode(command) && changeFolderMode(command);
-    } else {
-        return changeFileMode(command);
-    }
-}
-
 int
 printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode) {
     char new_mode_str[] = "---------", previous_mode_str[] = "---------";
     parseModeToString(new_mode, new_mode_str);
     parseModeToString(previous_mode, previous_mode_str);
-    printf("mode of '%s' changed from 0%o (%s) to 0%o (%s)\n", path,
+    printf("Mode of '%s' changed from 0%o (%s) to 0%o (%s)\n", path,
            previous_mode, previous_mode_str, new_mode,
            new_mode_str);
     fflush(stdout);
@@ -124,7 +156,7 @@ printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode) {
 int printRetainMessage(const char *path, mode_t mode) {
     char mode_str[] = "---------";
     parseModeToString(mode, mode_str);
-    printf("mode of '%s' retained as 0%o (%s)\n", path, mode, mode_str);
+    printf("Mode of '%s' retained as 0%o (%s)\n", path, mode, mode_str);
     fflush(stdout);
     return 0;
 }
@@ -144,27 +176,36 @@ int parseModeToString(mode_t mode, char *str) {
 
 int printNoPermissionMessage(const char *path) {
     fprintf(stderr,
-            "xmod: changing permissions of '%s': Operation not permitted",
+            "xmod: changing permissions of '%s': Operation not permitted\n",
             path);
     fflush(stdout);
     return 0;
 }
 
-static bool logFileAvailable;
+int printSymbolicMessage(const char *path) {
+    printf("neither symbolic link '%s' nor referent has been changed\n", path);
+    fflush(stdout);
+    return 0;
+}
+
+//static bool logFileAvailable;
 
 int main(int argc, char *argv[]) {
-    setBegin();
-
-    command_t result;
-    if (parseCommand(argc, argv, &result)) return 1;
+    /*setBegin();
 
     logFileAvailable = checkLogFilename();
     if (logFileAvailable) {
         registerEvent(getpid(), FILE_MODF, "some additional info");
     } else {
         fprintf(stderr, "File not available. Could not register event.\n");
-    }
+    }*/
 
-    changeFileMode(&result);
+    command_t result;
+    if (parseCommand(argc, argv, &result)) {
+        fprintf(stderr, "Could not parse command\n");
+        return 1;
+    }
+    changeMode(&result, argc, argv);
     return 0;
 }
+
