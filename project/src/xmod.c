@@ -36,12 +36,12 @@ int changeFileMode(command_t *command) {
     } else if (command->action == ACTION_SET) {
         mode = persistent_bits | command->mode;  // Set only the relevant bits
     } else if (command->action == ACTION_PARCIAL_SET) {
-        if(command->mode & 07){
-            mode = persistent_bits | command->mode | (0770 & mode);
-        }else if((command->mode >> 3) & 07){
-            mode = persistent_bits | command->mode | (0707 & mode);
-        }else if((command->mode >> 6) & 07){
-            mode = persistent_bits | command->mode | (0077 & mode);
+        if(command->mode & S_IRWXO){ 
+            mode = persistent_bits | command->mode | ((S_IRWXU | S_IRWXG) & mode);
+        }else if(command->mode & S_IRWXG){
+            mode = persistent_bits | command->mode | ((S_IRWXU | S_IRWXO) & mode);
+        }else if(command->mode & S_IRWXU){
+            mode = persistent_bits | command->mode | ((S_IRWXG | S_IRWXO) & mode);
         }
     }
 
