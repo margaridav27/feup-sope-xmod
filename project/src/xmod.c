@@ -127,7 +127,13 @@ int changeMode(command_t *command, int argc, char *argv[]) {
                     }
                 }
             } else if (de->d_type == DT_LNK) {
-                printSymbolicMessage(de->d_name);
+                char *n = malloc(
+                        strlen(command->path) + strlen(de->d_name) + 1);
+                if (n == NULL)
+                    continue;  // COMBACK: Insert very special error message
+                sprintf(n, "%s/%s", command->path, de->d_name);
+                printSymbolicMessage(n);
+                free(n);
             } else {
                 command_t c = *command;
 
