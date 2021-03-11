@@ -72,7 +72,7 @@ int changeMode(command_t *command, int argc, char *argv[]) {
         DIR *d = opendir(command->path);
 
         if (d == NULL) {
-            perror("");
+            fprintf(stderr,"xmod: cannot read directry '%s': %s\n",command->path, strerror(errno));
             return 1;
         }
 
@@ -89,10 +89,29 @@ int changeMode(command_t *command, int argc, char *argv[]) {
                     perror("Fork Error");
                 }
                 else if (pid == 0) { // Child process
-                    strcpy(argv[argc - 1], command->path);
-                    strcat(argv[argc - 1], "/");
-                    strcat(argv[argc - 1], de->d_name);
-                    execv("./build/xmod", argv); // Not sure that it's bullet proof...
+
+                    char** new_argv = malloc((argc+1) * sizeof(*new_argv));
+                    for(int i = 0; i < argc - 1; ++i)
+                    {
+                        size_t length = strlen(argv[i])+1;
+                        new_argv[i] = malloc(length);
+                        memcpy(new_argv[i], argv[i], length);
+                    }
+                    size_t length = strlen(command->path) + 2 + strlen(de->d_name);
+                    new_argv[argc - 1] = malloc(length);
+                    strcpy(new_argv[argc - 1], command->path);
+                    strcat(new_argv[argc - 1], "/");
+                    strcat(new_argv[argc - 1], de->d_name);
+                    new_argv[argc] = NULL;
+
+                    execv(new_argv[0], new_argv); // Not sure that it's bullet proof...
+
+                    // free memory
+                    for(int i = 0; i < argc; ++i)
+                    {
+                        free(new_argv[i]);
+                    }
+                    free(new_argv);
                 }
                 else { // Parent process
                     int childRetval;
