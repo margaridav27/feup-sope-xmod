@@ -43,14 +43,14 @@ void registerEvent(int pid, event_t event, char *info) {
         default: break;
     }
 
-    fprintf(logFP, "%d ; %d ; %s ; %s\n", getElapsed(), pid, action, info);
+    fprintf(logFP, "%f; %d ; %s ; %s\n", getElapsed(), pid, action, info);
 }
 
 int closeLogfile() {
     if (fclose(logFP) != 0) {
         perror("closeLogfile");
         return 1;
-    }
+        }
 
     return 0;
 }

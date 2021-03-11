@@ -3,7 +3,6 @@
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <unistd.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -11,8 +10,8 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <sys/types.h>
 #include <sys/wait.h>
+#include <unistd.h>
 
 #include "../include/log.h"
 #include "../include/parse.h"
@@ -30,11 +29,11 @@ int changeFileMode(command_t *command) {
     mode_t persistent_bits = __S_IFMT & mode;
 
     if (command->action == ACTION_REMOVE) {
-        mode &= ~(command->mode);  // Remove the relevant bits, keeping others
+        mode &= ~(command->mode); // Remove the relevant bits, keeping others
     } else if (command->action == ACTION_ADD) {
-        mode |= command->mode;  // Add the relevant bits, keeping others
+        mode |= command->mode; // Add the relevant bits, keeping others
     } else if (command->action == ACTION_SET) {
-        mode = persistent_bits | command->mode;  // Set only the relevant bits
+        mode = persistent_bits | command->mode; // Set only the relevant bits
     }
 
     if (chmod(command->path, mode) == -1) {
@@ -42,7 +41,7 @@ int changeFileMode(command_t *command) {
         return 1;
     }
 
-    //registerEvent(getpid(), FILE_MODF, "file's permissions were changed");
+    registerEvent(getpid(), FILE_MODF, "file's permissions were changed");
 
     // Remove additional bits for printing
     buf.st_mode &= ~persistent_bits;
@@ -122,7 +121,7 @@ int changeMode(command_t *command, int argc, char *argv[]) {
                 char *n = malloc(
                         strlen(command->path) + strlen(de->d_name) + 1);
                 if (n == NULL)
-                    continue;  // COMBACK: Insert very special error message
+                    continue; // COMBACK: Insert very special error message
 
                 sprintf(n, "%s/%s", command->path, de->d_name);
                 c.path = n;
@@ -205,7 +204,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+
     changeMode(&result, argc, argv);
     return 0;
 }
-
