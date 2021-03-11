@@ -47,7 +47,7 @@ int parseCommand(int argc, char *argv[], command_t *result) {
         } else if (change == '+') {
             result->action = ACTION_ADD;
         } else if (change == '=') {
-            result->action = ACTION_SET;
+            result->action = ACTION_PARCIAL_SET;
         } else {
             fprintf(stderr, "xmod: invalid mode: '%s'\n", mode_string);
             return 1;
