@@ -22,7 +22,8 @@ int changeFileMode(command_t *command) {
     struct stat buf;
 
     if (stat(command->path, &buf) == -1) {
-        perror("");
+        fprintf(stderr, "xmod: cannot access '%s': %s\n",
+                    command->path, strerror(errno));
         return 1;
     }
 
@@ -35,7 +36,17 @@ int changeFileMode(command_t *command) {
         mode |= command->mode;  // Add the relevant bits, keeping others
     } else if (command->action == ACTION_SET) {
         mode = persistent_bits | command->mode;  // Set only the relevant bits
+    } else if (command->action == ACTION_PARCIAL_SET) {
+        if(command->mode & S_IRWXO){ 
+            mode &= (~S_IRWXO);
+        }else if(command->mode & S_IRWXG){
+            mode &= (~S_IRWXG);
+        }else if(command->mode & S_IRWXU){
+            mode &= (~S_IRWXU);
+        }
+        mode |= command->mode;
     }
+
 
     if (chmod(command->path, mode) == -1) {
         perror("");
@@ -62,7 +73,8 @@ int changeMode(command_t *command, int argc, char *argv[]) {
 
     struct stat buf;
     if (stat(command->path, &buf) == -1) {
-        perror("");
+        fprintf(stderr, "xmod: cannot access '%s': %s\n",
+                    command->path, strerror(errno));
         return 1;
     }
 
@@ -131,6 +143,7 @@ int changeMode(command_t *command, int argc, char *argv[]) {
             }
         }
         closedir(d);
+        
     }
 
     if (errno != 0) {

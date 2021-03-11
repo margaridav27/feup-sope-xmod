@@ -21,7 +21,8 @@
 typedef enum {
     ACTION_REMOVE,
     ACTION_ADD,
-    ACTION_SET
+    ACTION_SET,
+    ACTION_PARCIAL_SET
 } action_t;
 
 typedef struct {
