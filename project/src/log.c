@@ -34,26 +34,8 @@ bool openLogFile() {
 }
 
 void logEvent(int pid, event_t event, char *info) {
-    char *action = "";
-    switch (event) {
-        case PROC_CREAT:
-            action = "PROC_CREAT";
-            break;
-        case PROC_EXIT:
-            action = "PROC_EXIT";
-            break;
-        case SIGNAL_RECV:
-            action = "SIGNAL_RECV";
-            break;
-        case SIGNAL_SENT:
-            action = "SIGNAL_SENT";
-            break;
-        case FILE_MODF:
-            action = "FILE_MODF";
-            break;
-        default:
-            break;
-    }
+    static const char *events[] = {"PROC_CREAT", "PROC_EXIT", "SIGNAL_RECV", "SIGNAL_SENT", "FILE_MODF"};
+    const char *action = events[event];
     fprintf(logFP, "%d ; %d ; %s ; %s\n", getElapsed(), pid, action, info);
 }
 
