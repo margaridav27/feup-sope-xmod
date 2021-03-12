@@ -21,7 +21,7 @@
 typedef enum {
     ACTION_REMOVE = '-',
     ACTION_ADD = '+',
-    ACTION_PARCIAL_SET = '=',
+    ACTION_PARTIAL_SET = '=',
     ACTION_SET,
 } action_t;
 

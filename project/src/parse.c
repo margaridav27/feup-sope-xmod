@@ -71,7 +71,7 @@ int parseCommand(int argc, char *argv[], command_t *result) {
             mode <<= GROUP_POSITION;
         } else if (user == 'a') {
             mode |= (mode << USER_POSITION) | (mode << GROUP_POSITION);
-            if(result->action == ACTION_PARCIAL_SET){
+            if (result->action == ACTION_PARTIAL_SET) {
                 result->action = ACTION_SET;
             }
         } else if (user != 'o') {
