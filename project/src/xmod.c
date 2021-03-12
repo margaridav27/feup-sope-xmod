@@ -106,9 +106,7 @@ int changeMode(command_t *command, int argc, char *argv[]) {
 
                 if (pid == -1) { // Failed to fork
                     perror("Fork Error");
-                    return 1;
                 } else if (pid == 0) { // Child process
-
                     // Preparing new argv
                     char **new_argv = malloc((argc + 1) * sizeof(*new_argv));
                     for (int i = 0; i < argc; ++i) { new_argv[i] = strdup(argv[i]); }
