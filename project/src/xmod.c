@@ -123,6 +123,17 @@ int changeMode(command_t *command, int argc, char *argv[]) {
                     // Setting up the environment variable                                      
                     setenv("IS_FIRST", "0", 0); 
 
+                   
+
+                    // Logging process creation - PROC_CREAT
+                    char info[1024];
+                    strcpy(info, new_argv[0]);
+                    for (int i = 1; i < argc; ++i) { 
+                        strcat(info, " ");
+                        strcat(info, new_argv[i]); 
+                    }
+                    logEvent(getpid(), PROC_CREAT, info);
+
                     execv(new_argv[0], new_argv);
 
                     for (int i = 0; i <= argc; ++i) { free(new_argv[i]); }
