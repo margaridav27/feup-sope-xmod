@@ -20,9 +20,6 @@
 static bool logfileUnavailable;
 
 int changeFileMode(command_t *command) {
-    // just to test...
-    logEvent(getpid(), PROC_CREAT, "test");
-
     struct stat buf;
     errno = 0;
     if (stat(command->path, &buf) == -1) {
@@ -69,6 +66,12 @@ int changeFileMode(command_t *command) {
     } else if (command->changes && mode != buf.st_mode) {
         printChangeMessage(command->path, buf.st_mode, mode);
     }
+
+    // Logging permissions modification of files/directories - FILE_MODF
+    char info[2048];
+    sprintf(info, "%s : %o : %o", command->path, buf.st_mode, mode);
+    logEvent(getpid(), FILE_MODF, info);
+
     return 0;
 }
 
@@ -134,7 +137,7 @@ int changeMode(command_t *command, int argc, char *argv[]) {
                     }
 
                     // Logging process termination - PROC_EXIT
-                    char *info;
+                    char info[1024];
                     sprintf(info, "%d", childRetval);
                     logEvent(getpid(), PROC_EXIT, info);
                 }
