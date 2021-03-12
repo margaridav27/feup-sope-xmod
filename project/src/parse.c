@@ -22,8 +22,8 @@ int parseCommand(int argc, char *argv[], command_t *result) {
             return 1;
     }
 
-    // Not enough arguments after flags: command is invalid
-    if (argc < 3 || argc - optind < 2) {
+    // Incorrect number of arguments after flags: command is invalid
+    if (argc - optind != 2) {
         fprintf(stderr, "xmod: missing operand\n");
         return 1;
     }
