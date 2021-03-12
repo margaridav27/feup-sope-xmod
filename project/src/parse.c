@@ -47,7 +47,7 @@ int parseCommand(int argc, char *argv[], command_t *result) {
         } else if (change == '+') {
             result->action = ACTION_ADD;
         } else if (change == '=') {
-            result->action = ACTION_SET;
+            result->action = ACTION_PARCIAL_SET;
         } else {
             fprintf(stderr, "xmod: invalid mode: '%s'\n", mode_string);
             return 1;
@@ -74,6 +74,9 @@ int parseCommand(int argc, char *argv[], command_t *result) {
             mode <<= GROUP_POSITION;
         } else if (user == 'a') {
             mode |= (mode << USER_POSITION) | (mode << GROUP_POSITION);
+            if(result->action == ACTION_PARCIAL_SET){
+                result->action = ACTION_SET;
+            }
         } else if (user != 'o') {
             fprintf(stderr, "xmod: invalid mode: '%s'\n", mode_string);
             return 1;

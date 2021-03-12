@@ -19,9 +19,10 @@
 
 int changeFileMode(command_t *command) {
     struct stat buf;
-
+    errno = 0;
     if (stat(command->path, &buf) == -1) {
-        perror("");
+        fprintf(stderr, "xmod: cannot access '%s': %s\n",
+                    command->path, strerror(errno));
         return 1;
     }
 
@@ -33,8 +34,18 @@ int changeFileMode(command_t *command) {
     } else if (command->action == ACTION_ADD) {
         mode |= command->mode; // Add the relevant bits, keeping others
     } else if (command->action == ACTION_SET) {
-        mode = persistent_bits | command->mode; // Set only the relevant bits
+        mode = persistent_bits | command->mode;  // Set only the relevant bits
+    } else if (command->action == ACTION_PARCIAL_SET) {
+        if(command->mode & S_IRWXO){ 
+            mode &= (~S_IRWXO);
+        }else if(command->mode & S_IRWXG){
+            mode &= (~S_IRWXG);
+        }else if(command->mode & S_IRWXU){
+            mode &= (~S_IRWXU);
+        }
+        mode |= command->mode;
     }
+
 
     if (chmod(command->path, mode) == -1) {
         perror("");
@@ -62,14 +73,17 @@ int changeFileMode(command_t *command) {
 int changeMode(command_t *command, int argc, char *argv[]) {
 
     struct stat buf;
+    errno = 0;
     if (stat(command->path, &buf) == -1) {
-        perror("");
+        fprintf(stderr, "xmod: cannot access '%s': %s\n",
+                    command->path, strerror(errno));
         return 1;
     }
 
     changeFileMode(command);
 
-    if (S_ISDIR(buf.st_mode) && command->recursive) {
+    if (S_ISDIR(buf.st_mode) && command->recursive) {   
+        errno = 0;
         DIR *d = opendir(command->path);
 
         if (d == NULL) {
@@ -114,7 +128,13 @@ int changeMode(command_t *command, int argc, char *argv[]) {
                     }
                 }
             } else if (de->d_type == DT_LNK) {
-                printSymbolicMessage(de->d_name);
+                char *n = malloc(
+                        strlen(command->path) + strlen(de->d_name) + 1);
+                if (n == NULL)
+                    continue;  // COMBACK: Insert very special error message
+                sprintf(n, "%s/%s", command->path, de->d_name);
+                printSymbolicMessage(n);
+                free(n);
             } else {
                 command_t c = *command;
 
@@ -132,10 +152,12 @@ int changeMode(command_t *command, int argc, char *argv[]) {
             }
         }
         closedir(d);
+        
     }
 
     if (errno != 0) {
-        perror("");
+        fprintf(stderr, "xmod: error while reading directory '%s': %s\n",
+                    command->path, strerror(errno));
         return 1;
     }
 
