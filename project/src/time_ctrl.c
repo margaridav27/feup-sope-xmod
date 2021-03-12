@@ -1,6 +1,8 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/time.h>
 #include <sys/types.h>
-#include <stdio.h>
 
 #include "../include/time_ctrl.h"
 
@@ -20,6 +22,6 @@ long getElapsed(struct timeval startTime) {
     struct timeval time;
 	gettimeofday(&time, NULL); // Get current time
     
-    return (time.tv_usec - startTime.tv_usec) * 1000000 
-    + (time.tv_sec - startTime.tv_sec);
+    return (long)(time.tv_usec - startTime.tv_usec) / 1000000 
+    + (long)(time.tv_sec - startTime.tv_sec) * 1000;
 }
