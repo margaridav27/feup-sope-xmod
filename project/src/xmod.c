@@ -25,8 +25,8 @@ int changeFileMode(command_t *command) {
     if (stat(command->path, &buf) == -1) {
         fprintf(stderr, "xmod: cannot access '%s': %s\n",
                 command->path, strerror(errno));
-        if(command->verbose){
-            printFailedMessage(command->path,command->mode);
+        if (command->verbose) {
+            printFailedMessage(command->path, command->mode);
         }
         return 1;
     }
@@ -50,7 +50,6 @@ int changeFileMode(command_t *command) {
         }
         mode |= command->mode;
     }
-
 
 
     if (chmod(command->path, mode) == -1) {
@@ -87,9 +86,9 @@ int changeMode(command_t *command, int argc, char *argv[]) {
     if (stat(command->path, &buf) == -1) {
         fprintf(stderr, "xmod: cannot access '%s': %s\n", command->path, strerror(errno));
         fprintf(stderr, "xmod: cannot access '%s': %s\n",
-                    command->path, strerror(errno));
-        if(command->verbose){
-            printFailedMessage(command->path,command->mode);
+                command->path, strerror(errno));
+        if (command->verbose) {
+            printFailedMessage(command->path, command->mode);
         }
         return 1;
     }
@@ -169,11 +168,11 @@ int changeMode(command_t *command, int argc, char *argv[]) {
                 errno = 0;
                 if (stat(n, &buf) == -1) {
                     fprintf(stderr, "xmod: cannot access '%s': %s\n",
-                                n, strerror(errno));
-                    if(command->verbose){
-                        printFailedMessage(n,command->mode);
+                            n, strerror(errno));
+                    if (command->verbose) {
+                        printFailedMessage(n, command->mode);
                     }
-                } else if(command->verbose){
+                } else if (command->verbose) {
                     printSymbolicMessage(n);
                 }
             } else {
@@ -220,6 +219,15 @@ int printRetainMessage(const char *path, mode_t mode) {
     return 0;
 }
 
+int printFailedMessage(const char *path, mode_t new_mode) {
+    char new_mode_str[] = "---------";
+    parseModeToString(new_mode, new_mode_str);
+    fprintf(stderr, "failed to change mode of '%s' changed to 0%o (%s)\n", path,
+            new_mode, new_mode_str);
+    fflush(stdout);
+    return 0;
+}
+
 int parseModeToString(mode_t mode, char *str) {
     if (mode & S_IXOTH) str[8] = 'x';
     if (mode & S_IWOTH) str[7] = 'w';
@@ -249,7 +257,7 @@ int main(int argc, char *argv[]) {
     if (getenv("IS_FIRST") == NULL) { // Initial process
         setStartTime();
         logfileUnavailable = initLog("w"); // Initially, logfile is supposed be truncated
-    } else { // Not initial process
+    } else {                               // Not initial process
         restoreStartTime();
         logfileUnavailable = initLog("a"); // Child process won't truncate the logfile
     }
@@ -266,7 +274,7 @@ int main(int argc, char *argv[]) {
 
     changeMode(&result, argc, argv);
 
-    if (!logfileUnavailable) { closeLog(); }
+    if (!logfileUnavailable) { closeLogFile(); }
 
     return 0;
 }

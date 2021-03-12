@@ -20,4 +20,4 @@ void restoreStartTime();
  */
 double getElapsed();
 
-#endif  // PROJECT_INCLUDE_TIME_CTRL_H_
+#endif // PROJECT_INCLUDE_TIME_CTRL_H_

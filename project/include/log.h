@@ -38,4 +38,4 @@ int logEvent(pid_t pid, event_t event, char *info);
  */
 int closeLogFile();
 
-#endif  // PROJECT_INCLUDE_LOG_H_
+#endif // PROJECT_INCLUDE_LOG_H_
