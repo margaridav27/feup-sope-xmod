@@ -19,12 +19,14 @@ void setStartTime() {
 }
 
 void restoreStartTime() {
-    sscanf(getenv("START_TIME"), "%lu %lu", &startTime.tv_sec, &startTime.tv_usec);
+    sscanf(getenv("START_TIME"), "%lu %lu", &startTime.tv_sec,
+           &startTime.tv_usec);
 }
 
-double getElapsed() {
+double getMillisecondsElapsed() {
     struct timeval time;
     gettimeofday(&time, NULL); // Get current time
 
-    return ((double) (time.tv_usec - startTime.tv_usec) / 1e6 + (double) (time.tv_sec - startTime.tv_sec)) * 1e3;
+    return ((double) (time.tv_usec - startTime.tv_usec) / 1e6 +
+            (double) (time.tv_sec - startTime.tv_sec)) * 1e3;
 }

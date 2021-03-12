@@ -48,11 +48,11 @@ int parseCommand(int argc, char *argv[], command_t *result) {
         // Conversion was unsuccessful: parse the string
         unsigned char user = mode_string[0], change = mode_string[1];
 
-        if (change != '-' && change != '+' && change != '=') {
+        if (change == '-' || change == '+' || change == '=') {
+            result->action = change;
+        } else {
             fprintf(stderr, "xmod: invalid mode: '%s'\n", mode_string);
             return 1;
-        } else {
-            result->action = change;
         }
 
         const char *permissions_string = mode_string + 2;

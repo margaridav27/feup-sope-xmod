@@ -19,7 +19,7 @@ typedef enum {
  * @param flag
  * @return int
  */
-int initLog(char *flag);
+int openLogFile(char *flag);
 
 /**
  * @brief
