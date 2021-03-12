@@ -40,7 +40,7 @@ $(BUILD_DIRECTORY)/%.c.o: %.c
 	@mkdir -p $(dir $@)
 	@$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
-$(BUILD_DIRECTORY)/$(TARGET_EXECUTABLE): $(OBJECT_FILES)
+$(TARGET_EXECUTABLE): $(OBJECT_FILES)
 	@echo "Linking: " $@
 	@$(CC) $(OBJECT_FILES) -o $@ $(LDFLAGS)
 
