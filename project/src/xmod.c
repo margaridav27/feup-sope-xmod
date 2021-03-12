@@ -131,6 +131,11 @@ int changeMode(command_t *command, int argc, char *argv[]) {
                     if (childRetval != 0) {
                         perror("Invalid value return from child");
                     }
+
+                    // Logging process termination - PROC_EXIT
+                    char *info;
+                    sprintf(info, "%d", childRetval);
+                    logEvent(getpid(), PROC_EXIT, info);
                 }
             } else if (de->d_type == DT_LNK) {
                 char *n = malloc(strlen(command->path) + strlen(de->d_name) + 1);
