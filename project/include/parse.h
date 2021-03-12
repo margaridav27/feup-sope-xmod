@@ -37,4 +37,4 @@ typedef struct {
 
 int parseCommand(int argc, char *argv[], command_t *result);
 
-#endif  // PROJECT_INCLUDE_PARSE_H_
+#endif // PROJECT_INCLUDE_PARSE_H_

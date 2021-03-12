@@ -8,18 +8,20 @@
 
 
 int parseCommand(int argc, char *argv[], command_t *result) {
-    memset(result, 0, sizeof(command_t));  // Clear all information
+    memset(result, 0, sizeof(command_t)); // Clear all information
 
     // Parse command line arguments for options
     int opt;
     while ((opt = getopt(argc, argv, "vcR")) != -1) {
-        if (opt == 'v') result->verbose = true;
-        else if (opt == 'c')
+        if (opt == 'v') {
+            result->verbose = true;
+        } else if (opt == 'c') {
             result->changes = true;
-        else if (opt == 'R')
+        } else if (opt == 'R') {
             result->recursive = true;
-        else
+        } else {
             return 1;
+        }
     }
 
     // Incorrect number of arguments after flags: command is invalid
