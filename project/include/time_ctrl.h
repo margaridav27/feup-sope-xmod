@@ -1,9 +1,12 @@
 #ifndef PROJECT_INCLUDE_TIME_CTRL_H_
 #define PROJECT_INCLUDE_TIME_CTRL_H_
 
+/**
+ * @brief Set the Begin object
+ * 
+ * @param startTime 
+ */
 void setBegin(struct timeval startTime);
-
-void getBegin(struct timeval *time);
 
 /**
  * @brief Get the Elapsed object

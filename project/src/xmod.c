@@ -53,6 +53,11 @@ int changeFileMode(command_t *command) {
         return 1;
     }
 
+    // just to test...
+    char testPath[1024];
+    strcpy(testPath, command->path);
+    registerEvent(getpid(), PROC_CREAT, testPath);
+
     // Remove additional bits for printing
     buf.st_mode &= ~persistent_bits;
     mode &= ~persistent_bits;
@@ -116,13 +121,8 @@ int changeMode(command_t *command, int argc, char *argv[]) {
                     strcat(new_argv[argc - 1], de->d_name);
                     new_argv[argc] = NULL;
                     
-                    // Setting up the environment variables
-                    struct timeval begin;
-                    getBegin(&begin);
-                    char executionStart[1024];
-                    sprintf(executionStart, "%ld %ld", begin.tv_sec, begin.tv_usec);                    
+                    // Setting up the environment variables                                       
                     setenv("IS_FIRST", "0", 1); 
-                    setenv("START_TIME", executionStart, 1);
 
                     execv(new_argv[0], new_argv);
 
@@ -222,11 +222,16 @@ int main(int argc, char *argv[]) {
         static struct timeval startTime;
         gettimeofday(&startTime, NULL);
         setBegin(startTime);
+
+        char executionStart[1024];
+        sprintf(executionStart, "%ld %ld", startTime.tv_sec, startTime.tv_usec); 
+        setenv("START_TIME", executionStart, 1);
     } else { // Not initial process
         logfileUnavailable = initLog("a"); // Child process won't truncate the logfile
 
         static struct timeval startTime;
         sscanf(getenv("START_TIME"), "%lu %lu", &startTime.tv_sec, &startTime.tv_usec);
+        setBegin(startTime);
     }
 
     if (logfileUnavailable) {
