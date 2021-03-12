@@ -24,6 +24,9 @@ int changeFileMode(command_t *command) {
     if (stat(command->path, &buf) == -1) {
         fprintf(stderr, "xmod: cannot access '%s': %s\n",
                     command->path, strerror(errno));
+        if(command->verbose){
+            printFailedMessage(command->path,command->mode);
+        }
         return 1;
     }
 
@@ -46,7 +49,7 @@ int changeFileMode(command_t *command) {
         }
         mode |= command->mode;
     }
-
+    
 
     if (chmod(command->path, mode) == -1) {
         perror("");
@@ -76,6 +79,9 @@ int changeMode(command_t *command, int argc, char *argv[]) {
     if (stat(command->path, &buf) == -1) {
         fprintf(stderr, "xmod: cannot access '%s': %s\n",
                     command->path, strerror(errno));
+        if(command->verbose){
+            printFailedMessage(command->path,command->mode);
+        }            
         return 1;
     }
 
@@ -127,13 +133,19 @@ int changeMode(command_t *command, int argc, char *argv[]) {
                     }
                 }
             } else if (de->d_type == DT_LNK) {
-                char *n = malloc(
-                        strlen(command->path) + strlen(de->d_name) + 1);
-                if (n == NULL)
-                    continue;  // COMBACK: Insert very special error message
+                char n[1024];
                 sprintf(n, "%s/%s", command->path, de->d_name);
-                printSymbolicMessage(n);
-                free(n);
+                struct stat buf;
+                errno = 0;
+                if (stat(n, &buf) == -1) {
+                    fprintf(stderr, "xmod: cannot access '%s': %s\n",
+                                n, strerror(errno));
+                    if(command->verbose){
+                        printFailedMessage(n,command->mode);
+                    }
+                } else if(command->verbose){
+                    printSymbolicMessage(n);
+                }
             } else {
                 command_t c = *command;
 
@@ -168,7 +180,7 @@ printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode) {
     char new_mode_str[] = "---------", previous_mode_str[] = "---------";
     parseModeToString(new_mode, new_mode_str);
     parseModeToString(previous_mode, previous_mode_str);
-    printf("Mode of '%s' changed from 0%o (%s) to 0%o (%s)\n", path,
+    printf("mode of '%s' changed from 0%o (%s) to 0%o (%s)\n", path,
            previous_mode, previous_mode_str, new_mode,
            new_mode_str);
     fflush(stdout);
@@ -178,7 +190,16 @@ printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode) {
 int printRetainMessage(const char *path, mode_t mode) {
     char mode_str[] = "---------";
     parseModeToString(mode, mode_str);
-    printf("Mode of '%s' retained as 0%o (%s)\n", path, mode, mode_str);
+    printf("mode of '%s' retained as 0%o (%s)\n", path, mode, mode_str);
+    fflush(stdout);
+    return 0;
+}
+
+int printFailedMessage(const char *path, mode_t new_mode){
+    char new_mode_str[] = "---------";
+    parseModeToString(new_mode, new_mode_str);
+    fprintf(stderr,"failed to change mode of '%s' changed to 0%o (%s)\n", path,
+           new_mode, new_mode_str);
     fflush(stdout);
     return 0;
 }

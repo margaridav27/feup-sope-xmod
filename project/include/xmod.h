@@ -19,4 +19,6 @@ int printNoPermissionMessage(const char *path);
 
 int printSymbolicMessage(const char *path);
 
+int printFailedMessage(const char *path, mode_t new_mode);
+
 #endif  // PROJECT_INCLUDE_XMOD_H_
