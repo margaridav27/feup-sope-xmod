@@ -13,10 +13,13 @@
 #include <sys/types.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/time.h>
 
 #include "../include/log.h"
 #include "../include/parse.h"
 #include "../include/time_ctrl.h"
+
+static bool logfileUnavailable;
 
 int changeFileMode(command_t *command) {
     struct stat buf;
@@ -41,8 +44,6 @@ int changeFileMode(command_t *command) {
         perror("");
         return 1;
     }
-
-    //registerEvent(getpid(), FILE_MODF, "file's permissions were changed");
 
     // Remove additional bits for printing
     buf.st_mode &= ~persistent_bits;
@@ -92,24 +93,35 @@ int changeMode(command_t *command, int argc, char *argv[]) {
 
                 if (pid == -1) { // Failed to fork
                     perror("Fork Error");
+                    return 1;
                 } else if (pid == 0) { // Child process
+
+                    // Preparing new argv
                     char **new_argv = malloc((argc + 1) * sizeof(*new_argv));
-                    for (int i = 0; i < argc; ++i)
-                        new_argv[i] = strdup(argv[i]);
-                    size_t length =
-                            strlen(command->path) + 2 + strlen(de->d_name);
+                    for (int i = 0; i < argc; ++i) { new_argv[i] = strdup(argv[i]); }
+                    size_t length = strlen(command->path) + 2 + strlen(de->d_name);
                     new_argv[argc - 1] = realloc(new_argv[argc - 1], length);
                     strcpy(new_argv[argc - 1], command->path);
                     strcat(new_argv[argc - 1], "/");
                     strcat(new_argv[argc - 1], de->d_name);
                     new_argv[argc] = NULL;
-                    // Not sure that it's bullet proof...
+                    
+                    // Setting up the environment variables
+                    struct timeval begin;
+                    getBegin(&begin);
+                    char executionStart[1024];
+                    sprintf(executionStart, "%ld %ld", begin.tv_sec, begin.tv_usec);                    
+                    setenv("IS_FIRST", "0", 1); 
+                    setenv("START_TIME", executionStart, 1);
+
                     execv(new_argv[0], new_argv);
-                    for (int i = 0; i <= argc; ++i) free(new_argv[i]);
+
+                    for (int i = 0; i <= argc; ++i) { free(new_argv[i]); }
+
                     free(new_argv);
                 } else { // Parent process
                     int childRetval;
-                    wait(&childRetval); // Waiting for the child process to finish processing the subfolder
+                    wait(&childRetval); // Waiting for the child process to finish his execution
                     if (childRetval != 0) {
                         perror("Invalid value return from child");
                     }
@@ -119,8 +131,7 @@ int changeMode(command_t *command, int argc, char *argv[]) {
             } else {
                 command_t c = *command;
 
-                char *n = malloc(
-                        strlen(command->path) + strlen(de->d_name) + 1);
+                char *n = malloc(strlen(command->path) + strlen(de->d_name) + 1);
                 if (n == NULL)
                     continue;  // COMBACK: Insert very special error message
 
@@ -147,7 +158,7 @@ int printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode) 
     char new_mode_str[] = "---------", previous_mode_str[] = "---------";
     parseModeToString(new_mode, new_mode_str);
     parseModeToString(previous_mode, previous_mode_str);
-    printf("Mode of '%s' changed from 0%o (%s) to 0%o (%s)\n", path,
+    printf("%d - Mode of '%s' changed from 0%o (%s) to 0%o (%s)\n", getpid(), path,
            previous_mode, previous_mode_str, new_mode,
            new_mode_str);
     fflush(stdout);
@@ -157,7 +168,7 @@ int printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode) 
 int printRetainMessage(const char *path, mode_t mode) {
     char mode_str[] = "---------";
     parseModeToString(mode, mode_str);
-    printf("Mode of '%s' retained as 0%o (%s)\n", path, mode, mode_str);
+    printf("%d - Mode of '%s' retained as 0%o (%s)\n", getpid(), path, mode, mode_str);
     fflush(stdout);
     return 0;
 }
@@ -176,9 +187,7 @@ int parseModeToString(mode_t mode, char *str) {
 }
 
 int printNoPermissionMessage(const char *path) {
-    fprintf(stderr,
-            "xmod: changing permissions of '%s': Operation not permitted\n",
-            path);
+    fprintf(stderr, "xmod: changing permissions of '%s': Operation not permitted\n", path);
     fflush(stdout);
     return 0;
 }
@@ -189,13 +198,24 @@ int printSymbolicMessage(const char *path) {
     return 0;
 }
 
-static bool logFileAvailable;
-
 int main(int argc, char *argv[]) {
-    setBegin();
+    
+    if (getenv("IS_FIRST") == NULL || strcmp(getenv("IS_FIRST"), "1")) { // Initial process
+        setenv("IS_FIRST", "1", 1); // In case getenv has returned NULL
 
-    logFileAvailable = checkLogFilename();
-    if (!logFileAvailable) {
+        logfileUnavailable = initLog("w"); // Initially, logfile is supposed be truncated
+
+        static struct timeval startTime;
+        gettimeofday(&startTime, NULL);
+        setBegin(startTime);
+    } else { // Not initial process
+        logfileUnavailable = initLog("a"); // Child process won't truncate the logfile
+
+        static struct timeval startTime;
+        sscanf(getenv("START_TIME"), "%lu %lu", &startTime.tv_sec, &startTime.tv_usec);
+    }
+
+    if (logfileUnavailable) {
         fprintf(stderr, "Logfile not available - events won't be registered.\n");
     }
 
@@ -206,6 +226,7 @@ int main(int argc, char *argv[]) {
     }
 
     changeMode(&result, argc, argv);
+
     return 0;
 }
 

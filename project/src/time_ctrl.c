@@ -4,18 +4,22 @@
 
 #include "../include/time_ctrl.h"
 
-struct timeval start_time;
+static struct timeval startTime;
 
-void setBegin() {
-    gettimeofday(&start_time, NULL); // Initialize start time
+void setBegin(struct timeval begin) {
+    startTime.tv_sec = begin.tv_sec;
+    startTime.tv_usec = begin.tv_usec;
 }
 
-double getElapsed() {
+void getBegin(struct timeval *time) {
+    time->tv_sec = startTime.tv_sec;
+    time->tv_usec = startTime.tv_usec;
+}
+
+long getElapsed(struct timeval startTime) {
     struct timeval time;
 	gettimeofday(&time, NULL); // Get current time
-
-    double real_time = ((double)(time.tv_usec - start_time.tv_usec) / 1000000 
-    + (double)(time.tv_sec - start_time.tv_sec)) * 1000;
-
-    return real_time;
+    
+    return (time.tv_usec - startTime.tv_usec) * 1000000 
+    + (time.tv_sec - startTime.tv_sec);
 }

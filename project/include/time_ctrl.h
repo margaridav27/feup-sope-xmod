@@ -1,17 +1,16 @@
 #ifndef PROJECT_INCLUDE_TIME_CTRL_H_
 #define PROJECT_INCLUDE_TIME_CTRL_H_
 
-/**
- * @brief Marks the beginning of the program execution
- * 
- */
-void setBegin();
+void setBegin(struct timeval startTime);
+
+void getBegin(struct timeval *time);
 
 /**
- * @brief Calculates the milliseconds elapsed since the beginning of the program execution
+ * @brief Get the Elapsed object
  * 
- * @return seconds elapsed 
+ * @param startTime 
+ * @return long 
  */
-double getElapsed();
+long getElapsed();
 
 #endif  // PROJECT_INCLUDE_TIME_CTRL_H_

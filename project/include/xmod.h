@@ -17,4 +17,10 @@ int printNoPermissionMessage(const char *path);
 
 int printSymbolicMessage(const char *path);
 
+void readNamedPipe(char *info);
+
+void writeNamedPipe(char *info);
+
+void deleteNamedPipe();
+
 #endif  // PROJECT_INCLUDE_XMOD_H_

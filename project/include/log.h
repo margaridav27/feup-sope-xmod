@@ -13,14 +13,13 @@ typedef enum {
     FILE_MODF
 } event_t;
 
-
 /**
  * @brief Checks LOG_FILENAME variable content  
  * @brief Opens the correspondent file if its path is defined
 
- * @return true if the variable is defined, false otherwise
+ * @return 0 if the variable is defined and the file is open successfully, 1 otherwise
  */
-bool checkLogFilename();
+int initLog(char *flag);
 
 /**
  * @brief Registers event at the file defined by LOG_FILENAME
@@ -29,13 +28,6 @@ bool checkLogFilename();
  * @param event type of event to be registered
  * @param info additional info associated with the event
  */
-void registerEvent(pid_t pid, event_t event, char *info);
-
-/**
- * @brief Closes logfile
- * 
- * @return 0 if it succeeds, 1 otherwise
- */
-int closeLogfile();
+int registerEvent(int pid, event_t event, char *info);
 
 #endif  // PROJECT_INCLUDE_LOG_H_

@@ -1,5 +1,3 @@
-#include "../include/log.h"
-
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -11,28 +9,36 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "../include/log.h"
 #include "../include/time_ctrl.h"
 
 static FILE *logFP;
 
-bool checkLogFilename() {
+int initLog(char *flag) {
+    
     // create env variable LOG_FILENAME "export LOG_FILENAME=./trace.txt"
-    char *logFile = getenv("LOG_FILENAME");
 
-    if (logFile == NULL) {
-        fprintf(stderr, "WARNING: variable LOG_FILENAME not defined.\n");
-        return false;
+    if (getenv("LOG_FILENAME") == NULL) {
+        fprintf(stderr, "Variable LOG_FILENAME not defined.\n");
+        return 1;
     }
 
-    if ((logFP = fopen(logFile, "a")) == NULL) {
-        fprintf(stderr, "ERROR: failed to open logfile.\n");
-        return false;
+    if ((logFP = fopen(getenv("LOG_FILENAME"), flag)) == NULL) {
+        fprintf(stderr, "Failed to open logfile.\n");
+        return 1;
     }
 
-    return true;
+    if (fclose(logFP)) return 1;
+    return 0;
 }
 
-void registerEvent(int pid, event_t event, char *info) {
+int registerEvent(int pid, event_t event, char *info) {
+
+    if ((logFP = fopen(getenv("LOG_FILENAME"), "a")) == NULL) {
+        fprintf(stderr, "Failed to open logfile.\n");
+        return 1;
+    }
+
     char *action = "";
     switch (event) {
         case PROC_CREAT: action = "PROC_CREAT"; break;
@@ -43,14 +49,8 @@ void registerEvent(int pid, event_t event, char *info) {
         default: break;
     }
 
-    fprintf(logFP, "%d ; %d ; %s ; %s\n", getElapsed(), pid, action, info);
-}
+    fprintf(logFP, "%lu ; %d ; %s ; %s\n", getElapsed(), pid, action, info);
 
-int closeLogfile() {
-    if (fclose(logFP) != 0) {
-        perror("closeLogfile");
-        return 1;
-    }
-
+    if (fclose(logFP)) return 1;
     return 0;
 }
