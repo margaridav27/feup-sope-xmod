@@ -20,7 +20,7 @@ typedef enum {
 
  * @return true if the variable is defined, false otherwise
  */
-bool checkLogFilename();
+bool openLogFile();
 
 /**
  * @brief Registers event at the file defined by LOG_FILENAME
@@ -29,13 +29,13 @@ bool checkLogFilename();
  * @param event type of event to be registered
  * @param info additional info associated with the event
  */
-void registerEvent(pid_t pid, event_t event, char *info);
+void logEvent(pid_t pid, event_t event, char *info);
 
 /**
  * @brief Closes logfile
  * 
  * @return 0 if it succeeds, 1 otherwise
  */
-int closeLogfile();
+int closeLogFile();
 
 #endif  // PROJECT_INCLUDE_LOG_H_

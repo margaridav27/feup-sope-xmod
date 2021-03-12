@@ -15,7 +15,7 @@
 
 static FILE *logFP;
 
-bool checkLogFilename() {
+bool openLogFile() {
     // create env variable LOG_FILENAME "export LOG_FILENAME=./trace.txt"
     char *logFile = getenv("LOG_FILENAME");
 
@@ -33,7 +33,7 @@ bool checkLogFilename() {
     return true;
 }
 
-void registerEvent(int pid, event_t event, char *info) {
+void logEvent(int pid, event_t event, char *info) {
     char *action = "";
     switch (event) {
         case PROC_CREAT:
@@ -57,7 +57,7 @@ void registerEvent(int pid, event_t event, char *info) {
     fprintf(logFP, "%d ; %d ; %s ; %s\n", getElapsed(), pid, action, info);
 }
 
-int closeLogfile() {
+int closeLogFile() {
     if (fclose(logFP) != 0) {
         perror("closeLogfile");
         return 1;

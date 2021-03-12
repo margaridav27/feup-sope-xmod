@@ -236,9 +236,9 @@ int printSymbolicMessage(const char *path) {
 int main(int argc, char *argv[]) {
     /*setBegin();
 
-    logFileAvailable = checkLogFilename();
+    logFileAvailable = openLogFile();
     if (logFileAvailable) {
-        registerEvent(getpid(), FILE_MODF, "some additional info");
+        logEvent(getpid(), FILE_MODF, "some additional info");
     } else {
         fprintf(stderr, "File not available. Could not register event.\n");
     }*/
