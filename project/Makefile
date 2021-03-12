@@ -33,7 +33,7 @@ CFLAGS := -Wall -Werror
 # LDFLAGS := 
 
 .DEFAULT_TARGET: all
-all: $(BUILD_DIRECTORY)/$(TARGET_EXECUTABLE)
+all: $(TARGET_EXECUTABLE)
 
 $(BUILD_DIRECTORY)/%.c.o: %.c
 	@echo "Building: " $< 
