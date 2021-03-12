@@ -14,20 +14,28 @@ typedef enum {
 } event_t;
 
 /**
- * @brief Checks LOG_FILENAME variable content  
- * @brief Opens the correspondent file if its path is defined
-
- * @return 0 if the variable is defined and the file is open successfully, 1 otherwise
+ * @brief 
+ * 
+ * @param flag 
+ * @return int 
  */
 int initLog(char *flag);
 
 /**
- * @brief Registers event at the file defined by LOG_FILENAME
+ * @brief 
  * 
- * @param pid process ID of the process that makes the register
- * @param event type of event to be registered
- * @param info additional info associated with the event
+ * @param pid 
+ * @param event 
+ * @param info 
+ * @return int 
  */
-int registerEvent(int pid, event_t event, char *info);
+int logEvent(int pid, event_t event, char *info);
+
+/**
+ * @brief 
+ * 
+ * @return int 
+ */
+int closeLog();
 
 #endif  // PROJECT_INCLUDE_LOG_H_

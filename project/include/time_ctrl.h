@@ -2,16 +2,20 @@
 #define PROJECT_INCLUDE_TIME_CTRL_H_
 
 /**
- * @brief Set the Begin object
+ * @brief Set the Start Time object
  * 
- * @param startTime 
  */
-void setBegin(struct timeval startTime);
+void setStartTime();
+
+/**
+ * @brief 
+ * 
+ */
+void restoreStartTime();
 
 /**
  * @brief Get the Elapsed object
  * 
- * @param startTime 
  * @return long 
  */
 long getElapsed();

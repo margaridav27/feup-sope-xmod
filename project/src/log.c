@@ -15,30 +15,23 @@
 static FILE *logFP;
 
 int initLog(char *flag) {
-    
-    // create env variable LOG_FILENAME "export LOG_FILENAME=./trace.txt"
+    // to create env variable: LOG_FILENAME "export LOG_FILENAME=./trace.txt"
+    char *logfile = getenv("LOG_FILENAME");
 
-    if (getenv("LOG_FILENAME") == NULL) {
+    if (logfile == NULL) {
         fprintf(stderr, "Variable LOG_FILENAME not defined.\n");
         return 1;
     }
 
-    if ((logFP = fopen(getenv("LOG_FILENAME"), flag)) == NULL) {
+    if ((logFP = fopen(logfile, flag)) == NULL) {
         fprintf(stderr, "Failed to open logfile.\n");
         return 1;
     }
 
-    if (fclose(logFP)) return 1;
     return 0;
 }
 
-int registerEvent(int pid, event_t event, char *info) {
-
-    if ((logFP = fopen(getenv("LOG_FILENAME"), "a")) == NULL) {
-        fprintf(stderr, "Failed to open logfile.\n");
-        return 1;
-    }
-
+int logEvent(int pid, event_t event, char *info) {
     char *action = "";
     switch (event) {
         case PROC_CREAT: action = "PROC_CREAT"; break;
@@ -51,6 +44,14 @@ int registerEvent(int pid, event_t event, char *info) {
 
     fprintf(logFP, "%lu ; %d ; %s ; %s\n", getElapsed(), pid, action, info);
 
-    if (fclose(logFP)) return 1;
+    return 0;
+}
+
+int closeLog() {
+    if (fclose(logFP) != 0) {
+        fprintf(stderr, "Failed to close logfile.\n");
+        return 1;
+    } 
+
     return 0;
 }

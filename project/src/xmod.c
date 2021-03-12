@@ -20,6 +20,11 @@
 static bool logfileUnavailable;
 
 int changeFileMode(command_t *command) {
+    // just to test...
+    char testPath[1024];
+    strcpy(testPath, command->path);
+    logEvent(getpid(), PROC_CREAT, testPath);
+
     struct stat buf;
     errno = 0;
     if (stat(command->path, &buf) == -1) {
@@ -52,11 +57,6 @@ int changeFileMode(command_t *command) {
         perror("");
         return 1;
     }
-
-    // just to test...
-    char testPath[1024];
-    strcpy(testPath, command->path);
-    registerEvent(getpid(), PROC_CREAT, testPath);
 
     // Remove additional bits for printing
     buf.st_mode &= ~persistent_bits;
@@ -121,8 +121,8 @@ int changeMode(command_t *command, int argc, char *argv[]) {
                     strcat(new_argv[argc - 1], de->d_name);
                     new_argv[argc] = NULL;
                     
-                    // Setting up the environment variables                                       
-                    setenv("IS_FIRST", "0", 1); 
+                    // Setting up the environment variable                                      
+                    setenv("IS_FIRST", "0", 0); 
 
                     execv(new_argv[0], new_argv);
 
@@ -213,25 +213,15 @@ int printSymbolicMessage(const char *path) {
 }
 
 int main(int argc, char *argv[]) {
+
+    printf("\n%d\t%s\n", getpid(), getenv("IS_FIRST"));
     
-    if (getenv("IS_FIRST") == NULL || strcmp(getenv("IS_FIRST"), "1")) { // Initial process
-        setenv("IS_FIRST", "1", 1); // In case getenv has returned NULL
-
+    if (getenv("IS_FIRST") == NULL) { // Initial process
+        setStartTime();
         logfileUnavailable = initLog("w"); // Initially, logfile is supposed be truncated
-
-        static struct timeval startTime;
-        gettimeofday(&startTime, NULL);
-        setBegin(startTime);
-
-        char executionStart[1024];
-        sprintf(executionStart, "%ld %ld", startTime.tv_sec, startTime.tv_usec); 
-        setenv("START_TIME", executionStart, 1);
     } else { // Not initial process
+        restoreStartTime();
         logfileUnavailable = initLog("a"); // Child process won't truncate the logfile
-
-        static struct timeval startTime;
-        sscanf(getenv("START_TIME"), "%lu %lu", &startTime.tv_sec, &startTime.tv_usec);
-        setBegin(startTime);
     }
 
     if (logfileUnavailable) {
@@ -240,11 +230,13 @@ int main(int argc, char *argv[]) {
 
     command_t result;
     if (parseCommand(argc, argv, &result)) {
-        fprintf(stderr, "Could not parse command\n");
+        fprintf(stderr, "Could not parse command.\n");
         return 1;
     }
 
     changeMode(&result, argc, argv);
 
+    if (!logfileUnavailable) { closeLog(); }
+        
     return 0;
 }
