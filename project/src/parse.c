@@ -39,18 +39,15 @@ int parseCommand(int argc, char *argv[], command_t *result) {
 
     if (process_end == string_end) {
         result->action = ACTION_SET;
-    } else {  // Conversion was unsuccessful: parse the string
-        char user = mode_string[0], change = mode_string[1];
+    } else {
+        // Conversion was unsuccessful: parse the string
+        unsigned char user = mode_string[0], change = mode_string[1];
 
-        if (change == '-') {
-            result->action = ACTION_REMOVE;
-        } else if (change == '+') {
-            result->action = ACTION_ADD;
-        } else if (change == '=') {
-            result->action = ACTION_PARCIAL_SET;
-        } else {
+        if (change != '-' && change != '+' && change != '=') {
             fprintf(stderr, "xmod: invalid mode: '%s'\n", mode_string);
             return 1;
+        } else {
+            result->action = change;
         }
 
         const char *permissions_string = mode_string + 2;
