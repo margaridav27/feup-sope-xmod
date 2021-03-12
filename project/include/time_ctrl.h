@@ -2,16 +2,22 @@
 #define PROJECT_INCLUDE_TIME_CTRL_H_
 
 /**
- * @brief Marks the beginning of the program execution
+ * @brief Set the Start Time object
  * 
  */
-void setBegin();
+void setStartTime();
 
 /**
- * @brief Calculates the seconds elapsed since the beginning of the program execution
+ * @brief 
  * 
- * @return seconds elapsed 
  */
-int getElapsed();
+void restoreStartTime();
+
+/**
+ * @brief Get the Elapsed object
+ * 
+ * @return long 
+ */
+double getElapsed();
 
 #endif  // PROJECT_INCLUDE_TIME_CTRL_H_

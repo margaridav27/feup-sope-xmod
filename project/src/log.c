@@ -1,5 +1,3 @@
-#include "../include/log.h"
-
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -15,29 +13,27 @@
 
 static FILE *logFP;
 
-bool openLogFile() {
-    // create env variable LOG_FILENAME "export LOG_FILENAME=./trace.txt"
-    char *logFile = getenv("LOG_FILENAME");
+int initLog(char *flag) {
+    // to create env variable: LOG_FILENAME "export LOG_FILENAME=./trace.txt"
+    char *logfile = getenv("LOG_FILENAME");
 
-    if (logFile == NULL) {
-        fprintf(stderr, "WARNING: variable LOG_FILENAME not defined.\n");
-        return false;
+    if (logfile == NULL) {
+        fprintf(stderr, "Variable LOG_FILENAME not defined.\n");
+        return 1;
     }
-
     errno = 0;
     if ((logFP = fopen(logFile, "w")) == NULL) {
         perror("Failed to open logfile");
-        return false;
+        return 1;
     }
 
-    fprintf(logFP, "%s\n", logFile);
-    return true;
+    return 0;
 }
 
 void logEvent(int pid, event_t event, char *info) {
     static const char *events[] = {"PROC_CREAT", "PROC_EXIT", "SIGNAL_RECV", "SIGNAL_SENT", "FILE_MODF"};
     const char *action = events[event];
-    fprintf(logFP, "%d ; %d ; %s ; %s\n", getElapsed(), pid, action, info);
+    fprintf(logFP, "%.3f ; %d ; %s ; %s\n", getElapsed(), pid, action, info);
 }
 
 int closeLogFile() {

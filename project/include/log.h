@@ -13,23 +13,23 @@ typedef enum {
     FILE_MODF
 } event_t;
 
-
 /**
- * @brief Checks LOG_FILENAME variable content  
- * @brief Opens the correspondent file if its path is defined
-
- * @return true if the variable is defined, false otherwise
+ * @brief
+ *
+ * @param flag
+ * @return int
  */
-bool openLogFile();
+int initLog(char *flag);
 
 /**
- * @brief Registers event at the file defined by LOG_FILENAME
+ * @brief
  * 
- * @param pid process ID of the process that makes the register
- * @param event type of event to be registered
- * @param info additional info associated with the event
+ * @param pid
+ * @param event
+ * @param info
+ * @return int
  */
-void logEvent(pid_t pid, event_t event, char *info);
+int logEvent(pid_t pid, event_t event, char *info);
 
 /**
  * @brief Closes logfile

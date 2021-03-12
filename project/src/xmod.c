@@ -1,29 +1,30 @@
-#include "../include/xmod.h"
-
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <unistd.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <sys/types.h>
+#include <sys/time.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <unistd.h>
 
 #include "../include/log.h"
 #include "../include/parse.h"
 #include "../include/time_ctrl.h"
+#include "../include/xmod.h"
+
+static bool logfileUnavailable;
 
 int changeFileMode(command_t *command) {
     struct stat buf;
     errno = 0;
     if (stat(command->path, &buf) == -1) {
         fprintf(stderr, "xmod: cannot access '%s': %s\n",
-                    command->path, strerror(errno));
+                command->path, strerror(errno));
         if(command->verbose){
             printFailedMessage(command->path,command->mode);
         }
@@ -34,22 +35,23 @@ int changeFileMode(command_t *command) {
     mode_t persistent_bits = __S_IFMT & mode;
 
     if (command->action == ACTION_REMOVE) {
-        mode &= ~(command->mode);  // Remove the relevant bits, keeping others
+        mode &= ~(command->mode); // Remove the relevant bits, keeping others
     } else if (command->action == ACTION_ADD) {
-        mode |= command->mode;  // Add the relevant bits, keeping others
+        mode |= command->mode; // Add the relevant bits, keeping others
     } else if (command->action == ACTION_SET) {
-        mode = persistent_bits | command->mode;  // Set only the relevant bits
+        mode = persistent_bits | command->mode; // Set only the relevant bits
     } else if (command->action == ACTION_PARTIAL_SET) {
-        if(command->mode & S_IRWXO){ 
+        if (command->mode & S_IRWXO) {
             mode &= (~S_IRWXO);
-        }else if(command->mode & S_IRWXG){
+        } else if (command->mode & S_IRWXG) {
             mode &= (~S_IRWXG);
-        }else if(command->mode & S_IRWXU){
+        } else if (command->mode & S_IRWXU) {
             mode &= (~S_IRWXU);
         }
         mode |= command->mode;
     }
-    
+
+
 
     if (chmod(command->path, mode) == -1) {
         perror("");
@@ -69,6 +71,12 @@ int changeFileMode(command_t *command) {
     } else if (command->changes && mode != buf.st_mode) {
         printChangeMessage(command->path, buf.st_mode, mode);
     }
+
+    // Logging permissions modification of files/directories - FILE_MODF
+    char info[2048];
+    sprintf(info, "%s : %o : %o", command->path, buf.st_mode, mode);
+    logEvent(getpid(), FILE_MODF, info);
+
     return 0;
 }
 
@@ -77,17 +85,18 @@ int changeMode(command_t *command, int argc, char *argv[]) {
     struct stat buf;
     errno = 0;
     if (stat(command->path, &buf) == -1) {
+        fprintf(stderr, "xmod: cannot access '%s': %s\n", command->path, strerror(errno));
         fprintf(stderr, "xmod: cannot access '%s': %s\n",
                     command->path, strerror(errno));
         if(command->verbose){
             printFailedMessage(command->path,command->mode);
-        }            
+        }
         return 1;
     }
 
     changeFileMode(command);
 
-    if (S_ISDIR(buf.st_mode) && command->recursive) {   
+    if (S_ISDIR(buf.st_mode) && command->recursive) {
         errno = 0;
         DIR *d = opendir(command->path);
 
@@ -111,29 +120,50 @@ int changeMode(command_t *command, int argc, char *argv[]) {
                 if (pid == -1) { // Failed to fork
                     perror("Fork Error");
                 } else if (pid == 0) { // Child process
+                    // Preparing new argv
                     char **new_argv = malloc((argc + 1) * sizeof(*new_argv));
-                    for (int i = 0; i < argc; ++i)
-                        new_argv[i] = strdup(argv[i]);
-                    size_t length =
-                            strlen(command->path) + 2 + strlen(de->d_name);
+                    for (int i = 0; i < argc; ++i) { new_argv[i] = strdup(argv[i]); }
+                    size_t length = strlen(command->path) + 2 + strlen(de->d_name);
                     new_argv[argc - 1] = realloc(new_argv[argc - 1], length);
                     strcpy(new_argv[argc - 1], command->path);
                     strcat(new_argv[argc - 1], "/");
                     strcat(new_argv[argc - 1], de->d_name);
                     new_argv[argc] = NULL;
-                    // Not sure that it's bullet proof...
+
+                    // Setting up the environment variable
+                    setenv("IS_FIRST", "0", 0);
+
+
+                    // Logging process creation - PROC_CREAT
+                    char info[1024];
+                    strcpy(info, new_argv[0]);
+                    for (int i = 1; i < argc; ++i) {
+                        strcat(info, " ");
+                        strcat(info, new_argv[i]);
+                    }
+                    logEvent(getpid(), PROC_CREAT, info);
+
                     execv(new_argv[0], new_argv);
-                    for (int i = 0; i <= argc; ++i) free(new_argv[i]);
+
+                    for (int i = 0; i <= argc; ++i) { free(new_argv[i]); }
+
                     free(new_argv);
                 } else { // Parent process
                     int childRetval;
-                    wait(&childRetval); // Waiting for the child process to finish processing the subfolder
+                    wait(&childRetval); // Waiting for the child process to finish his execution
+
                     if (childRetval != 0) {
                         perror("Invalid value return from child");
                     }
+
+                    // Logging process termination - PROC_EXIT
+                    char info[1024];
+                    sprintf(info, "%d", childRetval);
+                    logEvent(getpid(), PROC_EXIT, info);
                 }
             } else if (de->d_type == DT_LNK) {
-                char n[1024];
+                char *n = malloc(strlen(command->path) + strlen(de->d_name) + 2);
+                if (n == NULL) continue; // COMBACK: Insert very special error message
                 sprintf(n, "%s/%s", command->path, de->d_name);
                 struct stat buf;
                 errno = 0;
@@ -149,10 +179,8 @@ int changeMode(command_t *command, int argc, char *argv[]) {
             } else {
                 command_t c = *command;
 
-                char *n = malloc(
-                        strlen(command->path) + strlen(de->d_name) + 1);
-                if (n == NULL)
-                    continue;  // COMBACK: Insert very special error message
+                char *n = malloc(strlen(command->path) + strlen(de->d_name) + 2);
+                if (n == NULL) continue; // COMBACK: Insert very special error message
 
                 sprintf(n, "%s/%s", command->path, de->d_name);
                 c.path = n;
@@ -163,24 +191,21 @@ int changeMode(command_t *command, int argc, char *argv[]) {
             }
         }
         closedir(d);
-        
     }
 
     if (errno != 0) {
-        fprintf(stderr, "xmod: error while reading directory '%s': %s\n",
-                    command->path, strerror(errno));
+        fprintf(stderr, "xmod: error while reading directory '%s': %s\n", command->path, strerror(errno));
         return 1;
     }
 
     return 0;
 }
 
-int
-printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode) {
+int printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode) {
     char new_mode_str[] = "---------", previous_mode_str[] = "---------";
     parseModeToString(new_mode, new_mode_str);
     parseModeToString(previous_mode, previous_mode_str);
-    printf("mode of '%s' changed from 0%o (%s) to 0%o (%s)\n", path,
+    printf("Mode of '%s' changed from 0%o (%s) to 0%o (%s)\n", path,
            previous_mode, previous_mode_str, new_mode,
            new_mode_str);
     fflush(stdout);
@@ -190,16 +215,7 @@ printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode) {
 int printRetainMessage(const char *path, mode_t mode) {
     char mode_str[] = "---------";
     parseModeToString(mode, mode_str);
-    printf("mode of '%s' retained as 0%o (%s)\n", path, mode, mode_str);
-    fflush(stdout);
-    return 0;
-}
-
-int printFailedMessage(const char *path, mode_t new_mode){
-    char new_mode_str[] = "---------";
-    parseModeToString(new_mode, new_mode_str);
-    fprintf(stderr,"failed to change mode of '%s' changed to 0%o (%s)\n", path,
-           new_mode, new_mode_str);
+    printf("Mode of '%s' retained as 0%o (%s)\n", path, mode, mode_str);
     fflush(stdout);
     return 0;
 }
@@ -218,9 +234,7 @@ int parseModeToString(mode_t mode, char *str) {
 }
 
 int printNoPermissionMessage(const char *path) {
-    fprintf(stderr,
-            "xmod: changing permissions of '%s': Operation not permitted\n",
-            path);
+    fprintf(stderr, "xmod: changing permissions of '%s': Operation not permitted\n", path);
     fflush(stdout);
     return 0;
 }
@@ -231,24 +245,28 @@ int printSymbolicMessage(const char *path) {
     return 0;
 }
 
-//static bool logFileAvailable;
-
 int main(int argc, char *argv[]) {
-    /*setBegin();
+    if (getenv("IS_FIRST") == NULL) { // Initial process
+        setStartTime();
+        logfileUnavailable = initLog("w"); // Initially, logfile is supposed be truncated
+    } else { // Not initial process
+        restoreStartTime();
+        logfileUnavailable = initLog("a"); // Child process won't truncate the logfile
+    }
 
-    logFileAvailable = openLogFile();
-    if (logFileAvailable) {
-        logEvent(getpid(), FILE_MODF, "some additional info");
-    } else {
-        fprintf(stderr, "File not available. Could not register event.\n");
-    }*/
+    if (logfileUnavailable) {
+        fprintf(stderr, "Logfile not available - events won't be registered.\n");
+    }
 
     command_t result;
     if (parseCommand(argc, argv, &result)) {
-        fprintf(stderr, "Could not parse command\n");
+        fprintf(stderr, "Could not parse command.\n");
         return 1;
     }
+
     changeMode(&result, argc, argv);
+
+    if (!logfileUnavailable) { closeLog(); }
+
     return 0;
 }
-
