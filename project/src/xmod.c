@@ -47,17 +47,11 @@ int changeFileMode(command_t *command) {
         mode |= command->mode;
     }
 
-
     if (chmod(command->path, mode) == -1) {
         perror("");
         return 1;
     }
 
-<<<<<<< HEAD
-=======
-    registerEvent(getpid(), FILE_MODF, "file's permissions were changed");
-
->>>>>>> 718ee04beb810918d09ea692dc84129c5550a498
     // Remove additional bits for printing
     buf.st_mode &= ~persistent_bits;
     mode &= ~persistent_bits;
@@ -142,10 +136,8 @@ int changeMode(command_t *command, int argc, char *argv[]) {
                     }
                 }
             } else if (de->d_type == DT_LNK) {
-                char *n = malloc(
-                        strlen(command->path) + strlen(de->d_name) + 1);
-                if (n == NULL)
-                    continue;  // COMBACK: Insert very special error message
+                char *n = malloc(strlen(command->path) + strlen(de->d_name) + 1);
+                if (n == NULL) continue;  // COMBACK: Insert very special error message
                 sprintf(n, "%s/%s", command->path, de->d_name);
                 printSymbolicMessage(n);
                 free(n);

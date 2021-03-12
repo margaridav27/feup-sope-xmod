@@ -13,9 +13,9 @@ void setBegin(struct timeval begin) {
     startTime.tv_usec = begin.tv_usec;
 }
 
-void getBegin(struct timeval *time) {
-    time->tv_sec = startTime.tv_sec;
-    time->tv_usec = startTime.tv_usec;
+void getBegin(struct timeval *begin) {
+    begin->tv_sec = startTime.tv_sec;
+    begin->tv_usec = startTime.tv_usec;
 }
 
 long getElapsed(struct timeval startTime) {
