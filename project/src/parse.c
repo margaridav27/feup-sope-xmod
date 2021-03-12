@@ -33,11 +33,14 @@ int parseCommand(int argc, char *argv[], command_t *result) {
     // Mode has less than three characters: command is invalid
     if (strlen(mode_string) < 3) return 1;
 
+    // End of the string
     const char *string_end = mode_string + strlen(mode_string);
+    // Last character parsed
     char *process_end;
     long int mode = strtol(mode_string, &process_end, 8);
 
     if (process_end == string_end) {
+        // Processed the whole string successfully
         result->action = ACTION_SET;
     } else {
         // Conversion was unsuccessful: parse the string
