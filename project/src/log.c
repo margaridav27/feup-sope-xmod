@@ -42,7 +42,7 @@ int logEvent(int pid, event_t event, char *info) {
         default: break;
     }
 
-    fprintf(logFP, "%f ; %d ; %s ; %s\n", getElapsed(), pid, action, info);
+    fprintf(logFP, "%.3f ; %d ; %s ; %s\n", getElapsed(), pid, action, info);
 
     return 0;
 }
