@@ -24,8 +24,9 @@ bool openLogFile() {
         return false;
     }
 
+    errno = 0;
     if ((logFP = fopen(logFile, "w")) == NULL) {
-        fprintf(stderr, "ERROR: failed to open logfile.\n");
+        perror("Failed to open logfile");
         return false;
     }
 
@@ -40,8 +41,9 @@ void logEvent(int pid, event_t event, char *info) {
 }
 
 int closeLogFile() {
+    errno = 0;
     if (fclose(logFP) != 0) {
-        perror("closeLogfile");
+        perror("Error closing Logfile");
         return 1;
     }
 
