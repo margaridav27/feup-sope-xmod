@@ -23,10 +23,9 @@ void restoreStartTime() {
     sscanf(getenv("START_TIME"), "%lu %lu", &startTime.tv_sec, &startTime.tv_usec);
 }
 
-long getElapsed() {
+double getElapsed() {
     struct timeval time;
 	gettimeofday(&time, NULL); // Get current time
     
-    return (long)(time.tv_usec - startTime.tv_usec) / 1000000 
-    + (long)(time.tv_sec - startTime.tv_sec) * 1000;
+    return ((double) (time.tv_usec - startTime.tv_usec) / 1e6 + (double) (time.tv_sec - startTime.tv_sec)) * 1e3;
 }

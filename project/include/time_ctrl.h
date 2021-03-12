@@ -18,6 +18,6 @@ void restoreStartTime();
  * 
  * @return long 
  */
-long getElapsed();
+double getElapsed();
 
 #endif  // PROJECT_INCLUDE_TIME_CTRL_H_

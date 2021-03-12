@@ -21,9 +21,7 @@ static bool logfileUnavailable;
 
 int changeFileMode(command_t *command) {
     // just to test...
-    char testPath[1024];
-    strcpy(testPath, command->path);
-    logEvent(getpid(), PROC_CREAT, testPath);
+    logEvent(getpid(), PROC_CREAT, "test");
 
     struct stat buf;
     errno = 0;
@@ -213,9 +211,6 @@ int printSymbolicMessage(const char *path) {
 }
 
 int main(int argc, char *argv[]) {
-
-    printf("\n%d\t%s\n", getpid(), getenv("IS_FIRST"));
-    
     if (getenv("IS_FIRST") == NULL) { // Initial process
         setStartTime();
         logfileUnavailable = initLog("w"); // Initially, logfile is supposed be truncated
