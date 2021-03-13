@@ -2,7 +2,7 @@
 #define PROJECT_INCLUDE_IO_H_
 
 #include <sys/types.h>
-#include "parse.h"
+#include "./parse.h"
 
 int printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode);
 
