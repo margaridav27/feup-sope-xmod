@@ -1,23 +1,8 @@
 #ifndef PROJECT_INCLUDE_TIME_CTRL_H_
 #define PROJECT_INCLUDE_TIME_CTRL_H_
 
-/**
- * @brief Set the Start Time object
- * 
- */
-void setStartTime();
+int getStartTime();
 
-/**
- * @brief 
- * 
- */
-void restoreStartTime();
-
-/**
- * @brief Get the Elapsed object
- * 
- * @return long 
- */
 double getMillisecondsElapsed();
 
 #endif // PROJECT_INCLUDE_TIME_CTRL_H_
