@@ -182,11 +182,11 @@ void leave(int ret) {
 int main(int argc, char *argv[]) {
     getStartTime();
     isParentProcess() ? openLogFile("w") : openLogFile("a");
+    closeLogFile();
     command_t result;
     if (parseCommand(argc, argv, &result)) leave(1);
     logProcessCreation(argv, argc);
     changeMode(&result);
-    closeLogFile();
     leave(0);
     return 0;
 }
