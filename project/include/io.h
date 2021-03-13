@@ -18,5 +18,5 @@ int parseModeToString(mode_t mode, char *str);
 
 mode_t clear_extra_bits(mode_t mode);
 
-int print_message(mode_t new_mode, mode_t old_mode, const command_t *command);
+int print_message(mode_t new_mode, mode_t old_mode, const command_t *command, bool isLink);
 #endif //PROJECT_IO_H_

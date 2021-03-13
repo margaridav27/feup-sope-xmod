@@ -16,13 +16,13 @@ mode_t add_permissions(mode_t old_mode, mode_t new_mode);
 
 mode_t set_partial_permissions(mode_t old_mode, mode_t new_mode);
 
-int log_change_permission(const command_t *command, mode_t old_mode, mode_t new_mode);
+int log_change_permission(const command_t *command, mode_t old_mode, mode_t new_mode, bool isLink);
 
 int log_process_creation(char **argv, int argc);
 
 int log_process_exit(int ret);
 
-int change_file_mode(const command_t *command, struct stat *buf);
+int change_file_mode(const command_t *command, struct stat *buf, bool isLink);
 
 int change_folder_mode(const command_t *command);
 

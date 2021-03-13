@@ -68,12 +68,12 @@ mode_t set_partial_permissions(mode_t old_mode, mode_t new_mode) {
     return old_mode | new_mode;
 }
 
-int log_change_permission(const command_t *command, mode_t old_mode, mode_t new_mode) {
+int log_change_permission(const command_t *command, mode_t old_mode, mode_t new_mode, bool isLink) {
     char info[2048] = {};
     sprintf(info, "%s : %o : %o", command->path, old_mode, new_mode);
     logEvent(getpid(), FILE_MODF, info);
     //COMBACK: Properly print this message
-    print_message(new_mode, old_mode, command);
+    print_message(new_mode, old_mode, command, isLink);
     return 0;
 }
 
@@ -95,7 +95,7 @@ int log_process_exit(int ret) {
     return 0;
 }
 
-int change_file_mode(const command_t *command, struct stat *buf) {
+int change_file_mode(const command_t *command, struct stat *buf, bool isLink) {
     mode_t mode = buf->st_mode;
     mode_t persistent_bits = mode & S_IFMT;
     mode_t new_mode;
@@ -114,7 +114,7 @@ int change_file_mode(const command_t *command, struct stat *buf) {
         perror("xmod: failed to change permissions");
         return 1;
     }
-    log_change_permission(command, buf->st_mode, new_mode);
+    log_change_permission(command, buf->st_mode, new_mode, isLink);
     return 0;
 }
 
@@ -136,7 +136,7 @@ int change_folder_mode(const command_t *command) {
 
         struct stat buf;
         if (open_file(new_path, &buf)) continue;
-        if (S_ISDIR(buf.st_mode)) {
+        if (d->d_type == DT_DIR) {
             pid_t pid = fork();
             if (pid < 0) {
                 perror("xmod: fork");
@@ -146,8 +146,10 @@ int change_folder_mode(const command_t *command) {
             } else {
                 continue;
             }
-        } else
-            change_file_mode(&new_command, &buf);
+        } else {
+            bool link = d->d_type == DT_LNK;
+            change_file_mode(&new_command, &buf, link);
+        }
     }
     //COMBACK: This might also be a good place to install our handler (small folders fork fast)
     //COMBACK: Properly wait for children: this solution won't allow us to receive SIGINT from here on
@@ -159,7 +161,7 @@ int change_folder_mode(const command_t *command) {
 int change_mode(const command_t *command) {
     struct stat buf;
     if (open_file(command->path, &buf)) return 1;
-    if (change_file_mode(command, &buf)) return 1;
+    if (change_file_mode(command, &buf, 0)) return 1;
 
     if (S_ISDIR(buf.st_mode) && command->recursive) {
         if (change_folder_mode(command)) return 1;

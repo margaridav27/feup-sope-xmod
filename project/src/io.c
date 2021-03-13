@@ -62,16 +62,23 @@ mode_t clear_extra_bits(mode_t mode) {
     return mode & ~(S_IFMT);
 }
 
-int print_message(mode_t new_mode, mode_t old_mode, const command_t *command) {
+int print_message(mode_t new_mode, mode_t old_mode, const command_t *command, bool isLink) {
+    if (!command->verbose && !command->changes) return 0;
     // Clear these bits for printing
-    mode_t previous_mode = clear_extra_bits(old_mode);
+    old_mode = clear_extra_bits(old_mode);
     new_mode = clear_extra_bits(new_mode);
-
-    if (new_mode == previous_mode && command->verbose) {
-        if (S_ISLNK(previous_mode))
-            printSymbolicMessage(command->path);
-        else printRetainMessage(command->path, new_mode);
-    } else if (new_mode != previous_mode && (command->changes || command->verbose))
-        printChangeMessage(command->path, previous_mode, new_mode);
+    if (command->verbose) {
+        if (new_mode == old_mode) {
+            if (isLink) {
+                printSymbolicMessage(command->path);
+            } else {
+                printRetainMessage(command->path, old_mode);
+            }
+        } else {
+            printChangeMessage(command->path, old_mode, new_mode);
+        }
+    } else if (command->changes && new_mode != old_mode) {
+        printChangeMessage(command->path, old_mode, new_mode);
+    }
     return 0;
 }
