@@ -86,8 +86,6 @@ int changeMode(command_t *command, int argc, char *argv[]) {
     if (stat(command->path, &buf) == -1) {
         fprintf(stderr, "xmod: cannot access '%s': %s\n", command->path,
                 strerror(errno));
-        fprintf(stderr, "xmod: cannot access '%s': %s\n",
-                command->path, strerror(errno));
         if (command->verbose) {
             printFailedMessage(command->path, command->mode);
         }
@@ -210,13 +208,27 @@ int changeMode(command_t *command, int argc, char *argv[]) {
 }
 
 
+int open_file(const char *path, struct stat *buf) {
+    if (buf == NULL) return 1;
+    int r = stat(path, buf);
+    if (r == -1) {
+        perror("chmod: failed to open file");
+        return 1;
+    }
+}
+
+int change_file_mode(const command_t *command) {
+    struct stat buf;
+    if (open_file(command->path, &buf)) {
+        if(command->verbose) fprintf(stderr,"xmod: cannot access %s\n")
+    }
+}
+
 int main(int argc, char *argv[]) {
     getStartTime();
     getpid() == getpgid(0) ? openLogFile("w") : openLogFile("a");
     command_t result;
-    if (parseCommand(argc, argv, &result)) {
-        return 1;
-    }
+    if (parseCommand(argc, argv, &result)) return 1;
     changeMode(&result, argc, argv);
     closeLogFile();
     return 0;
