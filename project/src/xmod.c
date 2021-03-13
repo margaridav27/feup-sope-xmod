@@ -215,13 +215,15 @@ int open_file(const char *path, struct stat *buf) {
         perror("chmod: failed to open file");
         return 1;
     }
+    return 0;
 }
 
 int change_file_mode(const command_t *command) {
     struct stat buf;
     if (open_file(command->path, &buf)) {
-        if(command->verbose) fprintf(stderr,"xmod: cannot access %s\n")
+        if (command->verbose) fprintf(stderr, "xmod: cannot access %s\n", command->path);
     }
+    return 0;
 }
 
 int main(int argc, char *argv[]) {
