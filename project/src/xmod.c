@@ -68,12 +68,12 @@ mode_t set_partial_permissions(mode_t old_mode, mode_t new_mode) {
     return old_mode | new_mode;
 }
 
-int log_change_permission(const command_t *command, mode_t new_mode) {
+int log_change_permission(const command_t *command, mode_t old_mode, mode_t new_mode) {
     char info[2048] = {};
-    sprintf(info, "%s : %o : %o", command->path, command->mode, new_mode);
+    sprintf(info, "%s : %o : %o", command->path, old_mode, new_mode);
     logEvent(getpid(), FILE_MODF, info);
     //COMBACK: Properly print this message
-    print_message(command, new_mode);
+    print_message(new_mode, old_mode, command);
     return 0;
 }
 
@@ -114,7 +114,7 @@ int change_file_mode(const command_t *command, struct stat *buf) {
         perror("xmod: failed to change permissions");
         return 1;
     }
-    log_change_permission(command, new_mode);
+    log_change_permission(command, buf->st_mode, new_mode);
     return 0;
 }
 
@@ -141,9 +141,10 @@ int change_folder_mode(const command_t *command) {
             if (pid < 0) {
                 perror("xmod: fork");
                 continue;
-            }
-            if (pid == 0) {
+            } else if (pid == 0) {
                 create_new_process(command, new_path);
+            } else {
+                continue;
             }
         } else
             change_file_mode(&new_command, &buf);

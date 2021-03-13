@@ -16,7 +16,7 @@ mode_t add_permissions(mode_t old_mode, mode_t new_mode);
 
 mode_t set_partial_permissions(mode_t old_mode, mode_t new_mode);
 
-int log_change_permission(const command_t *command, mode_t new_mode);
+int log_change_permission(const command_t *command, mode_t old_mode, mode_t new_mode);
 
 int log_process_creation(char **argv, int argc);
 
