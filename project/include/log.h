@@ -13,29 +13,10 @@ typedef enum {
     FILE_MODF
 } event_t;
 
-/**
- * @brief
- *
- * @param flag
- * @return int
- */
 int openLogFile(char *flag);
 
-/**
- * @brief
- * 
- * @param pid
- * @param event
- * @param info
- * @return int
- */
 int logEvent(pid_t pid, event_t event, char *info);
 
-/**
- * @brief Closes logfile
- * 
- * @return 0 if it succeeds, 1 otherwise
- */
 int closeLogFile();
 
 #endif // PROJECT_INCLUDE_LOG_H_
