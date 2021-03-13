@@ -151,6 +151,7 @@ int change_folder_mode(const command_t *command) {
             change_file_mode(&new_command, &buf, link);
         }
     }
+    closedir(dir);
     //COMBACK: This might also be a good place to install our handler (small folders fork fast)
     //COMBACK: Properly wait for children: this solution won't allow us to receive SIGINT from here on
     int ret;
@@ -185,7 +186,7 @@ int main(int argc, char *argv[]) {
     if (parseCommand(argc, argv, &result)) leave(1);
     log_process_creation(argv, argc);
     change_mode(&result);
-    leave(0);
     closeLogFile();
+    leave(0);
     return 0;
 }
