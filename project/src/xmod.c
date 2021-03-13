@@ -71,7 +71,7 @@ mode_t setPartialPermissions(mode_t old_mode, mode_t new_mode) {
 int logChangePermission(const command_t *command, mode_t old_mode, mode_t new_mode, bool isLink) {
     char info[2048] = {};
     sprintf(info, "%s : %o : %o", command->path, old_mode, new_mode);
-    logEvent(getpid(), FILE_MODF, info);
+    if (new_mode != old_mode) logEvent(getpid(), FILE_MODF, info);
     //COMBACK: Properly print this message
     printMessage(new_mode, old_mode, command, isLink);
     return 0;
