@@ -41,6 +41,7 @@ int logEvent(pid_t pid, event_t event, char *info) {
     errno = 0;
     fprintf(logFile, "%.3f ; %d ; %s ; %s\n", getMillisecondsElapsed(), pid,
             action, info);
+    fflush(logFile);
     if (errno != 0) {
         perror("Failed to log");
         return 1;
