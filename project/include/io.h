@@ -1,4 +1,4 @@
-#ifndef PROJECT_IO_H
+#ifndef PROJECT_IO_H_
 #define PROJECT_IO_H
 
 #include <sys/types.h>
@@ -15,4 +15,4 @@ int printNoPermissionMessage(const char *path);
 
 int parseModeToString(mode_t mode, char *str);
 
-#endif //PROJECT_IO_H
+#endif //PROJECT_IO_H_
