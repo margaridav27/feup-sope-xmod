@@ -14,14 +14,17 @@
 
 static FILE *logFile;
 static bool log_file_available = false;
+static const char *logFileName;
 
 int openLogFile(char *flag) {
-    char *logFileName = getenv("LOG_FILENAME");
+    if (!log_file_available || logFileName == NULL) {
+        logFileName = getenv("LOG_FILENAME");
 
-    if (logFileName == NULL) {
-        //COMBACK: Find a better error message
-        if (strcmp(flag, "w") == 0) fprintf(stderr, "Variable LOG_FILENAME not defined.\n");
-        return 1;
+        if (logFileName == NULL) {
+            //COMBACK: Find a better error message
+            if (strcmp(flag, "w") == 0) fprintf(stderr, "Variable LOG_FILENAME not defined.\n");
+            return 1;
+        }
     }
     errno = 0;
     logFile = fopen(logFileName, flag);
@@ -35,6 +38,7 @@ int openLogFile(char *flag) {
 
 int logEvent(pid_t pid, event_t event, char *info) {
     if (!log_file_available) return 0;
+    openLogFile("a");
     static const char *events[] = {"PROC_CREAT", "PROC_EXIT", "SIGNAL_RECV",
                                    "SIGNAL_SENT", "FILE_MODF"};
     const char *action = events[event];
@@ -43,6 +47,7 @@ int logEvent(pid_t pid, event_t event, char *info) {
             action, info);
     errno = 0;
     fflush(logFile);
+    closeLogFile();
     if (errno != 0) {
         perror("Failed to log");
         return 1;
