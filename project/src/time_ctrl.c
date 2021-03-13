@@ -13,7 +13,7 @@ static struct timespec startTime;
 
 int getStartTime() {
     char path[2048] = "/proc/";
-    int ret = sprintf(path + strlen(path), "%d", getpgid(0));
+    int ret = snprintf(path + strlen(path), sizeof(path) - strlen(path), "%d", getpgid(0));
     if (ret < 0) return 1;
     struct stat buf;
     errno = 0;
