@@ -6,7 +6,7 @@ int printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode) 
     char new_mode_str[] = "---------", previous_mode_str[] = "---------";
     parseModeToString(new_mode, new_mode_str);
     parseModeToString(previous_mode, previous_mode_str);
-    printf("Mode of '%s' changed from 0%o (%s) to 0%o (%s)\n", path,
+    printf("Mode of '%s' changed from%#o (%s) to%#o (%s)\n", path,
            previous_mode, previous_mode_str, new_mode,
            new_mode_str);
     fflush(stdout);
@@ -16,7 +16,7 @@ int printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode) 
 int printRetainMessage(const char *path, mode_t mode) {
     char mode_str[] = "---------";
     parseModeToString(mode, mode_str);
-    printf("Mode of '%s' retained as 0%o (%s)\n", path, mode, mode_str);
+    printf("Mode of '%s' retained as %#o (%s)\n", path, mode, mode_str);
     fflush(stdout);
     return 0;
 }
@@ -24,7 +24,7 @@ int printRetainMessage(const char *path, mode_t mode) {
 int printFailedMessage(const char *path, mode_t new_mode) {
     char new_mode_str[] = "---------";
     parseModeToString(new_mode, new_mode_str);
-    fprintf(stderr, "failed to change mode of '%s' changed to 0%o (%s)\n", path,
+    fprintf(stderr, "failed to change mode of '%s' changed to %#o (%s)\n", path,
             new_mode, new_mode_str);
     fflush(stdout);
     return 0;
