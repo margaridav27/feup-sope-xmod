@@ -99,13 +99,13 @@ int changeFileMode(const command_t *command, struct stat *buf, bool isLink) {
     mode_t mode = buf->st_mode;
     mode_t persistent_bits = mode & S_IFMT;
     mode_t new_mode;
-    if (command->action == ACTION_REMOVE)
+    if (command->action == ACTION_REMOVE) {
         new_mode = removePermissions(mode, command->mode);
-    else if (command->action == ACTION_ADD)
+    } else if (command->action == ACTION_ADD) {
         new_mode = addPermissions(mode, command->mode);
-    else if (command->action == ACTION_PARTIAL_SET)
+    } else if (command->action == ACTION_PARTIAL_SET) {
         new_mode = setPartialPermissions(mode, command->mode);
-    else if (command->action == ACTION_SET) {
+    } else if (command->action == ACTION_SET) {
         new_mode = command->mode | persistent_bits;
     } else {
         return 1;
