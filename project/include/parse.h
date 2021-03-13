@@ -33,6 +33,8 @@ typedef struct {
     action_t action;
     mode_t mode;
     const char *path;
+    char *const *argv;
+    int argc;
 } command_t;
 
 int parseCommand(int argc, char *argv[], command_t *result);

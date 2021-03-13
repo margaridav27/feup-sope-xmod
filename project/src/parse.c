@@ -9,6 +9,8 @@
 
 int parseCommand(int argc, char *argv[], command_t *result) {
     memset(result, 0, sizeof(command_t)); // Clear all information
+    result->argv = argv;
+    result->argc = argc;
 
     // Parse command line arguments for options
     int opt;
