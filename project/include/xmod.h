@@ -1,5 +1,5 @@
-#ifndef PROJECT_XMOD_H
-#define PROJECT_XMOD_H
+#ifndef PROJECT_INCLUDE_XMOD_H_
+#define PROJECT_INCLUDE_XMOD_H_
 
 #include <sys/types.h>
 #include "../include/parse.h"
@@ -34,4 +34,4 @@ void leave(int ret);
 
 int main(int argc, char *argv[]);
 
-#endif //PROJECT_XMOD_H
+#endif //PROJECT_INCLUDE_XMOD_H_
