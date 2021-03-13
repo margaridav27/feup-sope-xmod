@@ -58,15 +58,15 @@ int printSymbolicMessage(const char *path) {
     return 0;
 }
 
-mode_t clear_extra_bits(mode_t mode) {
+mode_t clearExtraBits(mode_t mode) {
     return mode & ~(S_IFMT);
 }
 
-int print_message(mode_t new_mode, mode_t old_mode, const command_t *command, bool isLink) {
+int printMessage(mode_t new_mode, mode_t old_mode, const command_t *command, bool isLink) {
     if (!command->verbose && !command->changes) return 0;
     // Clear these bits for printing
-    old_mode = clear_extra_bits(old_mode);
-    new_mode = clear_extra_bits(new_mode);
+    old_mode = clearExtraBits(old_mode);
+    new_mode = clearExtraBits(new_mode);
     if (command->verbose) {
         if (new_mode == old_mode) {
             if (isLink) {
