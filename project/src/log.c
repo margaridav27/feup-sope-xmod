@@ -43,8 +43,9 @@ int logEvent(pid_t pid, event_t event, char *info) {
                                    "SIGNAL_SENT", "FILE_MODF"};
     const char *action = events[event];
     errno = 0;
-    fprintf(logFile, "%.3f ; %d ; %s ; %s\n", getMillisecondsElapsed(), pid,
-            action, info);
+    if (logFile != NULL)
+        fprintf(logFile, "%.3f ; %d ; %s ; %s\n", getMillisecondsElapsed(), pid,
+                action, info);
     errno = 0;
     fflush(logFile);
     closeLogFile();
