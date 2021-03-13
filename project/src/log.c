@@ -19,7 +19,8 @@ int openLogFile(char *flag) {
     char *logFileName = getenv("LOG_FILENAME");
 
     if (logFileName == NULL) {
-        fprintf(stderr, "Variable LOG_FILENAME not defined.\n");
+        //COMBACK: Find a better error message
+        if (strcmp(flag, "w") == 0) fprintf(stderr, "Variable LOG_FILENAME not defined.\n");
         return 1;
     }
     errno = 0;
@@ -32,7 +33,6 @@ int openLogFile(char *flag) {
     return 0;
 }
 
-//COMBACK: What is info?
 int logEvent(pid_t pid, event_t event, char *info) {
     if (!log_file_available) return 0;
     static const char *events[] = {"PROC_CREAT", "PROC_EXIT", "SIGNAL_RECV",
@@ -41,6 +41,7 @@ int logEvent(pid_t pid, event_t event, char *info) {
     errno = 0;
     fprintf(logFile, "%.3f ; %d ; %s ; %s\n", getMillisecondsElapsed(), pid,
             action, info);
+    errno = 0;
     fflush(logFile);
     if (errno != 0) {
         perror("Failed to log");
