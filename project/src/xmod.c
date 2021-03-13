@@ -32,9 +32,7 @@ int createNewProcess(const command_t *command, char *new_path) {
 
 int concatenateFolderFilenamePath(const char *folder_path, const char *file_name, char *dest) {
     if (folder_path == NULL || file_name == NULL || dest == NULL) return 1;
-    strcpy(dest, folder_path);
-    strcat(dest, "/");
-    strcat(dest, file_name);
+    snprintf(dest, PATH_MAX, "%s/%s", folder_path, file_name);
     return 0;
 }
 
@@ -70,7 +68,7 @@ mode_t setPartialPermissions(mode_t old_mode, mode_t new_mode) {
 
 int logChangePermission(const command_t *command, mode_t old_mode, mode_t new_mode, bool isLink) {
     char info[2048] = {};
-    sprintf(info, "%s : %o : %o", command->path, old_mode, new_mode);
+    snprintf(info, sizeof(info), "%s : %o : %o", command->path, old_mode, new_mode);
     if (new_mode != old_mode) logEvent(getpid(), FILE_MODF, info);
     //COMBACK: Properly print this message
     printMessage(new_mode, old_mode, command, isLink);
@@ -79,10 +77,10 @@ int logChangePermission(const command_t *command, mode_t old_mode, mode_t new_mo
 
 int logProcessCreation(char **argv, int argc) {
     char info[2048] = {};
-    sprintf(info + strlen(info), "%s", argv[0]);
+    snprintf(info, sizeof(info), "%s", argv[0]);
     for (int i = 1; i < argc; ++i) {
-        if (i != argc) sprintf(info + strlen(info), " ");
-        sprintf(info + strlen(info), "%s", argv[i]);
+        if (i != argc) snprintf(info + strlen(info), sizeof(info) - strlen(info), " ");
+        snprintf(info + strlen(info), sizeof(info) - strlen(info), "%s", argv[i]);
     }
     logEvent(getpid(), PROC_CREAT, info);
     return 0;
@@ -90,7 +88,7 @@ int logProcessCreation(char **argv, int argc) {
 
 int logProcessExit(int ret) {
     char info[2048] = {};
-    sprintf(info, "%d", ret);
+    snprintf(info, sizeof(info), "%d", ret);
     logEvent(getpid(), PROC_EXIT, info);
     return 0;
 }
