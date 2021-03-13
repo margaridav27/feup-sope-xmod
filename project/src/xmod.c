@@ -12,12 +12,11 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include "../include/io.h"
 #include "../include/log.h"
 #include "../include/parse.h"
 #include "../include/time_ctrl.h"
 #include "../include/xmod.h"
-#include "../include/io.h"
-#include "../include/parse.h"
 
 
 int changeFileMode(command_t *command) {
@@ -212,19 +211,12 @@ int changeMode(command_t *command, int argc, char *argv[]) {
 
 
 int main(int argc, char *argv[]) {
-    if (getenv("IS_FIRST") == NULL) { // Initial process
-        setStartTime();
-        openLogFile("w"); // Initially, logfile is supposed be truncated
-    } else {              // Not initial process
-        restoreStartTime();
-        openLogFile("a"); // Child process won't truncate the logfile
-    }
-
+    getStartTime();
+    getpid() == getpgid(0) ? openLogFile("w") : openLogFile("a");
     command_t result;
     if (parseCommand(argc, argv, &result)) {
         return 1;
     }
-
     changeMode(&result, argc, argv);
     closeLogFile();
     return 0;

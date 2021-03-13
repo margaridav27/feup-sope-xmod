@@ -23,7 +23,8 @@ int openLogFile(char *flag) {
         return 1;
     }
     errno = 0;
-    if ((logFile = fopen(logFileName, flag)) == NULL) {
+    logFile = fopen(logFileName, flag);
+    if (logFile == NULL) {
         perror("Failed to open logFileName");
         return 1;
     }
