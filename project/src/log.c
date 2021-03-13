@@ -44,7 +44,7 @@ int logEvent(pid_t pid, event_t event, char *info) {
     const char *action = events[event];
     errno = 0;
     if (logFile != NULL)
-        fprintf(logFile, "%.3f ; %d ; %s ; %s\n", getMillisecondsElapsed(), pid,
+        fprintf(logFile, "%.3f\t;\t%d\t;\t%s\t;\t%s\n", getMillisecondsElapsed(), pid,
                 action, info);
     errno = 0;
     fflush(logFile);
