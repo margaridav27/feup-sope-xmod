@@ -2,8 +2,7 @@
 #include <stdio.h>
 #include <sys/stat.h>
 
-int
-printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode) {
+int printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode) {
     char new_mode_str[] = "---------", previous_mode_str[] = "---------";
     parseModeToString(new_mode, new_mode_str);
     parseModeToString(previous_mode, previous_mode_str);
@@ -56,5 +55,23 @@ int printNoPermissionMessage(const char *path) {
 int printSymbolicMessage(const char *path) {
     printf("neither symbolic link '%s' nor referent has been changed\n", path);
     fflush(stdout);
+    return 0;
+}
+
+mode_t clear_extra_bits(mode_t mode) {
+    return mode & ~(S_IFMT);
+}
+
+int print_message(const command_t *command, mode_t new_mode) {
+    // Clear these bits for printing
+    mode_t previous_mode = clear_extra_bits(command->mode);
+    new_mode = clear_extra_bits(new_mode);
+
+    if (new_mode == previous_mode && command->verbose) {
+        if (S_ISLNK(previous_mode))
+            printSymbolicMessage(command->path);
+        else printRetainMessage(command->path, new_mode);
+    } else if (new_mode != previous_mode && command->changes)
+        printChangeMessage(command->path, previous_mode, new_mode);
     return 0;
 }

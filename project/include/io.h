@@ -2,6 +2,7 @@
 #define PROJECT_IO_H
 
 #include <sys/types.h>
+#include "parse.h"
 
 int printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode);
 
@@ -15,4 +16,7 @@ int printNoPermissionMessage(const char *path);
 
 int parseModeToString(mode_t mode, char *str);
 
+mode_t clear_extra_bits(mode_t mode);
+
+int print_message(const command_t *command, mode_t new_mode);
 #endif //PROJECT_IO_H_
