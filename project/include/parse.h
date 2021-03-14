@@ -1,24 +1,28 @@
-#ifndef PARSE
-#define PARSE
+#ifndef PROJECT_INCLUDE_PARSE_H_
+#define PROJECT_INCLUDE_PARSE_H_
 
 /*
  * A file's mode is of the form: - RWX RWX RWX
-                                    U   G   O
+ *                                  U   G   O
 */
+#include <stdbool.h>
+#include <sys/stat.h>
+
+#include <fcntl.h>
 
 #define GROUP_POSITION 3
 #define USER_POSITION 6
 
-#define EXECUTE_BIT 0
-#define WRITE_BIT 1
-#define READ_BIT 2
+#define EXECUTE_BIT S_IXOTH
+#define WRITE_BIT S_IWOTH
+#define READ_BIT S_IROTH
 
-#define BIT(n) (1<<(n))
-
-#include <stdbool.h>
 
 typedef enum {
-    ACTION_REMOVE, ACTION_ADD, ACTION_SET
+    ACTION_REMOVE = '-',
+    ACTION_ADD = '+',
+    ACTION_PARTIAL_SET = '=',
+    ACTION_SET,
 } action_t;
 
 typedef struct {
@@ -29,8 +33,10 @@ typedef struct {
     action_t action;
     mode_t mode;
     const char *path;
+    char *const *argv;
+    int argc;
 } command_t;
 
 int parseCommand(int argc, char *argv[], command_t *result);
 
-#endif
+#endif // PROJECT_INCLUDE_PARSE_H_
