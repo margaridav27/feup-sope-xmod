@@ -37,9 +37,12 @@ int setUpSignals(void) {
 }
 
 void terminateProgramParent(void) {
-    //COMBACK: LOG
     killpg(0, SIGCONT);
     killpg(0, SIGTERM);
+    leave(1);
+}
+
+void terminateProgramChild(void) {
     leave(1);
 }
 
@@ -93,4 +96,8 @@ bool checkChildAction(void) {
 
 bool checkTerminateSignal(void) {
     return isParentProcess() ? checkParentAction() : checkChildAction();
+}
+
+void terminateProgram(void) {
+    isParentProcess() ? terminateProgramParent() : checkChildAction();
 }

@@ -59,7 +59,7 @@ int changeFolderMode(const command_t *command) {
     }
     struct dirent *d;
     while ((d = readdir(dir)) != NULL) {
-        //COMBACK: This might be a good place to install our handler (in case there are many subfolders)
+        if(chec)
         if (strcmp(d->d_name, ".") == 0 || strcmp(d->d_name, "..") == 0) continue;
         char new_path[PATH_MAX];
         command_t new_command = *command;
@@ -84,10 +84,6 @@ int changeFolderMode(const command_t *command) {
         }
     }
     closedir(dir);
-    //COMBACK: This might also be a good place to install our handler (small folders fork fast)
-    //COMBACK: Properly wait for children: this solution won't allow us to receive SIGINT from here on
-    int ret;
-    while (wait(&ret) > 0) {}
     return 0;
 }
 

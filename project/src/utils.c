@@ -3,6 +3,7 @@
 #include "../include/log.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <sys/wait.h>
 #include <limits.h>
 
 bool isParentProcess(void) {
@@ -11,6 +12,7 @@ bool isParentProcess(void) {
 
 void leave(int ret) {
     logProcessExit(ret);
+    while (wait(NULL) >= 0);
     exit(ret);
 }
 
