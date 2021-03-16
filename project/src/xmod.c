@@ -1,23 +1,20 @@
 #include <dirent.h>
-#include <errno.h>
 #include <fcntl.h>
-#include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <sys/time.h>
-#include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
 #include <limits.h>
 
+#include "../include/parse.h"
 #include "../include/io.h"
 #include "../include/log.h"
-#include "../include/parse.h"
 #include "../include/time_ctrl.h"
 #include "../include/xmod.h"
+#include "../include/utils.h"
+#include "../include/signals.h"
 
 int createNewProcess(const command_t *command, char *new_path) {
     static char *new_argv[_POSIX_ARG_MAX] = {};
@@ -27,69 +24,6 @@ int createNewProcess(const command_t *command, char *new_path) {
         perror("xmod: exec");
         return 1;
     }
-    return 0;
-}
-
-int concatenateFolderFilenamePath(const char *folder_path, const char *file_name, char *dest) {
-    if (folder_path == NULL || file_name == NULL || dest == NULL) return 1;
-    snprintf(dest, PATH_MAX, "%s/%s", folder_path, file_name);
-    return 0;
-}
-
-int openFile(const char *path, struct stat *buf) {
-    if (path == NULL || buf == NULL) return 1;
-    int r = stat(path, buf);
-    if (r == -1) {
-        perror("xmod: failed to open file");
-        return 1;
-    }
-    return 0;
-}
-
-mode_t removePermissions(mode_t old_mode, mode_t new_mode) {
-    return old_mode & ~(new_mode); // Remove the relevant bits, keeping others
-}
-
-mode_t addPermissions(mode_t old_mode, mode_t new_mode) {
-    return old_mode | new_mode; // Add the relevant bits, keeping others
-}
-
-
-mode_t setPartialPermissions(mode_t old_mode, mode_t new_mode) {
-    if (new_mode & S_IRWXO) {
-        old_mode &= (~S_IRWXO);
-    } else if (new_mode & S_IRWXG) {
-        old_mode &= (~S_IRWXG);
-    } else if (new_mode & S_IRWXU) {
-        old_mode &= (~S_IRWXU);
-    }
-    return old_mode | new_mode;
-}
-
-int logChangePermission(const command_t *command, mode_t old_mode, mode_t new_mode, bool isLink) {
-    char info[2048] = {};
-    snprintf(info, sizeof(info), "%s : %o : %o", command->path, old_mode, new_mode);
-    if (new_mode != old_mode) logEvent(getpid(), FILE_MODF, info);
-    //COMBACK: Properly print this message
-    printMessage(new_mode, old_mode, command, isLink);
-    return 0;
-}
-
-int logProcessCreation(char **argv, int argc) {
-    char info[2048] = {};
-    snprintf(info, sizeof(info), "%s", argv[0]);
-    for (int i = 1; i < argc; ++i) {
-        if (i != argc) snprintf(info + strlen(info), sizeof(info) - strlen(info), " ");
-        snprintf(info + strlen(info), sizeof(info) - strlen(info), "%s", argv[i]);
-    }
-    logEvent(getpid(), PROC_CREAT, info);
-    return 0;
-}
-
-int logProcessExit(int ret) {
-    char info[2048] = {};
-    snprintf(info, sizeof(info), "%d", ret);
-    logEvent(getpid(), PROC_EXIT, info);
     return 0;
 }
 
@@ -166,15 +100,6 @@ int changeMode(const command_t *command) {
         if (changeFolderMode(command)) return 1;
     }
     return 0;
-}
-
-bool isParentProcess(void) {
-    return getpid() == getpgid(0);
-}
-
-void leave(int ret) {
-    logProcessExit(ret);
-    exit(ret);
 }
 
 int main(int argc, char *argv[]) {

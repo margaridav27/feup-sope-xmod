@@ -1,4 +1,4 @@
-#ifndef PROJECT_INCLUDE_PARSE_H_
+#ifndef PROJECT_INCLUDE_UTILS_H_
 #define PROJECT_INCLUDE_PARSE_H_
 
 /*
@@ -7,8 +7,8 @@
 */
 #include <stdbool.h>
 #include <sys/stat.h>
-
 #include <fcntl.h>
+#include "../include/utils.h"
 
 #define GROUP_POSITION 3
 #define USER_POSITION 6
@@ -18,25 +18,6 @@
 #define READ_BIT S_IROTH
 
 
-typedef enum {
-    ACTION_REMOVE = '-',
-    ACTION_ADD = '+',
-    ACTION_PARTIAL_SET = '=',
-    ACTION_SET,
-} action_t;
-
-typedef struct {
-    bool verbose;
-    bool changes;
-    bool recursive;
-
-    action_t action;
-    mode_t mode;
-    const char *path;
-    char *const *argv;
-    int argc;
-} command_t;
-
 int parseCommand(int argc, char *argv[], command_t *result);
 
-#endif // PROJECT_INCLUDE_PARSE_H_
+#endif // PROJECT_INCLUDE_UTILS_H_

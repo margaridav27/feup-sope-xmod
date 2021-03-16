@@ -11,6 +11,7 @@
 #include <unistd.h>
 
 #include "../include/time_ctrl.h"
+#include "../include/io.h"
 
 static FILE *logFile;
 static bool log_file_available = false;
@@ -63,5 +64,32 @@ int closeLogFile() {
         perror("Error closing Logfile");
         return 1;
     }
+    return 0;
+}
+
+int logChangePermission(const command_t *command, mode_t old_mode, mode_t new_mode, bool isLink) {
+    char info[2048] = {};
+    snprintf(info, sizeof(info), "%s : %o : %o", command->path, old_mode, new_mode);
+    if (new_mode != old_mode) logEvent(getpid(), FILE_MODF, info);
+    //COMBACK: Properly print this message
+    printMessage(new_mode, old_mode, command, isLink);
+    return 0;
+}
+
+int logProcessCreation(char **argv, int argc) {
+    char info[2048] = {};
+    snprintf(info, sizeof(info), "%s", argv[0]);
+    for (int i = 1; i < argc; ++i) {
+        if (i != argc) snprintf(info + strlen(info), sizeof(info) - strlen(info), " ");
+        snprintf(info + strlen(info), sizeof(info) - strlen(info), "%s", argv[i]);
+    }
+    logEvent(getpid(), PROC_CREAT, info);
+    return 0;
+}
+
+int logProcessExit(int ret) {
+    char info[2048] = {};
+    snprintf(info, sizeof(info), "%d", ret);
+    logEvent(getpid(), PROC_EXIT, info);
     return 0;
 }
