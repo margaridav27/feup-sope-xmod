@@ -109,6 +109,7 @@ int main(int argc, char *argv[]) {
     command_t result;
     if (parseCommand(argc, argv, &result)) leave(1);
     logProcessCreation(argv, argc);
+    setUpSignals();
     changeMode(&result);
     leave(0);
     return 0;
