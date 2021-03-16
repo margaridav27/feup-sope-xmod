@@ -11,8 +11,8 @@ bool isParentProcess(void) {
 }
 
 void leave(int ret) {
-    logProcessExit(ret);
     while (wait(NULL) >= 0);
+    logProcessExit(ret);
     exit(ret);
 }
 

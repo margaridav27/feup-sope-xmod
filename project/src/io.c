@@ -6,7 +6,7 @@ int printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode) 
     char new_mode_str[] = "---------", previous_mode_str[] = "---------";
     parseModeToString(new_mode, new_mode_str);
     parseModeToString(previous_mode, previous_mode_str);
-    printf("Mode of '%s' changed from%#o (%s) to%#o (%s)\n", path,
+    printf("mode of '%s' changed from%#o (%s) to %#o (%s)\n", path,
            previous_mode, previous_mode_str, new_mode,
            new_mode_str);
     fflush(stdout);
@@ -16,7 +16,7 @@ int printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode) 
 int printRetainMessage(const char *path, mode_t mode) {
     char mode_str[] = "---------";
     parseModeToString(mode, mode_str);
-    printf("Mode of '%s' retained as %#o (%s)\n", path, mode, mode_str);
+    printf("mode of '%s' retained as %#o (%s)\n", path, mode, mode_str);
     fflush(stdout);
     return 0;
 }

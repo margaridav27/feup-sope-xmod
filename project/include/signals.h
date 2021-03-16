@@ -17,17 +17,17 @@ void terminateProgramParent(void);
 
 void continueProgramParent(void);
 
-bool checkParentAction(void);
+bool checkParentAction(const char *path);
 
-void childHoldAction(void);
+void childHoldAction(const char *path);
 
 void childResumeAction(void);
 
 void childTerminateAction(void);
 
-bool checkChildAction(void);
+bool checkChildAction(const char *path);
 
-bool checkTerminateSignal(void);
+bool checkTerminateSignal(const char *path);
 
 void terminateProgram(void);
 #endif // PROJECT_INCLUDE_SIGNALS_H_

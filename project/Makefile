@@ -38,11 +38,11 @@ all: $(TARGET_EXECUTABLE)
 $(BUILD_DIRECTORY)/%.c.o: %.c
 	@echo "Building: " $< 
 	@mkdir -p $(dir $@)
-	@$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+	@$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@ -g
 
 $(TARGET_EXECUTABLE): $(OBJECT_FILES)
 	@echo "Linking: " $@
-	@$(CC) $(OBJECT_FILES) -o $@ $(LDFLAGS)
+	@$(CC) $(OBJECT_FILES) -o $@ $(LDFLAGS) -g
 
 .PHONY: clean
 clean:

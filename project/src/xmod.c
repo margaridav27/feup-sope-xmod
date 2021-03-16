@@ -16,6 +16,9 @@
 #include "../include/utils.h"
 #include "../include/signals.h"
 
+int number_of_files = 0, number_of_modified_files = 0, number_of_children = 0;
+
+
 int createNewProcess(const command_t *command, char *new_path) {
     static char *new_argv[_POSIX_ARG_MAX] = {};
     for (int i = 0; i < command->argc; ++i) new_argv[i] = command->argv[i];
@@ -24,10 +27,12 @@ int createNewProcess(const command_t *command, char *new_path) {
         perror("xmod: exec");
         return 1;
     }
+    ++number_of_children;
     return 0;
 }
 
 int changeFileMode(const command_t *command, struct stat *buf, bool isLink) {
+    ++number_of_files;
     mode_t mode = buf->st_mode;
     mode_t persistent_bits = mode & S_IFMT;
     mode_t new_mode;
@@ -46,6 +51,7 @@ int changeFileMode(const command_t *command, struct stat *buf, bool isLink) {
         perror("xmod: failed to change permissions");
         return 1;
     }
+    if (new_mode != mode) ++number_of_modified_files;
     logChangePermission(command, buf->st_mode, new_mode, isLink);
     return 0;
 }
@@ -58,8 +64,10 @@ int changeFolderMode(const command_t *command) {
         return 1;
     }
     struct dirent *d;
+    bool terminate = false;
     while ((d = readdir(dir)) != NULL) {
-        if(chec)
+        sleep(1);
+        if ((terminate = checkTerminateSignal(command->path))) break;
         if (strcmp(d->d_name, ".") == 0 || strcmp(d->d_name, "..") == 0) continue;
         char new_path[PATH_MAX];
         command_t new_command = *command;
@@ -84,6 +92,7 @@ int changeFolderMode(const command_t *command) {
         }
     }
     closedir(dir);
+    if (terminate || checkTerminateSignal(command->path)) terminateProgram();
     return 0;
 }
 
