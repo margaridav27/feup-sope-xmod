@@ -22,9 +22,9 @@ int openLogFile(bool truncate) {
         if (logFileName == NULL) return -1;
     }
     int flags = O_WRONLY | O_CLOEXEC;
-    flags |= truncate ? O_TRUNC | O_CREAT : O_APPEND;
+    flags |= truncate ? (O_TRUNC | O_CREAT) : O_APPEND;
     errno = 0;
-    int fd = open(logFileName, flags);
+    int fd = open(logFileName, flags, 0666);
     if (fd == -1) {
         perror("Failed to open logFileName");
         return -1;
