@@ -11,7 +11,14 @@ extern int numberOfFiles, numberOfModifiedFiles;
 const int *const noFiles = &numberOfFiles;
 const int *const noModifiedFiles = &numberOfModifiedFiles;
 
-void genericSignalHandler(int sig_no) {
+void generic_signal_handler(int sig_no) {
+    struct sigaction newAction;
+
+    newAction.sa_handler = SIG_DFL; // select default handler for signal
+    sigemptyset(&newAction.sa_mask);
+    newAction.sa_flags = 0;
+
+
     logSignalReceived(sig_no);
 
     // Our own actions
@@ -22,7 +29,7 @@ void genericSignalHandler(int sig_no) {
     }
         // Repeat the requested actions
     else {
-        signal(sig_no, SIG_DFL);
+        sigaction(sig_no,&newAction,NULL);
         raise(sig_no);
     }
 }
@@ -54,16 +61,25 @@ void childSigintHandler(void) {
 }
 
 int setUpSignals(const char *p) {
+    struct sigaction newActionTerm, newActionAll;
+
+    newActionTerm.sa_handler = SIG_IGN; // no handler specified
+    sigemptyset(&newActionTerm.sa_mask);
+    newActionTerm.sa_flags = 0;
+
+    newActionAll.sa_handler = generic_signal_handler; // handler to print signal received message
+    sigemptyset(&newActionAll.sa_mask);
+    newActionAll.sa_flags = 0;
     // COMBACK: Change signal setup to use sigaction
     // COMBACK: Find a better way to forward this argument
     path = p;
     int r = 0;
     for (int sig_no = 1; sig_no < SIGRTMIN; ++sig_no) {
         if (sig_no == SIGKILL || sig_no == SIGSTOP || sig_no == SIGCHLD) continue;
-        if (signal(sig_no, genericSignalHandler) == SIG_ERR) r = -1;
+        r = sigaction(sig_no, &newActionAll, NULL);// r set to -1 in case sigaction return error
     }
     // COMBACK: Stop using SIGTERM as the termination signal, convert to SIGUSR
-    if (isParentProcess() && signal(SIGTERM, SIG_IGN)) r = -1;
+    if (isParentProcess() && sigaction(SIGTERM, &newActionTerm, NULL)) r = -1;
     return r;
 }
 
