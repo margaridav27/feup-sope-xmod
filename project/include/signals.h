@@ -11,13 +11,13 @@ void child_sigcont_handler(int signo);
 
 void child_sigterm_handler(int signo);
 
-int setUpSignals(void);
+int setUpSignals(const char *p);
 
 void terminateProgramParent(void);
 
 void continueProgramParent(void);
 
-bool checkParentAction(const char *path);
+bool checkParentAction(void);
 
 void childHoldAction(const char *path);
 
@@ -25,9 +25,12 @@ void childResumeAction(void);
 
 void childTerminateAction(void);
 
-bool checkChildAction(const char *path);
+bool checkChildAction(void);
 
-bool checkTerminateSignal(const char *path);
+bool checkTerminateSignal(void);
 
 void terminateProgram(void);
+
+void log_current_status(const char *path, int number_of_files, int number_of_modified_files);
+
 #endif // PROJECT_INCLUDE_SIGNALS_H_

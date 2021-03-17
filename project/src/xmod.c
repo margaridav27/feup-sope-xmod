@@ -1,3 +1,4 @@
+#include "../include/xmod.h"
 #include <dirent.h>
 #include <fcntl.h>
 #include <stdbool.h>
@@ -7,16 +8,17 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <limits.h>
+#include <sys/resource.h>
 
 #include "../include/parse.h"
 #include "../include/io.h"
 #include "../include/log.h"
 #include "../include/time_ctrl.h"
-#include "../include/xmod.h"
 #include "../include/utils.h"
 #include "../include/signals.h"
 
 int number_of_files = 0, number_of_modified_files = 0, number_of_children = 0;
+pid_t children[99999];
 
 
 int createNewProcess(const command_t *command, char *new_path) {
@@ -27,7 +29,6 @@ int createNewProcess(const command_t *command, char *new_path) {
         perror("xmod: exec");
         return 1;
     }
-    ++number_of_children;
     return 0;
 }
 
@@ -64,10 +65,10 @@ int changeFolderMode(const command_t *command) {
         return 1;
     }
     struct dirent *d;
-    bool terminate = false;
+    // bool terminate = false;
     while ((d = readdir(dir)) != NULL) {
         sleep(1);
-        if ((terminate = checkTerminateSignal(command->path))) break;
+        // if ((terminate = checkTerminateSignal())) break;
         if (strcmp(d->d_name, ".") == 0 || strcmp(d->d_name, "..") == 0) continue;
         char new_path[PATH_MAX];
         command_t new_command = *command;
@@ -84,6 +85,8 @@ int changeFolderMode(const command_t *command) {
             } else if (pid == 0) {
                 createNewProcess(command, new_path);
             } else {
+                children[number_of_children] = pid;
+                ++number_of_children;
                 continue;
             }
         } else {
@@ -92,7 +95,7 @@ int changeFolderMode(const command_t *command) {
         }
     }
     closedir(dir);
-    if (terminate || checkTerminateSignal(command->path)) terminateProgram();
+    // if (terminate || checkTerminateSignal()) terminateProgram();
     return 0;
 }
 
@@ -109,12 +112,14 @@ int changeMode(const command_t *command) {
 
 int main(int argc, char *argv[]) {
     getStartTime();
-    isParentProcess() ? openLogFile("w") : openLogFile("a");
-    closeLogFile();
+    int fd = openLogFile(isParentProcess());
+    if (isParentProcess() && fd == -1)
+        fprintf(stderr, "Variable LOG_FILENAME not defined.\n");
+    closeLogFile(fd);
     command_t result;
     if (parseCommand(argc, argv, &result)) leave(1);
     logProcessCreation(argv, argc);
-    setUpSignals();
+    setUpSignals(result.path);
     changeMode(&result);
     leave(0);
     return 0;

@@ -38,4 +38,8 @@ mode_t removePermissions(mode_t old_mode, mode_t new_mode);
 mode_t addPermissions(mode_t old_mode, mode_t new_mode);
 
 mode_t setPartialPermissions(mode_t old_mode, mode_t new_mode);
+
+void convert_integer_to_string(int n, char *dest);
+
+void convert_signal_number_to_string(int signo, char *dest);
 #endif // PROJECT_INCLUDE_UTILS_H_

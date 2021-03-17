@@ -24,7 +24,7 @@ int getStartTime() {
     return 0;
 }
 
-double getMillisecondsElapsed() {
+int getMillisecondsElapsed() {
     if (!start_time_available) return -1;
     struct timespec now;
     clock_gettime(CLOCK_REALTIME, &now);

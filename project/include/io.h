@@ -4,11 +4,11 @@
 #include <sys/types.h>
 #include "./parse.h"
 
-int printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode);
+int printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode, char *info, int size);
 
-int printRetainMessage(const char *path, mode_t mode);
+int printRetainMessage(const char *path, mode_t mode, char *info, int size);
 
-int printSymbolicMessage(const char *path);
+int printSymbolicMessage(const char *path, char *info, int size);
 
 int printFailedMessage(const char *path, mode_t new_mode);
 

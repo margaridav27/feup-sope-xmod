@@ -1,32 +1,35 @@
 #include "../include/io.h"
 #include <stdio.h>
 #include <sys/stat.h>
+#include <fcntl.h>
+#include <string.h>
+#include <unistd.h>
 
-int printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode) {
+int printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode, char *info, int size) {
     char new_mode_str[] = "---------", previous_mode_str[] = "---------";
     parseModeToString(new_mode, new_mode_str);
     parseModeToString(previous_mode, previous_mode_str);
-    printf("mode of '%s' changed from%#o (%s) to %#o (%s)\n", path,
-           previous_mode, previous_mode_str, new_mode,
-           new_mode_str);
-    fflush(stdout);
+    snprintf(info, size - strlen(info), "mode of '%s' changed from %#o (%s) to %#o (%s)\n", path,
+             previous_mode, previous_mode_str, new_mode,
+             new_mode_str);
     return 0;
 }
 
-int printRetainMessage(const char *path, mode_t mode) {
+int printRetainMessage(const char *path, mode_t mode, char *info, int size) {
     char mode_str[] = "---------";
     parseModeToString(mode, mode_str);
-    printf("mode of '%s' retained as %#o (%s)\n", path, mode, mode_str);
-    fflush(stdout);
+    snprintf(info, size - strlen(info), "mode of '%s' retained as %#o (%s)\n", path, mode, mode_str);
     return 0;
 }
 
+//COMBACK
 int printFailedMessage(const char *path, mode_t new_mode) {
     char new_mode_str[] = "---------";
+    char info[1024] = {};
     parseModeToString(new_mode, new_mode_str);
-    fprintf(stderr, "failed to change mode of '%s' changed to %#o (%s)\n", path,
-            new_mode, new_mode_str);
-    fflush(stdout);
+    snprintf(info, sizeof(info) - strlen(info) - 1, "failed to change mode of '%s' changed to %#o (%s)\n", path,
+             new_mode, new_mode_str);
+    write(STDOUT_FILENO, info, sizeof(info));
     return 0;
 }
 
@@ -44,17 +47,20 @@ int parseModeToString(mode_t mode, char *str) {
     return 0;
 }
 
+//COMBACK
 int printNoPermissionMessage(const char *path) {
-    fprintf(stderr,
-            "xmod: changing permissions of '%s': Operation not permitted\n",
-            path);
-    fflush(stdout);
+    char info[1024] = {};
+    strncat(info, "xmod: changing permissions of '", sizeof(info) - strlen(info) - 1);
+    strncat(info, path, sizeof(info) - strlen(info) - 1);
+    strncat(info, "': Operation not permitted\n", sizeof(info) - strlen(info) - 1);
+    write(STDERR_FILENO, info, sizeof(info));
     return 0;
 }
 
-int printSymbolicMessage(const char *path) {
-    printf("neither symbolic link '%s' nor referent has been changed\n", path);
-    fflush(stdout);
+int printSymbolicMessage(const char *path, char *info, int size) {
+    strncat(info, "neither symbolic link '", sizeof(info) - strlen(info) - 1);
+    strncat(info, path, strlen(path));
+    strncat(info, "' nor referent has been changed\n", size - strlen(info));
     return 0;
 }
 
@@ -63,6 +69,7 @@ mode_t clearExtraBits(mode_t mode) {
 }
 
 int printMessage(mode_t new_mode, mode_t old_mode, const command_t *command, bool isLink) {
+    char info[1024] = {};
     if (!command->verbose && !command->changes) return 0;
     // Clear these bits for printing
     old_mode = clearExtraBits(old_mode);
@@ -70,15 +77,16 @@ int printMessage(mode_t new_mode, mode_t old_mode, const command_t *command, boo
     if (command->verbose) {
         if (new_mode == old_mode) {
             if (isLink) {
-                printSymbolicMessage(command->path);
+                printSymbolicMessage(command->path, info, sizeof(info));
             } else {
-                printRetainMessage(command->path, old_mode);
+                printRetainMessage(command->path, old_mode, info, sizeof(info));
             }
         } else {
-            printChangeMessage(command->path, old_mode, new_mode);
+            printChangeMessage(command->path, old_mode, new_mode, info, sizeof(info));
         }
     } else if (command->changes && new_mode != old_mode) {
-        printChangeMessage(command->path, old_mode, new_mode);
+        printChangeMessage(command->path, old_mode, new_mode, info, sizeof(info));
     }
+    write(STDOUT_FILENO, info, sizeof(info));
     return 0;
 }
