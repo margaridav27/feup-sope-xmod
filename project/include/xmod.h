@@ -1,10 +1,8 @@
-//COMBACK: Explain header usages
 #ifndef PROJECT_INCLUDE_XMOD_H_
 #define PROJECT_INCLUDE_XMOD_H_
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include "../include/parse.h"
+#include <sys/stat.h> // struct stat, S_IFMT
+#include "../include/utils.h" // command_t
 
 #define UNRELATED_BITS S_IFMT
 

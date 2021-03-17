@@ -1,11 +1,11 @@
-//COMBACK: Explain header usages
 #include "../include/parse.h"
 
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
+// #include <errno.h> // ernno // COMBACK
+#include <stdio.h> // fprintf()
+#include <stdlib.h> // strtol()
+#include <string.h> // memset(), strlen()
+#include <unistd.h> // getopt(), optind
+#include <sys/types.h> // mode_t
 
 
 int parseCommand(int argc, char *argv[], command_t *result) {

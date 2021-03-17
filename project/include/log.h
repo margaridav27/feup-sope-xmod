@@ -1,11 +1,9 @@
-//COMBACK: Explain header usages
 #ifndef PROJECT_INCLUDE_LOG_H_
 #define PROJECT_INCLUDE_LOG_H_
 
-#include <stdbool.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include "../include/parse.h"
+#include <stdbool.h> // bool
+#include <sys/types.h> // pid_t
+#include "../include/utils.h" // command_t
 
 typedef enum {
     PROC_CREAT,
@@ -25,12 +23,12 @@ int logProcessCreation(char **argv, int argc);
 
 int logProcessExit(int ret);
 
-void log_signal_received(int signo);
+int log_signal_received(int signo);
 
 void log_signal_sent(int signo, pid_t target);
 
 void log_current_status(const char *path, int number_of_files, int number_of_modified_files);
 
-void log_event(event_t event, char *info);
+int log_event(event_t event, char *info);
 
 #endif // PROJECT_INCLUDE_LOG_H_

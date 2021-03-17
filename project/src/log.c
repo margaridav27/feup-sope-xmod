@@ -1,35 +1,29 @@
-//COMBACK: Explain header usages
 #include "../include/log.h"
-#include <errno.h>
-#include <fcntl.h>
-#include <signal.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
 
-#include "../include/time_ctrl.h"
-#include "../include/io.h"
+#include <errno.h> // errno
+#include <fcntl.h> // O_WRONLY, O_CLOEXEC, O_TRUNC, O_APPEND, open()
+#include <signal.h> // sig_atomic_t
+#include <stdbool.h> // bool
+#include <stdio.h> // snprintf(), perror()
+#include <stdlib.h> // getenv()
+#include <string.h> // strncat()
+#include <unistd.h> // write(), fsync(), close()
 
+#include "../include/time_ctrl.h" // getMillisecondsElapsed()
+#include "../include/io.h" // printMessage()
+
+//COMBACK
 sig_atomic_t log_file_available = false;
 static const char *logFileName;
 
 int openLogFile(bool truncate) {
     if (!log_file_available || logFileName == NULL) {
-        //COMBACK: Look into error return value
         logFileName = getenv("LOG_FILENAME");
-
-        if (logFileName == NULL) {
-            return -1;
-        }
+        if (logFileName == NULL) return -1;
     }
     int flags = O_WRONLY | O_CLOEXEC;
     flags |= truncate ? O_TRUNC : O_APPEND;
     errno = 0;
-    //COMBACK: Look into error return value
     int fd = open(logFileName, flags);
     if (fd == -1) {
         perror("Failed to open logFileName");
@@ -43,8 +37,7 @@ int closeLogFile(int fd) {
     if (!log_file_available) return 0;
     if (fd == -1) return -1;
     errno = 0;
-    //COMBACK: Look into error return value
-    if (close(fd) != 0) {
+    if (close(fd) == -1) {
         perror("Error closing Logfile");
         return -1;
     }
@@ -52,55 +45,52 @@ int closeLogFile(int fd) {
 }
 
 int logChangePermission(const command_t *command, mode_t old_mode, mode_t new_mode, bool isLink) {
-    // COMBACK: Verify nullptr
+    if (command == NULL) return -1;
     char info[BUFSIZ] = {0};
+    int n = 0;
     snprintf(info, sizeof(info) - 1, "%s : %o : %o", command->path, old_mode, new_mode);
+    if (n < 0 || n >= sizeof(info) - 1) return -1;
     if (new_mode != old_mode) log_event(FILE_MODF, info);
     //COMBACK: Properly print this message
-    //COMBACK: Look into error return value
-    printMessage(new_mode, old_mode, command, isLink);
+    if (printMessage(new_mode, old_mode, command, isLink)) return -1;
     return 0;
 }
 
 int logProcessCreation(char **argv, int argc) {
-    // COMBACK: Verify nullptr
+    if (argv == NULL) return -1;
     char info[BUFSIZ] = {0};
     strncat(info, argv[0], sizeof(info) - 1);
     for (int i = 1; i < argc; ++i) {
         strncat(info, " ", sizeof(info) - strlen(info) - 1);
         strncat(info, argv[i], sizeof(info) - strlen(info) - 1);
     }
-    //COMBACK: Look into error return value
-    log_event(PROC_CREAT, info);
+    if (log_event(PROC_CREAT, info)) return -1;
     return 0;
 }
 
 int logProcessExit(int ret) {
     char info[BUFSIZ] = {0};
-    //COMBACK: Look into error return value
-    convert_integer_to_string(ret, info, sizeof(info));
-    //COMBACK: Look into error return value
-    log_event(PROC_EXIT, info);
+    if (convert_integer_to_string(ret, info, sizeof(info))) return -1;
+    if (log_event(PROC_EXIT, info)) return -1;
     return 0;
 }
 
-void log_signal_received(int signo) {
-    char info[1024] = {0};
+int log_signal_received(int sig_no) {
+    char info[BUFSIZ] = {0};
     const char *temp;
-    //COMBACK: Look into error return value
-    convert_signal_number_to_string(signo, &temp);
+    if (convert_signal_number_to_string(sig_no, &temp)) return -1;
     strncat(info, temp, sizeof(info) - strlen(info) - 1);
-    //COMBACK: Look into error return value
-    log_event(SIGNAL_RECV, info);
+    if (log_event(SIGNAL_RECV, info)) return -1;
+    return 0;
 }
 
-void log_signal_sent(int signo, pid_t target) {
+void log_signal_sent(int sig_no, pid_t target) {
     const char *sep = " : ";
     char info[BUFSIZ] = {0};
 
     const char *sig_name;
     //COMBACK: Look into error return value
-    convert_signal_number_to_string(signo, &sig_name);
+    convert_signal_number_to_string(sig_no, &sig_name);
     strncat(info, sig_name, sizeof(info) - strlen(info) - 1);
     strncat(info, sep, sizeof(info) - strlen(info) - 1);
 
@@ -134,9 +124,10 @@ void log_current_status(const char *path, int number_of_files, int number_of_mod
         perror("WRITE: ");
 }
 
-void log_event(event_t event, char *info) {
+int log_event(event_t event, char *info) {
     // COMBACK: Verify nullptr
-    int fd = openLogFile(false);
+    if (in)
+        int fd = openLogFile(false);
     if (fd == -1) return;
     static const char *events[] = {"PROC_CREAT", "PROC_EXIT", "SIGNAL_RECV",
                                    "SIGNAL_SENT", "FILE_MODF"};
@@ -161,10 +152,7 @@ void log_event(event_t event, char *info) {
     strncat(dest, info, sizeof(dest) - strlen(dest) - 1);
     strncat(dest, "\n", sizeof(dest) - strlen(dest) - 1);
 
-    //COMBACK: Look into error return value
-    write(fd, dest, strlen(dest));
-    //COMBACK: Look into error return value
-    fsync(fd);
-    //COMBACK: Look into error return value
-    closeLogFile(fd);
+    if (write(fd, dest, strlen(dest)) == -1) return -1;
+    if (fsync(fd) == -1) return -1;
+    if (closeLogFile(fd)) return -1;
 }

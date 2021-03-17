@@ -1,10 +1,9 @@
-//COMBACK: Explain header usages
 #ifndef PROJECT_INCLUDE_UTILS_H_
 #define PROJECT_INCLUDE_UTILS_H_
 
-#include <stdbool.h>
-#include <sys/types.h>
-#include <sys/stat.h>
+#include <stdbool.h> // bool
+#include <sys/types.h> // mode_t
+#include <sys/stat.h> // struct stat, S_IRWXO, S_IRWXG, S_IRWXU
 
 #define PERMISSIONS_OTHERS S_IRWXO
 #define PERMISSIONS_GROUP S_IRWXG
@@ -38,13 +37,13 @@ int openFile(const char *path, struct stat *buf);
 
 int concatenateFolderFilenamePath(const char *folder_path, const char *file_name, char *dest);
 
-mode_t removePermissions(mode_t old_mode, mode_t new_mode);
+mode_t modeRemovingPermissions(mode_t old_mode, mode_t new_mode);
 
-mode_t addPermissions(mode_t old_mode, mode_t new_mode);
+mode_t modeAddingPermissions(mode_t old_mode, mode_t new_mode);
 
-mode_t setPartialPermissions(mode_t old_mode, mode_t new_mode);
+mode_t modeSettingPartialPermissions(mode_t old_mode, mode_t new_mode);
 
 int convert_integer_to_string(int n, char *dest, unsigned int size);
 
-void convert_signal_number_to_string(int sig_no, const char **dest);
+int convert_signal_number_to_string(int sig_no, const char **dest);
 #endif // PROJECT_INCLUDE_UTILS_H_

@@ -1,8 +1,5 @@
-//COMBACK: Explain header usages
 #ifndef PROJECT_INCLUDE_SIGNALS_H_
 #define PROJECT_INCLUDE_SIGNALS_H_
-
-#include <stdbool.h>
 
 void parent_sigint_handler(int signo);
 

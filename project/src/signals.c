@@ -1,17 +1,10 @@
 //COMBACK: Explain header usages
 #include "../include/signals.h"
-#include <signal.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <ctype.h>
-#include <sys/wait.h>
-#include <log.h>
-#include <sys/resource.h>
-#include <unistd.h>
-#include <string.h>
-#include "../include/time_ctrl.h"
-#include "../include/utils.h"
-#include "../include/log.h"
+#include <signal.h> // signal(), raise(), SIG_DFL, killpg()
+#include <unistd.h> // usleep(), read(), write(), fsync(),
+#include <string.h> // strlen()
+#include "../include/utils.h" // is_parent_process(), leave()
+#include "../include/log.h" // log_signal_received(), log_current_status(), log_signal_sent()
 
 const char *path;
 extern int number_of_files, number_of_modified_files;

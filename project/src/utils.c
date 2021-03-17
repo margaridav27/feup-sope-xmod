@@ -1,12 +1,17 @@
-//COMBACK: Explain header usages
 #include "../include/utils.h"
-#include <unistd.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <sys/wait.h>
-#include <limits.h>
-#include <string.h>
-#include "../include/log.h"
+#include <unistd.h> // getpid(), getpgrp(), _exit()
+#include <stdio.h> // perror(), snprintf()
+#include <sys/stat.h> // stat()
+#include <sys/wait.h> // wait()
+#include <limits.h> // PATH_MAX
+#include <stdbool.h> // bool
+// #include <string.h>
+//  SIGHUP, SIGINT, SIGQUIT, SIGILL, SIGTRAP, SIGABRT, SIGFPE, SIGKILL, SIGUSR1 , SIGSEGV, SIGUSR2 , SIGPIPE, SIGALRM,
+//  SIGTERM, SIGCHLD , SIGCONT , SIGSTOP , SIGTSTP , SIGTTIN , SIGTTOU , SIGURG , SIGXCPU , SIGXFSZ , SIGVTALRM,
+//  SIGPROF , SIGWINCH , SIGPOLL
+#include <signal.h>
+#include "../include/log.h" // log_process_exit()
+
 
 bool isParentProcess(void) {
     //COMBACK: Look into error return value
@@ -21,15 +26,15 @@ void leave(int ret) {
     _exit(ret); // Exit, closing all active file descriptors
 }
 
-mode_t removePermissions(mode_t old_mode, mode_t new_mode) {
+mode_t modeRemovingPermissions(mode_t old_mode, mode_t new_mode) {
     return old_mode & ~(new_mode); // Remove the relevant bits, keeping others
 }
 
-mode_t addPermissions(mode_t old_mode, mode_t new_mode) {
+mode_t modeAddingPermissions(mode_t old_mode, mode_t new_mode) {
     return old_mode | new_mode; // Add the relevant bits
 }
 
-mode_t setPartialPermissions(mode_t old_mode, mode_t new_mode) {
+mode_t modeSettingPartialPermissions(mode_t old_mode, mode_t new_mode) {
     // Remove the existing permissions for this user, keeping other users intact
     if (new_mode & PERMISSIONS_OTHERS) {
         old_mode &= (~PERMISSIONS_OTHERS);
@@ -70,7 +75,7 @@ int convert_integer_to_string(int n, char *dest, unsigned int size) {
     return 0;
 }
 
-void convert_signal_number_to_string(int sig_no, const char **dest) {
+int convert_signal_number_to_string(int sig_no, const char **dest) {
     //COMBACK: Verify nullptr
     const char *name;
     // COMBACK: Explain why this isn't an array.

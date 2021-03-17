@@ -1,15 +1,13 @@
-//COMBACK: Explain header usages
 #include "../include/time_ctrl.h"
 
-#include <errno.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <time.h>
-#include <unistd.h>
+#include <errno.h> // COMBACK
+#include <stdio.h> // BUFSIZ
+#include <string.h> // strlen()
+#include <sys/stat.h> // stat()
+#include <time.h> // clock_gettime()
+#include <unistd.h> // getpgrp()
 
-#include "../include/utils.h"
+#include "../include/utils.h" // convert_integer_to_string()
 
 int getStartTime(struct timespec *dest) {
     //COMBACK: Verify nullptr
@@ -28,7 +26,7 @@ int getStartTime(struct timespec *dest) {
     return 0;
 }
 
-int getMillisecondsElapsed() {
+int getMillisecondsElapsed(void) {
     struct timespec now, then;
     //COMBACK: Look into error return value
     if (getStartTime(&then)) return -1;
