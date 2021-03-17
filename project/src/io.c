@@ -31,7 +31,7 @@ int printFailedMessage(const char *path, mode_t new_mode) {
     char info[BUFSIZ] = {0};
     //COMBACK: Look into error return value
     parseModeToString(new_mode, new_mode_str);
-    snprintf(info, sizeof(info) - strlen(info) - 2, "failed to change mode of '%s' changed to %#o (%s)\n", path,
+    snprintf(info, sizeof(info) - strlen(info) - 1, "failed to change mode of '%s' changed to %#o (%s)\n", path,
              new_mode, new_mode_str);
     //COMBACK: Look into error return value
     write(STDOUT_FILENO, info, strlen(info)); //COMBACK
@@ -55,9 +55,9 @@ int parseModeToString(mode_t mode, char *str) {
 //COMBACK: Will we be using this?
 int printNoPermissionMessage(const char *path) {
     char info[BUFSIZ] = {0};
-    strncat(info, "xmod: changing permissions of '", sizeof(info) - strlen(info) - 2);
+    strncat(info, "xmod: changing permissions of '", sizeof(info) - strlen(info) - 1);
     strncat(info, path, sizeof(info) - strlen(info) - 1);
-    strncat(info, "': Operation not permitted\n", sizeof(info) - strlen(info) - 2);
+    strncat(info, "': Operation not permitted\n", sizeof(info) - strlen(info) - 1);
     //COMBACK: Look into error return value
     write(STDERR_FILENO, info, strlen(info)); //COMBACK
     return 0;

@@ -12,11 +12,9 @@
 
 int getStartTime(struct timespec *dest) {
     if (dest == NULL) return -1;
-    //COMBACK: Decide on buffer size
     char path[BUFSIZ] = "/proc/";
-    //COMBACK: Decide on buffer size
     //COMBACK: Look into error return value
-    convert_integer_to_string(getpgrp(), path + strlen(path), sizeof(path) - strlen(path) - 1);
+    convert_integer_to_string(getpgrp(), path + strlen(path), sizeof(path) - strlen(path));
     //COMBACK: Look into error return value
     int ret;
     struct stat buf;

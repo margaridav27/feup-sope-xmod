@@ -133,7 +133,7 @@ int changeMode(const command_t *command) {
 int main(int argc, char *argv[]) {
     //COMBACK: Look into error return value
     //COMBACK: Is this still necessary?
-    getStartTime(NULL);
+    //getStartTime(NULL);
     //COMBACK: Find a better way to structure this
     //COMBACK: Look into error return value
     int fd = openLogFile(isParentProcess());

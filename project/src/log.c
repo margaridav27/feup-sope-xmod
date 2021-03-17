@@ -64,8 +64,8 @@ int logProcessCreation(char **argv, int argc) {
     char info[BUFSIZ] = {0};
     strncat(info, argv[0], sizeof(info) - 1);
     for (int i = 1; i < argc; ++i) {
-        strncat(info, " ", sizeof(info) - strlen(info) - 2);
-        strncat(info, argv[i], sizeof(info) - strlen(info) - 2);
+        strncat(info, " ", sizeof(info) - strlen(info) - 1);
+        strncat(info, argv[i], sizeof(info) - strlen(info) - 1);
     }
     //COMBACK: Look into error return value
     log_event(PROC_CREAT, info);
@@ -74,8 +74,6 @@ int logProcessCreation(char **argv, int argc) {
 
 int logProcessExit(int ret) {
     char info[BUFSIZ] = {0};
-    //COMBACK: Decide on buffer size
-
     //COMBACK: Look into error return value
     convert_integer_to_string(ret, info, sizeof(info));
     //COMBACK: Look into error return value
@@ -95,8 +93,7 @@ void log_signal_received(int signo) {
 
 void log_signal_sent(int signo, pid_t target) {
     const char *sep = " : ";
-    //COMBACK: Decide on buffer size
-    char info[1024] = {0};
+    char info[BUFSIZ] = {0};
 
     const char *sig_name;
     //COMBACK: Look into error return value
@@ -105,7 +102,7 @@ void log_signal_sent(int signo, pid_t target) {
     strncat(info, sep, sizeof(info) - strlen(info) - 1);
 
     //COMBACK: Look into error return value
-    convert_integer_to_string(target, info + strlen(info), sizeof(info) - strlen(info) - 1);
+    convert_integer_to_string(target, info + strlen(info), sizeof(info) - strlen(info));
     //COMBACK: Look into error return value
     log_event(SIGNAL_SENT, info);
 }
@@ -115,18 +112,18 @@ void log_current_status(const char *path, int number_of_files, int number_of_mod
     char dest[BUFSIZ] = {0};
 
     pid_t pid = getpid();
-    convert_integer_to_string(pid, dest, sizeof(dest) - strlen(dest) + 1);
-    strncat(dest, sep, sizeof(dest) - strlen(dest) - 2);
+    convert_integer_to_string(pid, dest, sizeof(dest));
+    strncat(dest, sep, sizeof(dest) - strlen(dest) - 1);
 
-    strncat(dest, path, sizeof(dest) - strlen(dest) - 2);
-    strncat(dest, sep, sizeof(dest) - strlen(dest) - 2);
+    strncat(dest, path, sizeof(dest) - strlen(dest) - 1);
+    strncat(dest, sep, sizeof(dest) - strlen(dest) - 1);
 
-    convert_integer_to_string(number_of_files, dest + strlen(dest), sizeof(dest) - strlen(dest) + 1);
-    strncat(dest, sep, sizeof(dest) - strlen(dest) - 2);
+    convert_integer_to_string(number_of_files, dest + strlen(dest), sizeof(dest) - strlen(dest));
+    strncat(dest, sep, sizeof(dest) - strlen(dest) - 1);
 
-    convert_integer_to_string(number_of_modified_files, dest + strlen(dest), sizeof(dest) - strlen(dest) + 1);
+    convert_integer_to_string(number_of_modified_files, dest + strlen(dest), sizeof(dest) - strlen(dest));
 
-    strncat(dest, "\n", sizeof(dest) - strlen(dest) - 2);
+    strncat(dest, "\n", sizeof(dest) - strlen(dest) - 1);
 
     //COMBACK: Look into error return value
     if (write(STDOUT_FILENO, dest, strlen(dest)) == -1)
@@ -142,23 +139,22 @@ void log_event(event_t event, char *info) {
     const char *sep = " ; ";
 
     char dest[BUFSIZ] = {0}; // Destination buffer
-    //COMBACK: Decide on buffer size
 
     //COMBACK: Look into error return value
     int instant = getMillisecondsElapsed();
     //COMBACK: Look into error return value
-    convert_integer_to_string(instant, dest, sizeof(dest) - 1);
-    strncat(dest, sep, sizeof(dest) - strlen(dest) - 2);
+    convert_integer_to_string(instant, dest, sizeof(dest));
+    strncat(dest, sep, sizeof(dest) - strlen(dest) - 1);
 
     //COMBACK: Look into error return value
-    convert_integer_to_string(getpid(), dest + strlen(dest), sizeof(dest) - strlen(dest) - 1); //COMBACK
-    strncat(dest, sep, sizeof(dest) - strlen(dest) - 2);
+    convert_integer_to_string(getpid(), dest + strlen(dest), sizeof(dest) - strlen(dest));
+    strncat(dest, sep, sizeof(dest) - strlen(dest) - 1);
 
-    strncat(dest, action, sizeof(dest) - strlen(dest) - 2);
-    strncat(dest, sep, sizeof(dest) - strlen(dest) - 2);
+    strncat(dest, action, sizeof(dest) - strlen(dest) - 1);
+    strncat(dest, sep, sizeof(dest) - strlen(dest) - 1);
 
-    strncat(dest, info, sizeof(dest) - strlen(dest) - 2);
-    strncat(dest, "\n", sizeof(dest) - strlen(dest) - 2);
+    strncat(dest, info, sizeof(dest) - strlen(dest) - 1);
+    strncat(dest, "\n", sizeof(dest) - strlen(dest) - 1);
 
     //COMBACK: Look into error return value
     write(fd, dest, strlen(dest));
