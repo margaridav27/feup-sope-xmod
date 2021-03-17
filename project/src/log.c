@@ -137,11 +137,20 @@ int logEvent(event_t event, char *info) {
     char dest[BUFSIZ] = {0}; // Destination buffer
 
     int instant = getMillisecondsElapsed();
-    if (instant == -1) return -1;
-    if (convertIntegerToString(instant, dest, sizeof(dest)) == -1) return -1;
+    if (instant == -1) {
+        closeLogFile(fd);
+        return -1;
+    }
+    if (convertIntegerToString(instant, dest, sizeof(dest)) == -1) {
+        closeLogFile(fd);
+        return -1;
+    }
     strncat(dest, sep, sizeof(dest) - strlen(dest) - 1);
 
-    if (convertIntegerToString(getpid(), dest + strlen(dest), sizeof(dest) - strlen(dest)) == -1) return -1;
+    if (convertIntegerToString(getpid(), dest + strlen(dest), sizeof(dest) - strlen(dest)) == -1) {
+        closeLogFile(fd);
+        return -1;
+    }
     strncat(dest, sep, sizeof(dest) - strlen(dest) - 1);
 
     strncat(dest, action, sizeof(dest) - strlen(dest) - 1);
@@ -150,8 +159,16 @@ int logEvent(event_t event, char *info) {
     strncat(dest, info, sizeof(dest) - strlen(dest) - 1);
     strncat(dest, "\n", sizeof(dest) - strlen(dest) - 1);
 
-    if (write(fd, dest, strlen(dest)) == -1) return -1;
-    if (fsync(fd) == -1) return -1;
+    if (write(fd, dest, strlen(dest)) == -1) {
+        closeLogFile(fd);
+        return -1;
+    }
+
+    if (fsync(fd) == -1) {
+        closeLogFile(fd);
+        return -1;
+    }
+
     if (closeLogFile(fd)) return -1;
     return 0;
 }
