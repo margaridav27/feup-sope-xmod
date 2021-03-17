@@ -5,6 +5,10 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#define PERMISSIONS_OTHERS S_IRWXO
+#define PERMISSIONS_GROUP S_IRWXG
+#define PERMISSIONS_USER S_IRWXU
+
 typedef enum {
     ACTION_REMOVE = '-',
     ACTION_ADD = '+',
@@ -41,5 +45,5 @@ mode_t setPartialPermissions(mode_t old_mode, mode_t new_mode);
 
 void convert_integer_to_string(int n, char *dest);
 
-void convert_signal_number_to_string(int signo, char *dest);
+void convert_signal_number_to_string(int sig_no, const char **dest);
 #endif // PROJECT_INCLUDE_UTILS_H_

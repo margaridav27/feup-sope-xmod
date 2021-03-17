@@ -2,12 +2,14 @@
 #define PROJECT_INCLUDE_XMOD_H_
 
 #include <sys/types.h>
+#include <sys/stat.h>
 #include "../include/parse.h"
+
+#define UNRELATED_BITS S_IFMT
 
 int createNewProcess(const command_t *command, char *new_path);
 
-
-int changeFileMode(const command_t *command, struct stat *buf, bool isLink);
+int changeFileMode(const command_t *command, struct stat *buf);
 
 int changeFolderMode(const command_t *command);
 

@@ -8,12 +8,15 @@
 #include "../include/log.h"
 
 bool isParentProcess(void) {
+    //COMBACK: Look into error return value
     return getpid() == getpgrp(); // The group leader has the group id as its process id.
 }
 
 void leave(int ret) {
     while (wait(NULL) >= 0); // Wait for any remaining children
+    //COMBACK: Look into error return value
     logProcessExit(ret); // Record exit in logfile
+    //COMBACK: Look into error return value
     _exit(ret); // Exit, closing all active file descriptors
 }
 
@@ -27,12 +30,12 @@ mode_t addPermissions(mode_t old_mode, mode_t new_mode) {
 
 mode_t setPartialPermissions(mode_t old_mode, mode_t new_mode) {
     // Remove the existing permissions for this user, keeping other users intact
-    if (new_mode & S_IRWXO) {
-        old_mode &= (~S_IRWXO);
-    } else if (new_mode & S_IRWXG) {
-        old_mode &= (~S_IRWXG);
-    } else if (new_mode & S_IRWXU) {
-        old_mode &= (~S_IRWXU);
+    if (new_mode & PERMISSIONS_OTHERS) {
+        old_mode &= (~PERMISSIONS_OTHERS);
+    } else if (new_mode & PERMISSIONS_GROUP) {
+        old_mode &= (~PERMISSIONS_GROUP);
+    } else if (new_mode & PERMISSIONS_USER) {
+        old_mode &= (~PERMISSIONS_USER);
     }
     // Add the requested permissions for this user, keeping other users intact
     return old_mode | new_mode;
@@ -55,14 +58,18 @@ int concatenateFolderFilenamePath(const char *folder_path, const char *file_name
 }
 
 void convert_integer_to_string(int n, char *dest) {
+    // COMBACK: Maybe make this less LCOM-y?
     int temp = n, i = 0;
     while (temp /= 10) ++i; // Count number of digits.
     do { dest[i--] = (char) ('0' + n % 10); } while (n /= 10); // Convert digits to characters.
 }
 
-void convert_signal_number_to_string(int signo, char *dest) {
+void convert_signal_number_to_string(int sig_no, const char **dest) {
+    // COMBACK: Verify pointer safety
     const char *name;
-    switch (signo) {
+    // COMBACK: Explain why this isn't an array.
+    // COMBACK: Explain why we aren't using strsignal();
+    switch (sig_no) {
         case SIGHUP: name = "SIGHUP";
             break;
         case SIGINT: name = "SIGINT";
@@ -120,5 +127,5 @@ void convert_signal_number_to_string(int signo, char *dest) {
         default: name = "UNKNOWN";
             break;
     }
-    strncpy(dest, name, strlen(name));
+    *dest = name;
 }

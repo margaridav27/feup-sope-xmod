@@ -5,6 +5,8 @@
 ### Correction of small problems in original code are marked with '###' -- V.2
 # V.3 corrects a NOT SO SMALL problem: in the previous version, xmod run over the $DIR changed by chmod!
 #
+set -m
+export LOG_FILENAME=trace.txt
 LOGDIR="/tmp"
 PROGCH="chmod"
 
@@ -25,8 +27,8 @@ $PROGCH 755 $DIR
 # save initial permissions of $FILE $DIR (can be useful...)
 TESTN=0
 stat --printf="%A\t%n\n" $FILE > $LOGDIR/perm.`basename $FILE`.$TESTN
-find $DIR -exec stat --printf="%a\t%n\n" '{0}' \; 2> /dev/null | sort -k 2  > $LOGDIR/perm.`basename $DIR`.$TESTN
-# find $DIR -maxdepth 1 -exec stat --printf="%a\t%n\n" '{0}' \; 2> /dev/null | sort -k 2  > $LOGDIR/perm.`basename $DIR`.$TESTN
+find $DIR -exec stat --printf="%a\t%n\n" '{}' \; 2> /dev/null | sort -k 2  > $LOGDIR/perm.`basename $DIR`.$TESTN
+# find $DIR -maxdepth 1 -exec stat --printf="%a\t%n\n" '{}' \; 2> /dev/null | sort -k 2  > $LOGDIR/perm.`basename $DIR`.$TESTN
 
 # example of tests
 ARGS1="0757 $FILE"

@@ -8,25 +8,33 @@
 #include <time.h>
 #include <unistd.h>
 
-static bool start_time_available = false;
-static struct timespec startTime;
+#include "../include/utils.h"
 
-int getStartTime() {
+int getStartTime(struct timespec *dest) {
+    if (dest == NULL) return -1;
+    //COMBACK: Decide on buffer size
     char path[2048] = "/proc/";
-    int ret = snprintf(path + strlen(path), sizeof(path) - strlen(path), "%d", getpgid(0));
-    if (ret < 0) return 1;
+    //COMBACK: Decide on buffer size
+    char temp[32] = {0};
+    //COMBACK: Look into error return value
+    convert_integer_to_string(getpgrp(), temp);
+    //COMBACK: Look into error return value
+    strncat(path, temp, strlen(temp));
+    int ret;
     struct stat buf;
     errno = 0;
+    //COMBACK: Look into error return value
     ret = stat(path, &buf);
     if (ret == -1) return 1;
-    startTime = buf.st_atim;
-    start_time_available = true;
+    *dest = buf.st_atim;
     return 0;
 }
 
 int getMillisecondsElapsed() {
-    if (!start_time_available) return -1;
-    struct timespec now;
+    struct timespec now, then;
+    //COMBACK: Look into error return value
+    if (getStartTime(&then)) return -1;
+    //COMBACK: Look into error return value
     clock_gettime(CLOCK_REALTIME, &now);
-    return (now.tv_sec - startTime.tv_sec) * 1e3 + (now.tv_nsec - startTime.tv_nsec) * 1e-6;
+    return (now.tv_sec - then.tv_sec) * 1e3 + (now.tv_nsec - then.tv_nsec) * 1e-6;
 }
