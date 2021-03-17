@@ -35,7 +35,7 @@ void leave(int ret);
 
 int openFile(const char *path, struct stat *buf);
 
-int concatenateFolderFilenamePath(const char *folder_path, const char *file_name, char *dest);
+int concatenateFolderFilenamePath(const char *folder_path, const char *file_name, char *dest, unsigned int size);
 
 mode_t modeRemovingPermissions(mode_t old_mode, mode_t new_mode);
 

@@ -10,19 +10,17 @@
 //  SIGTERM, SIGCHLD , SIGCONT , SIGSTOP , SIGTSTP , SIGTTIN , SIGTTOU , SIGURG , SIGXCPU , SIGXFSZ , SIGVTALRM,
 //  SIGPROF , SIGWINCH , SIGPOLL
 #include <signal.h>
+#include <string.h> // strlen()
 #include "../include/log.h" // log_process_exit()
 
 
 bool isParentProcess(void) {
-    //COMBACK: Look into error return value
     return getpid() == getpgrp(); // The group leader has the group id as its process id.
 }
 
 void leave(int ret) {
     while (wait(NULL) >= 0); // Wait for any remaining children
-    //COMBACK: Look into error return value
     logProcessExit(ret); // Record exit in logfile
-    //COMBACK: Look into error return value
     _exit(ret); // Exit, closing all active file descriptors
 }
 
@@ -48,8 +46,7 @@ mode_t modeSettingPartialPermissions(mode_t old_mode, mode_t new_mode) {
 }
 
 int openFile(const char *path, struct stat *buf) {
-    //COMBACK: Verify nullptr
-    if (path == NULL || buf == NULL) return 1;
+    if (path == NULL || buf == NULL) return -1;
     // Try to open the file.
     if (stat(path, buf) == -1) {
         perror("xmod : failed to open file");
@@ -58,25 +55,28 @@ int openFile(const char *path, struct stat *buf) {
     return 0;
 }
 
-int concatenateFolderFilenamePath(const char *folder_path, const char *file_name, char *dest) {
-    //COMBACK: Verify nullptr
+int concatenateFolderFilenamePath(const char *folder_path, const char *file_name, char *dest, unsigned int size) {
     if (folder_path == NULL || file_name == NULL || dest == NULL) return -1;
-    snprintf(dest, PATH_MAX, "%s/%s", folder_path, file_name);
+    if (size < strlen(folder_path) + strlen(file_name) + 1) return -1;
+    if (folder_path == NULL || file_name == NULL || dest == NULL) return -1;
+    int n = snprintf(dest, size, "%s/%s", folder_path, file_name);
+    if (n < 0 || n >= (int) size) return -1;
     return 0;
 }
 
 int convert_integer_to_string(int n, char *dest, unsigned int size) {
-    //COMBACK: Verify nullptr
+    if (dest == NULL) return -1;
     // COMBACK: Maybe make this less LCOM-y?
-    int temp = n, i = 0;
+    int temp = n;
+    unsigned i = 0;
     while (temp /= 10) ++i; // Count number of digits.
-    if (i > size - 1) return 1;
+    if (i > size - 1) return -1;
     do { dest[i--] = (char) ('0' + n % 10); } while (n /= 10); // Convert digits to characters.
     return 0;
 }
 
 int convert_signal_number_to_string(int sig_no, const char **dest) {
-    //COMBACK: Verify nullptr
+    if (dest == NULL) return -1;
     const char *name;
     // COMBACK: Explain why this isn't an array.
     // COMBACK: Explain why we aren't using strsignal();
@@ -139,4 +139,5 @@ int convert_signal_number_to_string(int sig_no, const char **dest) {
             break;
     }
     *dest = name;
+    return 0;
 }

@@ -44,7 +44,6 @@ int changeFileMode(const command_t *command, struct stat *buf) {
     } else {
         return 1;
     }
-    //COMBACK: Look into error return value
     if (chmod(command->path, new_mode) == -1) {
         perror("xmod: failed to change permissions");
         return -1;
@@ -68,8 +67,7 @@ int changeFolderMode(const command_t *command) {
         if (strcmp(d->d_name, ".") == 0 || strcmp(d->d_name, "..") == 0) continue;
         char new_path[PATH_MAX] = {0};
         command_t new_command = *command;
-        //COMBACK: Look into error return value
-        if (concatenateFolderFilenamePath(command->path, d->d_name, new_path)) continue;
+        if (concatenateFolderFilenamePath(command->path, d->d_name, new_path, sizeof(new_path))) continue;
         new_command.path = new_path;
 
         struct stat buf;
@@ -80,8 +78,9 @@ int changeFolderMode(const command_t *command) {
                 perror("xmod: fork");
                 continue;
             } else if (pid == 0) {
-                //COMBACK: Look into error return value
-                createNewProcess(command, new_path);
+                //COMBACK: Print error message
+                if (createNewProcess(command, new_path)) {}
+                _exit(1);
             } else {
                 continue;
             }
@@ -124,9 +123,9 @@ int main(int argc, char *argv[]) {
     command_t result;
     if (parseCommand(argc, argv, &result)) leave(-1);
     // COMBACK: Print error message
-    if (logProcessCreation(argv, argc));
+    if (logProcessCreation(argv, argc)) {}
     // COMBACK: Print error message
-    if (setUpSignals(result.path));
+    if (setUpSignals(result.path)) {}
     if (changeMode(&result)) leave(-1);
     leave(0);
 }

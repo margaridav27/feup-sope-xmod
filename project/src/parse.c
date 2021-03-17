@@ -1,6 +1,6 @@
 #include "../include/parse.h"
 
-// #include <errno.h> // ernno // COMBACK
+// #include <errno.h> // ernno
 #include <stdio.h> // fprintf()
 #include <stdlib.h> // strtol()
 #include <string.h> // memset(), strlen()
@@ -9,8 +9,7 @@
 
 
 int parseCommand(int argc, char *argv[], command_t *result) {
-    // COMBACK: Verify nullptr
-    //COMBACK: Look into error return value
+    if (argv == NULL || result == NULL) return -1;
     memset(result, 0, sizeof(command_t)); // Clear all information
 
     // COMBACK: Passing everything might be overkill
@@ -19,24 +18,17 @@ int parseCommand(int argc, char *argv[], command_t *result) {
 
     // Parse command line arguments for options
     int opt;
-    //COMBACK: Look into error return value
     while ((opt = getopt(argc, argv, "vcR")) != -1) {
-        if (opt == 'v') {
-            result->verbose = true;
-        } else if (opt == 'c') {
-            result->changes = true;
-        } else if (opt == 'R') {
-            result->recursive = true;
-        } else {
-            return 1;
-        }
+        if (opt == 'v') result->verbose = true;
+        else if (opt == 'c') result->changes = true;
+        else if (opt == 'R') result->recursive = true;
+        else return 1;
     }
 
     // Incorrect number of arguments after flags: command is invalid
     if (argc - optind != 2) {
-        //COMBACK: Look into error return value
         fprintf(stderr, "xmod: missing operand\n");
-        return 1;
+        return -1;
     }
 
     // After processing options, this is the first argument
@@ -48,7 +40,6 @@ int parseCommand(int argc, char *argv[], command_t *result) {
     const char *string_end = mode_string + strlen(mode_string);
     // Last character parsed
     char *process_end;
-    //COMBACK: Look into error return value
     int64_t mode = strtol(mode_string, &process_end, 8);
 
     if (process_end == string_end) {
@@ -61,9 +52,8 @@ int parseCommand(int argc, char *argv[], command_t *result) {
         if (change == '-' || change == '+' || change == '=') {
             result->action = change;
         } else {
-            //COMBACK: Look into error return value
             fprintf(stderr, "xmod: invalid mode: '%s'\n", mode_string);
-            return 1;
+            return -1;
         }
 
         const char *permissions_string = mode_string + 2;
@@ -75,9 +65,8 @@ int parseCommand(int argc, char *argv[], command_t *result) {
             } else if (permissions_string[i] == 'x') {
                 mode |= EXECUTE_BIT;
             } else {
-                //COMBACK: Look into error return value
                 fprintf(stderr, "xmod: invalid mode: '%s'\n", mode_string);
-                return 1;
+                return -1;
             }
         }
 
@@ -90,9 +79,8 @@ int parseCommand(int argc, char *argv[], command_t *result) {
             mode |= (mode << USER_POSITION) | (mode << GROUP_POSITION);
             if (result->action == ACTION_PARTIAL_SET) result->action = ACTION_SET;
         } else if (user != 'o') {
-            //COMBACK: Look into error return value
             fprintf(stderr, "xmod: invalid mode: '%s'\n", mode_string);
-            return 1;
+            return -1;
         }
     }
     result->mode = (mode_t) mode;
