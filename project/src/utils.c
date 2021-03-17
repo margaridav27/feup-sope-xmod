@@ -21,7 +21,6 @@ bool isParentProcess(void) {
 void leave(int ret) {
     while (wait(NULL) >= 0); // Wait for any remaining children
     logProcessExit(ret); // Record exit in logfile
-    printf("é suposto tar no fim\n");
     _exit(ret); // Exit, closing all active file descriptors
 }
 
