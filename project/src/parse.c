@@ -41,7 +41,7 @@ int parseCommand(int argc, char *argv[], command_t *result) {
     const char *string_end = mode_string + strlen(mode_string);
     // Last character parsed
     char *process_end;
-    long int mode = strtol(mode_string, &process_end, 8);
+    int64_t mode = strtol(mode_string, &process_end, 8);
 
     if (process_end == string_end) {
         // Processed the whole string successfully

@@ -20,9 +20,11 @@ const int *const no_modified_files = &number_of_modified_files;
 void generic_signal_handler(int signo) {
     log_signal_received(signo);
 
-    if (signo == SIGINT) isParentProcess() ? parent_sigint_handler(signo) : child_sigint_handler(signo);
-    else if (signo == SIGTERM && !isParentProcess()) leave(1);
-    else {
+    if (signo == SIGINT) {
+        isParentProcess() ? parent_sigint_handler(signo) : child_sigint_handler(signo);
+    } else if (signo == SIGTERM && !isParentProcess()) {
+        leave(1);
+    } else {
         // Repeat the requested action
         signal(signo, SIG_DFL);
         raise(signo);
