@@ -88,8 +88,9 @@ int printMessage(mode_t new_mode, mode_t old_mode, const command_t *command, boo
     if (command->verbose) { // Print all information
         if (new_mode == old_mode) {
             if (isLink){ 
-                if (printSymbolicMessage(command->path, info, sizeof(info) - strlen(info) - 1)) return -1;}
-            else if (printRetainMessage(command->path, old_mode, info, sizeof(info) - strlen(info) - 1)) return -1;
+                if (printSymbolicMessage(command->path, info, sizeof(info) - strlen(info) - 1)) 
+                return -1;
+            } else if (printRetainMessage(command->path, old_mode, info, sizeof(info) - strlen(info) - 1)){ return -1;}
         } else if (printChangeMessage(command->path, old_mode, new_mode, info, sizeof(info) - strlen(info) - 1)) {
             return -1;
         }
