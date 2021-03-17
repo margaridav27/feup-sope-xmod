@@ -67,7 +67,7 @@ int changeFolderMode(const command_t *command) {
     struct dirent *d;
     // bool terminate = false;
     while ((d = readdir(dir)) != NULL) {
-        sleep(1);
+        // sleep(1);
         // if ((terminate = checkTerminateSignal())) break;
         if (strcmp(d->d_name, ".") == 0 || strcmp(d->d_name, "..") == 0) continue;
         char new_path[PATH_MAX];

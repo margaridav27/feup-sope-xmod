@@ -9,7 +9,7 @@ int printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode, 
     char new_mode_str[] = "---------", previous_mode_str[] = "---------";
     parseModeToString(new_mode, new_mode_str);
     parseModeToString(previous_mode, previous_mode_str);
-    snprintf(info, size - strlen(info), "mode of '%s' changed from %#o (%s) to %#o (%s)\n", path,
+    snprintf(info, size, "mode of '%s' changed from %#o (%s) to %#o (%s)\n", path,
              previous_mode, previous_mode_str, new_mode,
              new_mode_str);
     return 0;
@@ -29,7 +29,7 @@ int printFailedMessage(const char *path, mode_t new_mode) {
     parseModeToString(new_mode, new_mode_str);
     snprintf(info, sizeof(info) - strlen(info) - 1, "failed to change mode of '%s' changed to %#o (%s)\n", path,
              new_mode, new_mode_str);
-    write(STDOUT_FILENO, info, sizeof(info));
+    write(STDOUT_FILENO, info, strlen(info));
     return 0;
 }
 
@@ -53,14 +53,14 @@ int printNoPermissionMessage(const char *path) {
     strncat(info, "xmod: changing permissions of '", sizeof(info) - strlen(info) - 1);
     strncat(info, path, sizeof(info) - strlen(info) - 1);
     strncat(info, "': Operation not permitted\n", sizeof(info) - strlen(info) - 1);
-    write(STDERR_FILENO, info, sizeof(info));
+    write(STDERR_FILENO, info, strlen(info));
     return 0;
 }
 
 int printSymbolicMessage(const char *path, char *info, int size) {
-    strncat(info, "neither symbolic link '", sizeof(info) - strlen(info) - 1);
-    strncat(info, path, strlen(path));
-    strncat(info, "' nor referent has been changed\n", size - strlen(info));
+    strncat(info, "neither symbolic link '", size);
+    strncat(info, path, size);
+    strncat(info, "' nor referent has been changed\n", size);
     return 0;
 }
 
@@ -85,6 +85,6 @@ int printMessage(mode_t new_mode, mode_t old_mode, const command_t *command, boo
     } else if (command->changes && new_mode != old_mode) {
         printChangeMessage(command->path, old_mode, new_mode, info, sizeof(info));
     }
-    write(STDOUT_FILENO, info, sizeof(info));
+    write(STDOUT_FILENO, info, strlen(info));
     return 0;
 }
