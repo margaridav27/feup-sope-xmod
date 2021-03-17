@@ -25,8 +25,8 @@ $PROGCH 755 $DIR
 # save initial permissions of $FILE $DIR (can be useful...)
 TESTN=0
 stat --printf="%A\t%n\n" $FILE > $LOGDIR/perm.`basename $FILE`.$TESTN
-find $DIR -exec stat --printf="%a\t%n\n" '{}' \; 2> /dev/null | sort -k 2  > $LOGDIR/perm.`basename $DIR`.$TESTN
-# find $DIR -maxdepth 1 -exec stat --printf="%a\t%n\n" '{}' \; 2> /dev/null | sort -k 2  > $LOGDIR/perm.`basename $DIR`.$TESTN
+find $DIR -exec stat --printf="%a\t%n\n" '{0}' \; 2> /dev/null | sort -k 2  > $LOGDIR/perm.`basename $DIR`.$TESTN
+# find $DIR -maxdepth 1 -exec stat --printf="%a\t%n\n" '{0}' \; 2> /dev/null | sort -k 2  > $LOGDIR/perm.`basename $DIR`.$TESTN
 
 # example of tests
 ARGS1="0757 $FILE"

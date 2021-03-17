@@ -22,10 +22,10 @@ int printRetainMessage(const char *path, mode_t mode, char *info, int size) {
     return 0;
 }
 
-//COMBACK
+//COMBACK: Will we be using this?
 int printFailedMessage(const char *path, mode_t new_mode) {
     char new_mode_str[] = "---------";
-    char info[1024] = {};
+    char info[1024] = {0};
     parseModeToString(new_mode, new_mode_str);
     snprintf(info, sizeof(info) - strlen(info) - 1, "failed to change mode of '%s' changed to %#o (%s)\n", path,
              new_mode, new_mode_str);
@@ -49,7 +49,7 @@ int parseModeToString(mode_t mode, char *str) {
 
 //COMBACK
 int printNoPermissionMessage(const char *path) {
-    char info[1024] = {};
+    char info[1024] = {0};
     strncat(info, "xmod: changing permissions of '", sizeof(info) - strlen(info) - 1);
     strncat(info, path, sizeof(info) - strlen(info) - 1);
     strncat(info, "': Operation not permitted\n", sizeof(info) - strlen(info) - 1);
@@ -65,25 +65,21 @@ int printSymbolicMessage(const char *path, char *info, int size) {
 }
 
 mode_t clearExtraBits(mode_t mode) {
+    // Remove bits not related to permissions.
     return mode & ~(S_IFMT);
 }
 
 int printMessage(mode_t new_mode, mode_t old_mode, const command_t *command, bool isLink) {
-    char info[1024] = {};
-    if (!command->verbose && !command->changes) return 0;
+    char info[1024] = {0};
+    if (!command->verbose && !command->changes) return 0; // No need to log
     // Clear these bits for printing
     old_mode = clearExtraBits(old_mode);
     new_mode = clearExtraBits(new_mode);
-    if (command->verbose) {
-        if (new_mode == old_mode) {
-            if (isLink) {
-                printSymbolicMessage(command->path, info, sizeof(info));
-            } else {
-                printRetainMessage(command->path, old_mode, info, sizeof(info));
-            }
-        } else {
-            printChangeMessage(command->path, old_mode, new_mode, info, sizeof(info));
-        }
+    if (command->verbose) { // Print all information
+        if (new_mode == old_mode)
+            isLink ? printSymbolicMessage(command->path, info, sizeof(info)) :
+            printRetainMessage(command->path, old_mode, info, sizeof(info));
+        else printChangeMessage(command->path, old_mode, new_mode, info, sizeof(info));
     } else if (command->changes && new_mode != old_mode) {
         printChangeMessage(command->path, old_mode, new_mode, info, sizeof(info));
     }

@@ -22,7 +22,7 @@ pid_t children[99999];
 
 
 int createNewProcess(const command_t *command, char *new_path) {
-    static char *new_argv[_POSIX_ARG_MAX] = {};
+    static char *new_argv[_POSIX_ARG_MAX] = {0};
     for (int i = 0; i < command->argc; ++i) new_argv[i] = command->argv[i];
     new_argv[command->argc - 1] = new_path;
     if (execv(new_argv[0], new_argv)) {

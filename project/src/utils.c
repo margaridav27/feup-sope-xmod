@@ -40,6 +40,7 @@ mode_t setPartialPermissions(mode_t old_mode, mode_t new_mode) {
 
 int openFile(const char *path, struct stat *buf) {
     if (path == NULL || buf == NULL) return 1;
+    // Try to open the file.
     if (stat(path, buf) == -1) {
         perror("xmod : failed to open file");
         return -1;
@@ -55,10 +56,8 @@ int concatenateFolderFilenamePath(const char *folder_path, const char *file_name
 
 void convert_integer_to_string(int n, char *dest) {
     int temp = n, i = 0;
-    while (temp /= 10) ++i;
-    do {
-        dest[i--] = (char) ('0' + n % 10);
-    } while (n /= 10);
+    while (temp /= 10) ++i; // Count number of digits.
+    do { dest[i--] = (char) ('0' + n % 10); } while (n /= 10); // Convert digits to characters.
 }
 
 void convert_signal_number_to_string(int signo, char *dest) {

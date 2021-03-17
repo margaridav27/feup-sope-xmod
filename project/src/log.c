@@ -48,7 +48,7 @@ int closeLogFile(int fd) {
 }
 
 int logChangePermission(const command_t *command, mode_t old_mode, mode_t new_mode, bool isLink) {
-    char info[2048] = {};
+    char info[2048] = {0};
     snprintf(info, sizeof(info), "%s : %o : %o", command->path, old_mode, new_mode);
     if (new_mode != old_mode) log_event(FILE_MODF, info);
     //COMBACK: Properly print this message
@@ -57,7 +57,7 @@ int logChangePermission(const command_t *command, mode_t old_mode, mode_t new_mo
 }
 
 int logProcessCreation(char **argv, int argc) {
-    char info[2048] = {};
+    char info[2048] = {0};
 
     strncat(info, argv[0],strlen(argv[0]));
     for (int i = 1; i < argc; ++i) {
@@ -70,8 +70,8 @@ int logProcessCreation(char **argv, int argc) {
 }
 
 int logProcessExit(int ret) {
-    char info[1024] = {};
-    char temp[32] = {}; // Temporary buffer for conversion
+    char info[1024] = {0};
+    char temp[32] = {0}; // Temporary buffer for conversion
 
     convert_integer_to_string(ret, temp);
     strncat(info, temp, strlen(temp) + 1);
@@ -81,8 +81,8 @@ int logProcessExit(int ret) {
 }
 
 void log_signal_received(int signo) {
-    char info[1024] = {};
-    char temp[32] = {}; // Temporary buffer for conversion
+    char info[1024] = {0};
+    char temp[32] = {0}; // Temporary buffer for conversion
     convert_signal_number_to_string(signo, temp);
     strncat(info, temp, strlen(temp) + 1);
     log_event(SIGNAL_RECV, info);
@@ -90,8 +90,8 @@ void log_signal_received(int signo) {
 
 void log_signal_sent(int signo, pid_t target) {
     const char *sep = " : ";
-    char info[1024] = {};
-    char temp[32] = {}; // Temporary buffer for conversions
+    char info[1024] = {0};
+    char temp[32] = {0}; // Temporary buffer for conversions
 
     memset(temp, 0, sizeof(temp));
     convert_signal_number_to_string(signo, temp);
@@ -106,8 +106,8 @@ void log_signal_sent(int signo, pid_t target) {
 
 void log_current_status(const char *path, int number_of_files, int number_of_modified_files) {
     const char *sep = " ; ";
-    char dest[2048] = {};
-    char temp[32] = {};
+    char dest[2048] = {0};
+    char temp[32] = {0};
 
     pid_t pid = getpid();
     convert_integer_to_string(pid, temp);
@@ -141,8 +141,8 @@ void log_event(event_t event, char *info) {
     const char *action = events[event];
     const char *sep = " ; ";
 
-    char dest[2048] = {}; // Destination buffer
-    char temp[32] = {}; // Temporary buffer for conversions
+    char dest[2048] = {0}; // Destination buffer
+    char temp[32] = {0}; // Temporary buffer for conversions
 
     int instant = getMillisecondsElapsed();
     convert_integer_to_string(instant, temp);

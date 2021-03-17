@@ -27,7 +27,7 @@ INCLUDE_FLAGS := $(addprefix -I, $(INCLUDE_DIRECTORIES))
 CPPFLAGS := $(INCLUDE_FLAGS) -MMD -MP
 
 # Compiler flags
-CFLAGS := -Wall -Werror
+CFLAGS := -Wall -Werror -Wpedantic -std=gnu11
 
 # Linker flags
 # LDFLAGS := 

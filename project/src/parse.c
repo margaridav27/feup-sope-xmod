@@ -58,7 +58,7 @@ int parseCommand(int argc, char *argv[], command_t *result) {
         }
 
         const char *permissions_string = mode_string + 2;
-        for (int i = 0; i < strlen(permissions_string); ++i) {
+        for (unsigned int i = 0; i < strlen(permissions_string); ++i) {
             if (permissions_string[i] == 'r') {
                 mode |= READ_BIT;
             } else if (permissions_string[i] == 'w') {
