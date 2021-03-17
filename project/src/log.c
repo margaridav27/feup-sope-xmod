@@ -1,3 +1,4 @@
+//COMBACK: Explain header usages
 #include "../include/log.h"
 #include <errno.h>
 #include <fcntl.h>
@@ -51,6 +52,7 @@ int closeLogFile(int fd) {
 }
 
 int logChangePermission(const command_t *command, mode_t old_mode, mode_t new_mode, bool isLink) {
+    // COMBACK: Verify nullptr
     char info[BUFSIZ] = {0};
     snprintf(info, sizeof(info) - 1, "%s : %o : %o", command->path, old_mode, new_mode);
     if (new_mode != old_mode) log_event(FILE_MODF, info);
@@ -61,6 +63,7 @@ int logChangePermission(const command_t *command, mode_t old_mode, mode_t new_mo
 }
 
 int logProcessCreation(char **argv, int argc) {
+    // COMBACK: Verify nullptr
     char info[BUFSIZ] = {0};
     strncat(info, argv[0], sizeof(info) - 1);
     for (int i = 1; i < argc; ++i) {
@@ -108,6 +111,7 @@ void log_signal_sent(int signo, pid_t target) {
 }
 
 void log_current_status(const char *path, int number_of_files, int number_of_modified_files) {
+    // COMBACK: Verify nullptr
     const char *sep = " ; ";
     char dest[BUFSIZ] = {0};
 
@@ -131,6 +135,7 @@ void log_current_status(const char *path, int number_of_files, int number_of_mod
 }
 
 void log_event(event_t event, char *info) {
+    // COMBACK: Verify nullptr
     int fd = openLogFile(false);
     if (fd == -1) return;
     static const char *events[] = {"PROC_CREAT", "PROC_EXIT", "SIGNAL_RECV",

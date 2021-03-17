@@ -1,3 +1,4 @@
+//COMBACK: Explain header usages
 #include "../include/io.h"
 #include <stdio.h>
 #include <sys/stat.h>
@@ -6,6 +7,7 @@
 #include <unistd.h>
 
 int printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode, char *info, unsigned int size) {
+    // COMBACK: Verify nullptr
     char new_mode_str[] = "---------", previous_mode_str[] = "---------";
     //COMBACK: Look into error return value
     parseModeToString(new_mode, new_mode_str);
@@ -18,6 +20,7 @@ int printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode, 
 }
 
 int printRetainMessage(const char *path, mode_t mode, char *info, unsigned int size) {
+    // COMBACK: Verify nullptr
     char mode_str[] = "---------";
     //COMBACK: Look into error return value
     parseModeToString(mode, mode_str);
@@ -27,6 +30,7 @@ int printRetainMessage(const char *path, mode_t mode, char *info, unsigned int s
 
 //COMBACK: Will we be using this?
 int printFailedMessage(const char *path, mode_t new_mode) {
+    // COMBACK: Verify nullptr
     char new_mode_str[] = "---------";
     char info[BUFSIZ] = {0};
     //COMBACK: Look into error return value
@@ -40,6 +44,7 @@ int printFailedMessage(const char *path, mode_t new_mode) {
 
 
 int parseModeToString(mode_t mode, char *str) {
+    // COMBACK: Verify nullptr
     if (mode & S_IXOTH) str[8] = 'x';
     if (mode & S_IWOTH) str[7] = 'w';
     if (mode & S_IROTH) str[6] = 'r';
@@ -54,6 +59,7 @@ int parseModeToString(mode_t mode, char *str) {
 
 //COMBACK: Will we be using this?
 int printNoPermissionMessage(const char *path) {
+    // COMBACK: Verify nullptr
     char info[BUFSIZ] = {0};
     strncat(info, "xmod: changing permissions of '", sizeof(info) - strlen(info) - 1);
     strncat(info, path, sizeof(info) - strlen(info) - 1);
@@ -64,6 +70,7 @@ int printNoPermissionMessage(const char *path) {
 }
 
 int printSymbolicMessage(const char *path, char *info, unsigned int size) {
+    // COMBACK: Verify nullptr
     strncat(info, "neither symbolic link '", size - 1);
     strncat(info, path, size - 1);
     strncat(info, "' nor referent has been changed\n", size - 1);
@@ -76,6 +83,7 @@ mode_t clearExtraBits(mode_t mode) {
 }
 
 int printMessage(mode_t new_mode, mode_t old_mode, const command_t *command, bool isLink) {
+    // COMBACK: Verify nullptr
     char info[1024] = {0};
     if (!command->verbose && !command->changes) return 0; // No need to log
     // Clear these bits for printing

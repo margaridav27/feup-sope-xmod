@@ -1,3 +1,4 @@
+//COMBACK: Explain header usages
 #include "../include/utils.h"
 #include <unistd.h>
 #include <stdlib.h>
@@ -42,6 +43,7 @@ mode_t setPartialPermissions(mode_t old_mode, mode_t new_mode) {
 }
 
 int openFile(const char *path, struct stat *buf) {
+    //COMBACK: Verify nullptr
     if (path == NULL || buf == NULL) return 1;
     // Try to open the file.
     if (stat(path, buf) == -1) {
@@ -52,12 +54,14 @@ int openFile(const char *path, struct stat *buf) {
 }
 
 int concatenateFolderFilenamePath(const char *folder_path, const char *file_name, char *dest) {
+    //COMBACK: Verify nullptr
     if (folder_path == NULL || file_name == NULL || dest == NULL) return -1;
     snprintf(dest, PATH_MAX, "%s/%s", folder_path, file_name);
     return 0;
 }
 
 int convert_integer_to_string(int n, char *dest, unsigned int size) {
+    //COMBACK: Verify nullptr
     // COMBACK: Maybe make this less LCOM-y?
     int temp = n, i = 0;
     while (temp /= 10) ++i; // Count number of digits.
@@ -67,7 +71,7 @@ int convert_integer_to_string(int n, char *dest, unsigned int size) {
 }
 
 void convert_signal_number_to_string(int sig_no, const char **dest) {
-    // COMBACK: Verify pointer safety
+    //COMBACK: Verify nullptr
     const char *name;
     // COMBACK: Explain why this isn't an array.
     // COMBACK: Explain why we aren't using strsignal();

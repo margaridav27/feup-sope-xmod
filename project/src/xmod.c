@@ -25,6 +25,7 @@ int number_of_files = 0, number_of_modified_files = 0;
 
 
 int createNewProcess(const command_t *command, char *new_path) {
+    //COMBACK: Verify nullptr
     static char *new_argv[_POSIX_ARG_MAX] = {0};
     for (int i = 0; i < command->argc; ++i) new_argv[i] = command->argv[i];
     new_argv[command->argc - 1] = new_path;
@@ -37,6 +38,7 @@ int createNewProcess(const command_t *command, char *new_path) {
 }
 
 int changeFileMode(const command_t *command, struct stat *buf) {
+    //COMBACK: Verify nullptr
     ++number_of_files;
     mode_t mode = buf->st_mode;
     mode_t persistent_bits = mode & UNRELATED_BITS;
@@ -64,6 +66,8 @@ int changeFileMode(const command_t *command, struct stat *buf) {
 }
 
 int changeFolderMode(const command_t *command) {
+    //COMBACK: Verify nullptr
+
     // Read the folder
     //COMBACK: Look into error return value
     DIR *dir = opendir(command->path);
@@ -117,6 +121,7 @@ int changeFolderMode(const command_t *command) {
 }
 
 int changeMode(const command_t *command) {
+    //COMBACK: Verify nullptr
     struct stat buf;
     //COMBACK: Look into error return value
     if (openFile(command->path, &buf)) return 1;

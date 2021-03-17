@@ -1,3 +1,4 @@
+//COMBACK: Explain header usages
 #ifndef PROJECT_INCLUDE_LOG_H_
 #define PROJECT_INCLUDE_LOG_H_
 

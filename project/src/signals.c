@@ -1,3 +1,4 @@
+//COMBACK: Explain header usages
 #include "../include/signals.h"
 #include <signal.h>
 #include <stdbool.h>

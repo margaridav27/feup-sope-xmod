@@ -1,3 +1,4 @@
+//COMBACK: Explain header usages
 #include "../include/parse.h"
 
 #include <errno.h>
@@ -8,6 +9,7 @@
 
 
 int parseCommand(int argc, char *argv[], command_t *result) {
+    // COMBACK: Verify nullptr
     //COMBACK: Look into error return value
     memset(result, 0, sizeof(command_t)); // Clear all information
 

@@ -1,3 +1,4 @@
+//COMBACK: Explain header usages
 #include "../include/time_ctrl.h"
 
 #include <errno.h>
@@ -11,6 +12,7 @@
 #include "../include/utils.h"
 
 int getStartTime(struct timespec *dest) {
+    //COMBACK: Verify nullptr
     if (dest == NULL) return -1;
     char path[BUFSIZ] = "/proc/";
     //COMBACK: Look into error return value
