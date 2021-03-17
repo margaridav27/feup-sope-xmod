@@ -57,11 +57,13 @@ int concatenateFolderFilenamePath(const char *folder_path, const char *file_name
     return 0;
 }
 
-void convert_integer_to_string(int n, char *dest) {
+int convert_integer_to_string(int n, char *dest, unsigned int size) {
     // COMBACK: Maybe make this less LCOM-y?
     int temp = n, i = 0;
     while (temp /= 10) ++i; // Count number of digits.
+    if (i > size - 1) return 1;
     do { dest[i--] = (char) ('0' + n % 10); } while (n /= 10); // Convert digits to characters.
+    return 0;
 }
 
 void convert_signal_number_to_string(int sig_no, const char **dest) {

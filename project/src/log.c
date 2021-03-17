@@ -75,11 +75,9 @@ int logProcessCreation(char **argv, int argc) {
 int logProcessExit(int ret) {
     char info[BUFSIZ] = {0};
     //COMBACK: Decide on buffer size
-    char temp[32] = {0}; // Temporary buffer for conversion
 
     //COMBACK: Look into error return value
-    convert_integer_to_string(ret, temp);
-    strncat(info, temp, sizeof(temp) - strlen(temp) - 1);
+    convert_integer_to_string(ret, info, sizeof(info));
     //COMBACK: Look into error return value
     log_event(PROC_EXIT, info);
     return 0;
@@ -87,7 +85,6 @@ int logProcessExit(int ret) {
 
 void log_signal_received(int signo) {
     char info[1024] = {0};
-    // char temp[32] = {0}; // Temporary buffer for conversion
     const char *temp;
     //COMBACK: Look into error return value
     convert_signal_number_to_string(signo, &temp);
@@ -107,10 +104,8 @@ void log_signal_sent(int signo, pid_t target) {
     strncat(info, sig_name, sizeof(info) - strlen(info) - 1);
     strncat(info, sep, sizeof(info) - strlen(info) - 1);
 
-    char temp[32] = {0}; // Temporary buffer for conversions
     //COMBACK: Look into error return value
-    convert_integer_to_string(target, temp);
-    strncat(info, temp, sizeof(temp) - strlen(temp) - 1);
+    convert_integer_to_string(target, info + strlen(info), sizeof(info) - strlen(info) - 1);
     //COMBACK: Look into error return value
     log_event(SIGNAL_SENT, info);
 }
@@ -118,24 +113,18 @@ void log_signal_sent(int signo, pid_t target) {
 void log_current_status(const char *path, int number_of_files, int number_of_modified_files) {
     const char *sep = " ; ";
     char dest[BUFSIZ] = {0};
-    char temp[32] = {0};
 
     pid_t pid = getpid();
-    convert_integer_to_string(pid, temp);
-    strncat(dest, temp, sizeof(dest) - strlen(dest) - 2);
+    convert_integer_to_string(pid, dest, sizeof(dest) - strlen(dest) + 1);
     strncat(dest, sep, sizeof(dest) - strlen(dest) - 2);
 
     strncat(dest, path, sizeof(dest) - strlen(dest) - 2);
     strncat(dest, sep, sizeof(dest) - strlen(dest) - 2);
 
-    memset(temp, 0, sizeof(temp));
-    convert_integer_to_string(number_of_files, temp);
-    strncat(dest, temp, sizeof(dest) - strlen(dest) - 2);
+    convert_integer_to_string(number_of_files, dest + strlen(dest), sizeof(dest) - strlen(dest) + 1);
     strncat(dest, sep, sizeof(dest) - strlen(dest) - 2);
 
-    memset(temp, 0, sizeof(temp));
-    convert_integer_to_string(number_of_modified_files, temp);
-    strncat(dest, temp, sizeof(dest) - strlen(dest) - 2);
+    convert_integer_to_string(number_of_modified_files, dest + strlen(dest), sizeof(dest) - strlen(dest) + 1);
 
     strncat(dest, "\n", sizeof(dest) - strlen(dest) - 2);
 
@@ -154,19 +143,15 @@ void log_event(event_t event, char *info) {
 
     char dest[BUFSIZ] = {0}; // Destination buffer
     //COMBACK: Decide on buffer size
-    char temp[32] = {0}; // Temporary buffer for conversions
 
     //COMBACK: Look into error return value
     int instant = getMillisecondsElapsed();
     //COMBACK: Look into error return value
-    convert_integer_to_string(instant, temp);
-    strncat(dest, temp, sizeof(dest) - 1);
+    convert_integer_to_string(instant, dest, sizeof(dest) - 1);
     strncat(dest, sep, sizeof(dest) - strlen(dest) - 2);
 
-    memset(temp, 0, sizeof(temp) - 1);
     //COMBACK: Look into error return value
-    convert_integer_to_string(getpid(), temp);
-    strncat(dest, temp, sizeof(dest) - strlen(dest) - 2);
+    convert_integer_to_string(getpid(), dest + strlen(dest), sizeof(dest) - strlen(dest) - 1); //COMBACK
     strncat(dest, sep, sizeof(dest) - strlen(dest) - 2);
 
     strncat(dest, action, sizeof(dest) - strlen(dest) - 2);
