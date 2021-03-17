@@ -3,6 +3,7 @@
 #include <string.h> // memset(), strlen()
 #include <unistd.h> // getopt(), optind
 #include <sys/types.h> // mode_t
+#include <stdbool.h> // bool
 
 #include "../include/parse.h"
 

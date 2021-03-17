@@ -38,7 +38,6 @@ int printFailedMessage(const char *path, mode_t new_mode) {
     return 0;
 }
 
-
 int parseModeToString(mode_t mode, char *str) {
     // COMBACK: Verify size
     if (str == NULL) return -1;
