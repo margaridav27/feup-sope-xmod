@@ -1,4 +1,3 @@
-#include "../include/xmod.h"
 #include <dirent.h> // opendir(), readdir(), DT_DIR, DT_LNK
 #include <stdbool.h> // true, false
 #include <stdio.h> // perror(),
@@ -6,14 +5,16 @@
 #include <sys/stat.h> // chmod(), struct stat
 #include <unistd.h> // execv(),
 #include <limits.h> // MAX_PATH
+
+#include "../include/xmod.h"
 #include "../include/parse.h" // parseCommand()
 #include "../include/io.h" // printMessage()
-#include "../include/log.h" // logChangePermission(),
-// leave(), modeRemovingPermissions(), modeAddingPermissions(), modeSettingPartialPermissions(), concatenateFolderFilenamePath()
 #include "../include/utils.h"
 #include "../include/signals.h" // setUpSignals()
+#include "../include/log.h" // logChangePermission(), leave(), modeRemovingPermissions(), 
+                            // modeAddingPermissions(), modeSettingPartialPermissions(), concatenateFolderFilenamePath()
 
-int number_of_files = 0, number_of_modified_files = 0;
+int numberOfFiles = 0, numberOfModifiedFiles = 0;
 
 int createNewProcess(const command_t *command, char *new_path) {
     if (command == NULL || new_path == NULL) return -1;
@@ -30,7 +31,7 @@ int createNewProcess(const command_t *command, char *new_path) {
 
 int changeFileMode(const command_t *command, struct stat *buf) {
     if (command == NULL || buf == NULL) return -1;
-    ++number_of_files;
+    ++numberOfFiles;
     mode_t mode = buf->st_mode;
     mode_t persistent_bits = mode & UNRELATED_BITS;
     mode_t new_mode;
@@ -49,7 +50,7 @@ int changeFileMode(const command_t *command, struct stat *buf) {
         perror("xmod: failed to change permissions");
         return -1;
     }
-    if (new_mode != mode) ++number_of_modified_files;
+    if (new_mode != mode) ++numberOfModifiedFiles;
     if (logChangePermission(command, buf->st_mode, new_mode, false)) return -1;
     return 0;
 }

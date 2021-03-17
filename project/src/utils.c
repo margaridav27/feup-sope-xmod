@@ -1,17 +1,17 @@
-#include "../include/utils.h"
 #include <unistd.h> // getpid(), getpgrp(), _exit()
 #include <stdio.h> // perror(), snprintf()
 #include <sys/stat.h> // stat()
 #include <sys/wait.h> // wait()
 #include <limits.h> // PATH_MAX
 #include <stdbool.h> // bool
-// #include <string.h>
+#include <string.h> // strlen()
 //  SIGHUP, SIGINT, SIGQUIT, SIGILL, SIGTRAP, SIGABRT, SIGFPE, SIGKILL, SIGUSR1 , SIGSEGV, SIGUSR2 , SIGPIPE, SIGALRM,
 //  SIGTERM, SIGCHLD , SIGCONT , SIGSTOP , SIGTSTP , SIGTTIN , SIGTTOU , SIGURG , SIGXCPU , SIGXFSZ , SIGVTALRM,
 //  SIGPROF , SIGWINCH , SIGPOLL
 #include <signal.h>
-#include <string.h> // strlen()
-#include "../include/log.h" // log_process_exit()
+
+#include "../include/utils.h"
+#include "../include/log.h" // logProcessExit()
 
 
 bool isParentProcess(void) {
@@ -64,7 +64,7 @@ int concatenateFolderFilenamePath(const char *folder_path, const char *file_name
     return 0;
 }
 
-int convert_integer_to_string(int n, char *dest, unsigned int size) {
+int convertIntegerToString(int n, char *dest, unsigned int size) {
     if (dest == NULL) return -1;
     // COMBACK: Maybe make this less LCOM-y?
     int temp = n;
@@ -75,7 +75,7 @@ int convert_integer_to_string(int n, char *dest, unsigned int size) {
     return 0;
 }
 
-int convert_signal_number_to_string(int sig_no, const char **dest) {
+int convertSignalNumberToString(int sig_no, const char **dest) {
     if (dest == NULL) return -1;
     const char *name;
     // COMBACK: Explain why this isn't an array.

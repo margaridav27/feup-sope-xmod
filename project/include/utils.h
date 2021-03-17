@@ -43,7 +43,7 @@ mode_t modeAddingPermissions(mode_t old_mode, mode_t new_mode);
 
 mode_t modeSettingPartialPermissions(mode_t old_mode, mode_t new_mode);
 
-int convert_integer_to_string(int n, char *dest, unsigned int size);
+int convertIntegerToString(int n, char *dest, unsigned int size);
 
-int convert_signal_number_to_string(int sig_no, const char **dest);
+int convertSignalNumberToString(int sig_no, const char **dest);
 #endif // PROJECT_INCLUDE_UTILS_H_

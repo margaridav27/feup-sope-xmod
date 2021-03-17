@@ -1,12 +1,10 @@
-#include "../include/parse.h"
-
-// #include <errno.h> // ernno
 #include <stdio.h> // fprintf()
 #include <stdlib.h> // strtol()
 #include <string.h> // memset(), strlen()
 #include <unistd.h> // getopt(), optind
 #include <sys/types.h> // mode_t
 
+#include "../include/parse.h"
 
 int parseCommand(int argc, char *argv[], command_t *result) {
     if (argv == NULL || result == NULL) return -1;

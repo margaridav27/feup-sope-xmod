@@ -23,12 +23,12 @@ int logProcessCreation(char **argv, int argc);
 
 int logProcessExit(int ret);
 
-int log_signal_received(int signo);
+int logSignalReceived(int signo);
 
-int log_signal_sent(int sig_no, pid_t target);
+int logSignalSent(int sig_no, pid_t target);
 
-int log_current_status(const char *path, int number_of_files, int number_of_modified_files);
+int logCurrentStatus(const char *path, int numberOfFiles, int numberOfModifiedFiles);
 
-int log_event(event_t event, char *info);
+int logEvent(event_t event, char *info);
 
 #endif // PROJECT_INCLUDE_LOG_H_

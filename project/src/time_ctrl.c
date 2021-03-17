@@ -1,5 +1,3 @@
-#include "../include/time_ctrl.h"
-
 #include <errno.h> // errno
 #include <stdio.h> // BUFSIZ
 #include <string.h> // strlen()
@@ -7,12 +5,13 @@
 #include <time.h> // clock_gettime()
 #include <unistd.h> // getpgrp()
 
-#include "../include/utils.h" // convert_integer_to_string()
+#include "../include/time_ctrl.h"
+#include "../include/utils.h" // convertIntegerToString()
 
 int getStartTime(struct timespec *dest) {
     if (dest == NULL) return -1;
     char path[BUFSIZ] = "/proc/";
-    if (convert_integer_to_string(getpgrp(), path + strlen(path), sizeof(path) - strlen(path))) return -1;
+    if (convertIntegerToString(getpgrp(), path + strlen(path), sizeof(path) - strlen(path))) return -1;
     struct stat buf;
     errno = 0;
     if (stat(path, &buf) == -1) return -1;

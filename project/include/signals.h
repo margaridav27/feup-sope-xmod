@@ -1,9 +1,9 @@
 #ifndef PROJECT_INCLUDE_SIGNALS_H_
 #define PROJECT_INCLUDE_SIGNALS_H_
 
-void parent_sigint_handler(void);
+void parentSigintHandler(void);
 
-void child_sigint_handler(void);
+void childSigintHandler(void);
 
 int setUpSignals(const char *p);
 

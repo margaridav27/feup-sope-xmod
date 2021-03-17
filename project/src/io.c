@@ -1,7 +1,8 @@
-#include "../include/io.h"
 #include <stdio.h> // snprintf(), BUFSIZ
 #include <string.h> // strncat()
 #include <unistd.h> // write()
+
+#include "../include/io.h"
 
 int printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode, char *info, unsigned int size) {
     if (path == NULL || info == NULL || size < 9) return -1;
