@@ -19,6 +19,7 @@ int createNewProcess(const command_t *command, char *new_path) {
     if (command == NULL || new_path == NULL) return -1;
     static char *new_argv[_POSIX_ARG_MAX] = {0};
     for (int i = 0; i < command->argc; ++i) new_argv[i] = command->argv[i];
+    logProcessCreation(new_argv, command->argc);
     new_argv[command->argc - 1] = new_path;
     if (execv(new_argv[0], new_argv) == -1) {
         perror("xmod: exec");
