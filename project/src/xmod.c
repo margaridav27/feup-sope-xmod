@@ -75,7 +75,7 @@ int changeFolderMode(const command_t *command) {
     //COMBACK: Look into error return value
     while ((d = readdir(dir)) != NULL) {
         //TODO: Uncomment me to check signal handling
-        sleep(1);
+        // sleep(1);
         if (strcmp(d->d_name, ".") == 0 || strcmp(d->d_name, "..") == 0) continue;
         char new_path[PATH_MAX];
         command_t new_command = *command;

@@ -13,7 +13,7 @@
 int getStartTime(struct timespec *dest) {
     if (dest == NULL) return -1;
     //COMBACK: Decide on buffer size
-    char path[2048] = "/proc/";
+    char path[BUFSIZ] = "/proc/";
     //COMBACK: Decide on buffer size
     char temp[32] = {0};
     //COMBACK: Look into error return value
