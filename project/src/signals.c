@@ -25,10 +25,9 @@ void generic_signal_handler(int sig_no) {
         isParentProcess() ? parentSigintHandler() : childSigintHandler();
     } else if (sig_no == SIGTERM && !isParentProcess()) {
         leave(1);
-    }
+    } else {
         // Repeat the requested actions
-    else {
-        sigaction(sig_no,&newAction,NULL);
+        sigaction(sig_no, &newAction, NULL);
         raise(sig_no);
     }
 }
