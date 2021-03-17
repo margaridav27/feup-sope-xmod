@@ -88,7 +88,7 @@ int changeFolderMode(const command_t *command) {
             }
         } else if (d->d_type == DT_LNK) {
             //COMBACK: Might need to rethink function sequence
-            if (printMessage(0, 0, command, true)) continue;
+            if (printMessage(0, 0, &new_command, true)) continue;
         } else {
             //COMBACK: Print error message
             if (changeFileMode(&new_command, &buf)) continue;
