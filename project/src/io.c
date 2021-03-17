@@ -47,7 +47,7 @@ int parseModeToString(mode_t mode, char *str) {
     return 0;
 }
 
-//COMBACK
+//COMBACK: Will we be using this?
 int printNoPermissionMessage(const char *path) {
     char info[1024] = {0};
     strncat(info, "xmod: changing permissions of '", sizeof(info) - strlen(info) - 1);

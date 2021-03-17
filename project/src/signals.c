@@ -41,8 +41,6 @@ void parent_sigint_handler(int signo) {
         int n = read(STDIN_FILENO, buffer, 10);
         buffer[n] = '\0';
     } while (buffer[0] != 'Y' && buffer[0] != 'y' && buffer[0] != 'N' && buffer[0] != 'n');
-    // if (buffer[0] == 'Y' || buffer[0] == 'y') puts("WHAT");
-    // else puts("WHERE");
     if (buffer[0] == 'Y' || buffer[0] == 'y') terminateProgramParent();
     else if (buffer[0] == 'N' || buffer[0] == 'n') continueProgramParent();
     // perror("");

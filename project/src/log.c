@@ -162,7 +162,6 @@ void log_event(event_t event, char *info) {
     strncat(dest, "\n", strlen("\n") + 1);
 
     // //COMBACK check error
-
     write(fd, dest, strlen(dest));
     fsync(fd);
     closeLogFile(fd);
