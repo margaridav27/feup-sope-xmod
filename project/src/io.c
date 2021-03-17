@@ -76,10 +76,12 @@ int printMessage(mode_t new_mode, mode_t old_mode, const command_t *command, boo
     old_mode = clearExtraBits(old_mode);
     new_mode = clearExtraBits(new_mode);
     if (command->verbose) { // Print all information
-        if (new_mode == old_mode)
-            isLink ? printSymbolicMessage(command->path, info, sizeof(info)) :
-            printRetainMessage(command->path, old_mode, info, sizeof(info));
-        else printChangeMessage(command->path, old_mode, new_mode, info, sizeof(info));
+        if (new_mode == old_mode) {
+            if (isLink) printSymbolicMessage(command->path, info, sizeof(info));
+            else printRetainMessage(command->path, old_mode, info, sizeof(info));
+        } else {
+            printChangeMessage(command->path, old_mode, new_mode, info, sizeof(info));
+        }
     } else if (command->changes && new_mode != old_mode) {
         printChangeMessage(command->path, old_mode, new_mode, info, sizeof(info));
     }
