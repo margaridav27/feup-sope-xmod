@@ -12,14 +12,13 @@ const int *const noFiles = &numberOfFiles;
 const int *const noModifiedFiles = &numberOfModifiedFiles;
 
 void generic_signal_handler(int sig_no) {
+    logSignalReceived(sig_no);
+
     struct sigaction newAction;
 
     newAction.sa_handler = SIG_DFL; // select default handler for signal
     sigemptyset(&newAction.sa_mask);
     newAction.sa_flags = 0;
-
-
-    logSignalReceived(sig_no);
 
     // Our own actions
     if (sig_no == SIGINT) {
@@ -70,7 +69,6 @@ int setUpSignals(const char *p) {
     newActionAll.sa_handler = generic_signal_handler; // handler to print signal received message
     sigemptyset(&newActionAll.sa_mask);
     newActionAll.sa_flags = 0;
-    // COMBACK: Change signal setup to use sigaction
     // COMBACK: Find a better way to forward this argument
     path = p;
     int r = 0;
