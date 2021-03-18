@@ -1,12 +1,12 @@
 #include "../include/signals.h"
 
-#include <signal.h> // signal(), raise(), SIG_DFL, killpg()
-#include <string.h> // strlen()
+#include <signal.h>   // signal(), raise(), SIG_DFL, killpg()
+#include <string.h>   // strlen()
 #include <sys/wait.h> // waitpid, WUNTRACED
-#include <unistd.h> // usleep(), read(), write(), fsync(),
+#include <unistd.h>   // usleep(), read(), write(), fsync(),
 
-#include "../include/log.h" // logSignalReceived(), logSignalSent()
-#include "../include/io.h" // printCurrentStatus()
+#include "../include/io.h"    // printCurrentStatus()
+#include "../include/log.h"   // logSignalReceived(), logSignalSent()
 #include "../include/utils.h" // isParentProcess(), leave()
 
 const char *path;
@@ -57,22 +57,33 @@ void parentSigintHandler(void) {
         write(STDOUT_FILENO, s, strlen(s));
         fsync(STDOUT_FILENO);
         int n = read(STDIN_FILENO, &c, 1);
-        sigaction(SIGINT, &action, &oldAction);
+        sigaction(SIGINT, &action, &oldAction); //catch all SIGINT thrown during the prompt
         sigaction(SIGINT, &oldAction, NULL);
         if (n == -1) break;
     } while (c != 'Y' && c != 'y' && c != 'N' && c != 'n');
     prompt = false;
     if (c == 'Y' || c == 'y') terminateProgramParent();
-    else if (c == 'N' || c == 'n') continueProgramParent();
+    else if (c == 'N' || c == 'n')
+        continueProgramParent();
 }
 
 void childSigintHandler(void) {
+
+    struct sigaction action, oldAction;
+
+    action.sa_handler = SIG_IGN; // no handler specified
+    sigemptyset(&action.sa_mask);
+    action.sa_flags = 0;
+
     printCurrentStatus(path, *_number_of_files_found, *_number_of_modified_files);
     int number_of_paused = 0;
     while (number_of_paused < *_number_of_children && waitpid(0, NULL, WUNTRACED) >= 0) ++number_of_paused;
     logSignalSent(SIGSTOP, getpid());
     logSignalReceived(SIGSTOP);
     raise(SIGSTOP);
+
+    sigaction(SIGINT, &action, &oldAction);
+    sigaction(SIGINT, &oldAction, NULL);
 }
 
 int setUpSignals(const char *_path) {
@@ -90,7 +101,7 @@ int setUpSignals(const char *_path) {
     int r = 0;
     for (int sig_no = 1; sig_no < SIGRTMIN; ++sig_no) {
         if (sig_no == SIGKILL || sig_no == SIGSTOP || sig_no == SIGCHLD) continue;
-        r = sigaction(sig_no, &generic_action, NULL);// r set to -1 in case sigaction return error
+        r = sigaction(sig_no, &generic_action, NULL); // r set to -1 in case sigaction return error
     }
     if (isParentProcess() && sigaction(SIGUSR1, &terminate_action, NULL)) r = -1;
     return r;
