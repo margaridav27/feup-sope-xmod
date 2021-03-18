@@ -66,12 +66,21 @@ int concatenateFolderFilenamePath(const char *folder_path, const char *file_name
 
 int convertIntegerToString(int n, char *dest, unsigned int size) {
     if (dest == NULL) return -1;
-    // COMBACK: Maybe make this less LCOM-y?
+    unsigned noDigits = 0;
+    if (n < 0) {
+        n *= -1;
+        dest[0] = '-';
+        ++noDigits;
+    }
     int temp = n;
-    unsigned i = 0;
-    while (temp /= 10) ++i; // Count number of digits.
-    if (i > size - 1) return -1;
-    do { dest[i--] = (char) ('0' + n % 10); } while (n /= 10); // Convert digits to characters.
+    while (temp /= 10) ++noDigits; // Count number of digits.
+    if (noDigits > size - 1) return -1;
+    do {
+        char digit = '0' + (n % 10);
+        dest[noDigits] = digit;
+        --noDigits;
+        n /= 10;
+    } while (n > 0);
     return 0;
 }
 
