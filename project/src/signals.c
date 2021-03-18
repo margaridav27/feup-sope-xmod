@@ -5,7 +5,8 @@
 #include <sys/wait.h> // waitpid, WUNTRACED
 #include <unistd.h> // usleep(), read(), write(), fsync(),
 
-#include "../include/log.h" // logSignalReceived(), logCurrentStatus(), logSignalSent()
+#include "../include/log.h" // logSignalReceived(), logSignalSent()
+#include "../include/io.h" // printCurrentStatus()
 #include "../include/utils.h" // isParentProcess(), leave()
 
 const char *path;
@@ -43,7 +44,7 @@ void parentSigintHandler(void) {
     // Wait until all children have paused
     int number_of_paused = 0;
     while (number_of_paused < *_number_of_children && waitpid(0, NULL, WUNTRACED) >= 0) ++number_of_paused;
-    logCurrentStatus(path, *_number_of_files_found, *_number_of_modified_files);
+    printCurrentStatus(path, *_number_of_files_found, *_number_of_modified_files);
     char c = 'Y';
     do {
         const char *s = "Are you sure that you want to terminate? (Y/N) ";
@@ -58,7 +59,7 @@ void parentSigintHandler(void) {
 }
 
 void childSigintHandler(void) {
-    logCurrentStatus(path, *_number_of_files_found, *_number_of_modified_files);
+    printCurrentStatus(path, *_number_of_files_found, *_number_of_modified_files);
     int number_of_paused = 0;
     while (number_of_paused < *_number_of_children && waitpid(0, NULL, WUNTRACED) >= 0) ++number_of_paused;
     logSignalSent(SIGSTOP, getpid());

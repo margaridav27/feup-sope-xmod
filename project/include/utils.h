@@ -41,6 +41,8 @@ int concatenateFolderFilenamePath(const char *folder_path, const char *file_name
 
 int convertIntegerToString(int n, char *dest, unsigned int size);
 
+int parseModeToString(mode_t mode, char *str, unsigned int size) ;
+
 int convertSignalNumberToString(int sig_no, const char **dest);
 
 bool isParentProcess(void);
