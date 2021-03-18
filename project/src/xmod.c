@@ -19,8 +19,8 @@ int createNewProcess(const command_t *command, char *new_path) {
     if (command == NULL || new_path == NULL) return -1;
     static char *new_argv[_POSIX_ARG_MAX] = {0};
     for (int i = 0; i < command->argc; ++i) new_argv[i] = command->argv[i];
-    logProcessCreation(new_argv, command->argc);
     new_argv[command->argc - 1] = new_path;
+    logProcessCreation(new_argv, command->argc);
     if (execv(new_argv[0], new_argv) == -1) {
         perror("xmod: exec");
         return -1;
@@ -64,7 +64,7 @@ int changeFolderMode(const command_t *command) {
     }
     struct dirent *d;
     while ((d = readdir(dir)) != NULL) {
-        sleep(1); //TODO: Uncomment me to check signal handling
+        // sleep(1); //TODO: Uncomment me to check signal handling
         if (strcmp(d->d_name, ".") == 0 || strcmp(d->d_name, "..") == 0) continue;
         char new_path[PATH_MAX] = {0};
         command_t new_command = *command;
