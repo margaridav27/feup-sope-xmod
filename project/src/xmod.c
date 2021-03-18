@@ -11,10 +11,9 @@
 #include "../include/io.h" // printMessage()
 #include "../include/utils.h"
 #include "../include/signals.h" // setUpSignals()
-#include "../include/log.h" // logChangePermission(), leave(), modeRemovingPermissions(), 
-                            // modeAddingPermissions(), modeSettingPartialPermissions(), concatenateFolderFilenamePath()
+#include "../include/log.h" // logChangePermission(), leave(), modeRemovingPermissions(), modeAddingPermissions(), modeSettingPartialPermissions(), concatenateFolderFilenamePath()
 
-int numberOfFiles = 0, numberOfModifiedFiles = 0;
+int numberOfFiles = 0, numberOfModifiedFiles = 0, numberOfChildren = 0;
 
 int createNewProcess(const command_t *command, char *new_path) {
     if (command == NULL || new_path == NULL) return -1;
@@ -65,7 +64,7 @@ int changeFolderMode(const command_t *command) {
     }
     struct dirent *d;
     while ((d = readdir(dir)) != NULL) {
-        // sleep(1); //TODO: Uncomment me to check signal handling
+        sleep(1); //TODO: Uncomment me to check signal handling
         if (strcmp(d->d_name, ".") == 0 || strcmp(d->d_name, "..") == 0) continue;
         char new_path[PATH_MAX] = {0};
         command_t new_command = *command;
@@ -76,6 +75,7 @@ int changeFolderMode(const command_t *command) {
         if (openFile(new_path, &buf)) continue;
         if (d->d_type == DT_DIR) {
             pid_t pid = fork();
+            ++numberOfChildren;
             if (pid < 0) {
                 perror("xmod: fork");
                 continue;

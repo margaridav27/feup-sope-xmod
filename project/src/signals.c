@@ -1,15 +1,18 @@
 #include <signal.h> // signal(), raise(), SIG_DFL, killpg()
 #include <unistd.h> // usleep(), read(), write(), fsync(),
 #include <string.h> // strlen()
+#include <sys/wait.h>
+#include <stdio.h>
 
 #include "../include/signals.h"
 #include "../include/utils.h" // isParentProcess(), leave()
 #include "../include/log.h" // logSignalReceived(), logCurrentStatus(), logSignalSent()
 
 const char *path;
-extern int numberOfFiles, numberOfModifiedFiles;
+extern int numberOfFiles, numberOfModifiedFiles, numberOfChildren;
 const int *const noFiles = &numberOfFiles;
 const int *const noModifiedFiles = &numberOfModifiedFiles;
+const int *const noChildren = &numberOfChildren;
 
 void generic_signal_handler(int sig_no) {
     logSignalReceived(sig_no);
@@ -34,7 +37,8 @@ void generic_signal_handler(int sig_no) {
 
 void parentSigintHandler(void) {
     // COMBACK: Find a better solution for syncronizing this
-    usleep(5000); // Wait for other prompts
+    int n = 0;
+    while (n < *noChildren && waitpid(0, NULL, WUNTRACED) >= 0) ++n;
     //COMBACK: Check signal safety
     logCurrentStatus(path, *noFiles, *noModifiedFiles);
     char c = 'Y';
@@ -51,6 +55,8 @@ void parentSigintHandler(void) {
 
 void childSigintHandler(void) {
     logCurrentStatus(path, *noFiles, *noModifiedFiles);
+    int n = 0;
+    while (n < *noChildren && waitpid(0, NULL, WUNTRACED) >= 0) ++n;
     logSignalSent(SIGSTOP, getpid());
     logSignalReceived(SIGSTOP);
     //COMBACK: Try to find a way to use this to alert the parent that we are done printing. If it is not possible, 
