@@ -22,8 +22,6 @@ int logEvent(event_t event, char *info);
 
 int logChangePermission(const command_t *command, mode_t old_mode, mode_t new_mode, bool isLink);
 
-int logCurrentStatus(const char *path, int numberOfFiles, int numberOfModifiedFiles);
-
 int logProcessCreation(char **argv, int argc);
 
 int logProcessExit(int ret);

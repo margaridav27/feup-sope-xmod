@@ -4,6 +4,8 @@
 #include <string.h> // strncat()
 #include <unistd.h> // write()
 
+#include "../include/utils.h" // parseModeToString()
+
 int printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode, char *info, unsigned int size) {
     if (path == NULL || info == NULL) return -1;
     if (size < 9) return -1;
@@ -27,20 +29,6 @@ int printRetainMessage(const char *path, mode_t mode, char *info, unsigned int s
     return 0;
 }
 
-int parseModeToString(mode_t mode, char *str, unsigned int size) {
-    if (str == NULL) return -1;
-    if (size < 9) return -1;
-    if (mode & S_IRUSR) str[0] = 'r';
-    if (mode & S_IWUSR) str[1] = 'w';
-    if (mode & S_IXUSR) str[2] = 'x';
-    if (mode & S_IRGRP) str[3] = 'r';
-    if (mode & S_IWGRP) str[4] = 'w';
-    if (mode & S_IXGRP) str[5] = 'x';
-    if (mode & S_IROTH) str[6] = 'r';
-    if (mode & S_IWOTH) str[7] = 'w';
-    if (mode & S_IXOTH) str[8] = 'x';
-    return 0;
-}
 
 int printSymbolicMessage(const char *path, char *info, unsigned int size) {
     if (path == NULL || info == NULL || size == 0) return -1;
@@ -77,5 +65,32 @@ int printMessage(mode_t new_mode, mode_t old_mode, const command_t *command, boo
         if (printChangeMessage(command->path, old_mode, new_mode, buf, sizeof(buf) - strlen(buf) - 1)) return -1;
     }
     if (write(STDOUT_FILENO, buf, strlen(buf)) == -1) return -1;
+    return 0;
+}
+
+int printCurrentStatus(const char *path, int numberOfFiles, int numberOfModifiedFiles) {
+    if (path == NULL) return -1;
+    const char *sep = " ; ";
+    char dest[BUFSIZ] = {0};
+
+    pid_t pid = getpid();
+    if (convertIntegerToString(pid, dest, sizeof(dest))) return -1;
+    strncat(dest, sep, sizeof(dest) - strlen(dest) - 1);
+
+    strncat(dest, path, sizeof(dest) - strlen(dest) - 1);
+    strncat(dest, sep, sizeof(dest) - strlen(dest) - 1);
+
+    if (convertIntegerToString(numberOfFiles, dest + strlen(dest), sizeof(dest) - strlen(dest))) return -1;
+    strncat(dest, sep, sizeof(dest) - strlen(dest) - 1);
+
+    if (convertIntegerToString(numberOfModifiedFiles, dest + strlen(dest), sizeof(dest) - strlen(dest)))
+        return -1;
+
+    strncat(dest, "\n", sizeof(dest) - strlen(dest) - 1);
+
+    if (write(STDOUT_FILENO, dest, strlen(dest)) == -1) {
+        perror("WRITE: ");
+        return -1;
+    }
     return 0;
 }

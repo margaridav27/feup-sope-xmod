@@ -98,33 +98,6 @@ int logSignalSent(int sig_no, pid_t target) {
     return 0;
 }
 
-int logCurrentStatus(const char *path, int numberOfFiles, int numberOfModifiedFiles) {
-    if (path == NULL) return -1;
-    const char *sep = " ; ";
-    char dest[BUFSIZ] = {0};
-
-    pid_t pid = getpid();
-    if (convertIntegerToString(pid, dest, sizeof(dest))) return -1;
-    strncat(dest, sep, sizeof(dest) - strlen(dest) - 1);
-
-    strncat(dest, path, sizeof(dest) - strlen(dest) - 1);
-    strncat(dest, sep, sizeof(dest) - strlen(dest) - 1);
-
-    if (convertIntegerToString(numberOfFiles, dest + strlen(dest), sizeof(dest) - strlen(dest))) return -1;
-    strncat(dest, sep, sizeof(dest) - strlen(dest) - 1);
-
-    if (convertIntegerToString(numberOfModifiedFiles, dest + strlen(dest), sizeof(dest) - strlen(dest)))
-        return -1;
-
-    strncat(dest, "\n", sizeof(dest) - strlen(dest) - 1);
-
-    if (write(STDOUT_FILENO, dest, strlen(dest)) == -1) {
-        perror("WRITE: ");
-        return -1;
-    }
-    return 0;
-}
-
 int logEvent(event_t event, char *info) {
     if (info == NULL) return -1;
     if (!logfile_available) return 0;

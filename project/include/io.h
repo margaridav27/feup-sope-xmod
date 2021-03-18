@@ -13,6 +13,7 @@ int printRetainMessage(const char *path, mode_t mode, char *info, unsigned int s
 
 int printSymbolicMessage(const char *path, char *info, unsigned int size);
 
+int printCurrentStatus(const char *path, int numberOfFiles, int numberOfModifiedFiles);
 
 int parseModeToString(mode_t mode, char *str, unsigned int size);
 

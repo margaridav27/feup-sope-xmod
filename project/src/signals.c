@@ -5,7 +5,8 @@
 #include <sys/wait.h> // waitpid, WUNTRACED
 #include <unistd.h> // usleep(), read(), write(), fsync(),
 
-#include "../include/log.h" // logSignalReceived(), logCurrentStatus(), logSignalSent()
+#include "../include/log.h" // logSignalReceived(), logSignalSent()
+#include "../include/io.h" // printCurrentStatus()
 #include "../include/utils.h" // isParentProcess(), leave()
 
 const char *path;
@@ -49,8 +50,8 @@ void parentSigintHandler(void) {
     // Wait until all children have paused
     int number_of_paused = 0;
     while (number_of_paused < *_number_of_children && waitpid(0, NULL, WUNTRACED) >= 0) ++number_of_paused;
-    logCurrentStatus(path, *_number_of_files_found, *_number_of_modified_files);
-    char c = '0';
+    printCurrentStatus(path, *_number_of_files_found, *_number_of_modified_files);
+    char c = 'Y';
     do {
         const char *s = "Are you sure that you want to terminate? (Y/N) ";
         write(STDOUT_FILENO, s, strlen(s));
@@ -66,7 +67,7 @@ void parentSigintHandler(void) {
 }
 
 void childSigintHandler(void) {
-    logCurrentStatus(path, *_number_of_files_found, *_number_of_modified_files);
+    printCurrentStatus(path, *_number_of_files_found, *_number_of_modified_files);
     int number_of_paused = 0;
     while (number_of_paused < *_number_of_children && waitpid(0, NULL, WUNTRACED) >= 0) ++number_of_paused;
     logSignalSent(SIGSTOP, getpid());
@@ -95,13 +96,14 @@ int setUpSignals(const char *_path) {
     return r;
 }
 
-void terminateProgramParent(void) {
+int terminateProgramParent(void) {
     pid_t pgrp = getpgrp();
-    killpg(0, SIGCONT); // Wake up children
-    logSignalSent(SIGCONT, pgrp);
-    killpg(0, SIGUSR1); // Ask children to terminate
-    logSignalSent(SIGUSR1, pgrp);
+    if (killpg(0, SIGCONT)) return -1; // Wake up children
+    if (logSignalSent(SIGCONT, pgrp)) return -1;
+    if (killpg(0, SIGUSR1)) return -1; // Ask children to terminate
+    if (logSignalSent(SIGUSR1, pgrp)) return -1;
     leave(1); // Abnormal termination: exit code 1
+    return 0;
 }
 
 int continueProgramParent(void) {

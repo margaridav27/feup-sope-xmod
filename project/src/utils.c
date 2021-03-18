@@ -81,6 +81,22 @@ int convertIntegerToString(int n, char *dest, unsigned int size) {
     return 0;
 }
 
+
+int parseModeToString(mode_t mode, char *str, unsigned int size) {
+    if (str == NULL) return -1;
+    if (size < 9) return -1;
+    if (mode & S_IRUSR) str[0] = 'r';
+    if (mode & S_IWUSR) str[1] = 'w';
+    if (mode & S_IXUSR) str[2] = 'x';
+    if (mode & S_IRGRP) str[3] = 'r';
+    if (mode & S_IWGRP) str[4] = 'w';
+    if (mode & S_IXGRP) str[5] = 'x';
+    if (mode & S_IROTH) str[6] = 'r';
+    if (mode & S_IWOTH) str[7] = 'w';
+    if (mode & S_IXOTH) str[8] = 'x';
+    return 0;
+}
+
 int convertSignalNumberToString(int sig_no, const char **dest) {
     if (dest == NULL) return -1;
     /* Although this mapping may seem extreme, it is the only option given two things:
