@@ -1,0 +1,38 @@
+5 ; 18419 ; PROC_CREAT ; ./xmod -vR 777 test/res
+17 ; 18420 ; PROC_CREAT ; ./xmod -vR 777 test/res
+17 ; 18421 ; PROC_CREAT ; ./xmod -vR 777 test/res
+17 ; 18422 ; PROC_CREAT ; ./xmod -vR 777 test/res
+23 ; 18422 ; PROC_CREAT ; ./xmod -vR 777 test/res/folder2
+23 ; 18420 ; PROC_CREAT ; ./xmod -vR 777 test/res/res
+23 ; 18421 ; PROC_CREAT ; ./xmod -vR 777 test/res/folder1
+27 ; 18425 ; PROC_CREAT ; ./xmod -vR 777 test/res/folder2
+27 ; 18424 ; PROC_CREAT ; ./xmod -vR 777 test/res/folder2
+27 ; 18423 ; PROC_CREAT ; ./xmod -vR 777 test/res/res
+28 ; 18426 ; PROC_CREAT ; ./xmod -vR 777 test/res/folder1
+31 ; 18424 ; PROC_CREAT ; ./xmod -vR 777 test/res/folder2/subfolder2.2
+31 ; 18425 ; PROC_CREAT ; ./xmod -vR 777 test/res/folder2/subfolder2
+34 ; 18423 ; PROC_CREAT ; ./xmod -vR 777 test/res/res/res
+34 ; 18426 ; PROC_CREAT ; ./xmod -vR 777 test/res/folder1/subfolder1
+37 ; 18424 ; PROC_EXIT ; 0
+40 ; 18426 ; PROC_EXIT ; 0
+41 ; 18425 ; PROC_EXIT ; 0
+44 ; 18427 ; PROC_CREAT ; ./xmod -vR 777 test/res/res/res
+45 ; 18428 ; PROC_CREAT ; ./xmod -vR 777 test/res/res/res
+47 ; 18422 ; PROC_EXIT ; 0
+47 ; 18421 ; PROC_EXIT ; 0
+49 ; 18427 ; PROC_CREAT ; ./xmod -vR 777 test/res/res/res/folder1
+49 ; 18428 ; PROC_CREAT ; ./xmod -vR 777 test/res/res/res/folder2
+55 ; 18429 ; PROC_CREAT ; ./xmod -vR 777 test/res/res/res/folder1
+56 ; 18430 ; PROC_CREAT ; ./xmod -vR 777 test/res/res/res/folder2
+57 ; 18431 ; PROC_CREAT ; ./xmod -vR 777 test/res/res/res/folder2
+61 ; 18430 ; PROC_CREAT ; ./xmod -vR 777 test/res/res/res/folder2/subfolder2.2
+62 ; 18429 ; PROC_CREAT ; ./xmod -vR 777 test/res/res/res/folder1/subfolder1
+67 ; 18430 ; PROC_EXIT ; 0
+67 ; 18429 ; PROC_EXIT ; 0
+68 ; 18431 ; PROC_CREAT ; ./xmod -vR 777 test/res/res/res/folder2/subfolder2
+71 ; 18427 ; PROC_EXIT ; 0
+74 ; 18431 ; PROC_EXIT ; 0
+81 ; 18428 ; PROC_EXIT ; 0
+85 ; 18423 ; PROC_EXIT ; 0
+89 ; 18420 ; PROC_EXIT ; 0
+93 ; 18419 ; PROC_EXIT ; 0

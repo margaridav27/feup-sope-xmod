@@ -38,18 +38,26 @@ void generic_signal_handler(int sig_no) {
 }
 
 void parentSigintHandler(void) {
+    struct sigaction action, oldAction;
+
+    action.sa_handler = SIG_IGN; // no handler specified
+    sigemptyset(&action.sa_mask);
+    action.sa_flags = 0;
+
     if (prompt) return;
     prompt = true;
     // Wait until all children have paused
     int number_of_paused = 0;
     while (number_of_paused < *_number_of_children && waitpid(0, NULL, WUNTRACED) >= 0) ++number_of_paused;
     logCurrentStatus(path, *_number_of_files_found, *_number_of_modified_files);
-    char c = 'Y';
+    char c = '0';
     do {
         const char *s = "Are you sure that you want to terminate? (Y/N) ";
         write(STDOUT_FILENO, s, strlen(s));
         fsync(STDOUT_FILENO);
         int n = read(STDIN_FILENO, &c, 1);
+        sigaction(SIGINT, &action, &oldAction);
+        sigaction(SIGINT, &oldAction, NULL);
         if (n == -1) break;
     } while (c != 'Y' && c != 'y' && c != 'N' && c != 'n');
     prompt = false;
