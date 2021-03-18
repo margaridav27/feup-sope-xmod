@@ -2,17 +2,18 @@
 #include <unistd.h> // usleep(), read(), write(), fsync(),
 #include <string.h> // strlen()
 #include <sys/wait.h>
-#include <stdio.h>
 
 #include "../include/signals.h"
 #include "../include/utils.h" // isParentProcess(), leave()
 #include "../include/log.h" // logSignalReceived(), logCurrentStatus(), logSignalSent()
 
 const char *path;
-extern int numberOfFiles, numberOfModifiedFiles, numberOfChildren;
-const int *const noFiles = &numberOfFiles;
+extern int numberOfFilesFound, numberOfModifiedFiles, numberOfChildren;
+const int *const noFiles = &numberOfFilesFound;
 const int *const noModifiedFiles = &numberOfModifiedFiles;
 const int *const noChildren = &numberOfChildren;
+
+sig_atomic_t prompt = false;
 
 void generic_signal_handler(int sig_no) {
     logSignalReceived(sig_no);
@@ -36,6 +37,8 @@ void generic_signal_handler(int sig_no) {
 }
 
 void parentSigintHandler(void) {
+    if (prompt) return;
+    prompt = true;
     // Wait until all children have paused
     int noPaused = 0;
     while (noPaused < *noChildren && waitpid(0, NULL, WUNTRACED) >= 0) ++noPaused;
@@ -48,6 +51,7 @@ void parentSigintHandler(void) {
         int n = read(STDIN_FILENO, &c, 1);
         if (n == -1) break;
     } while (c != 'Y' && c != 'y' && c != 'N' && c != 'n');
+    prompt = false;
     if (c == 'Y' || c == 'y') terminateProgramParent();
     else if (c == 'N' || c == 'n') continueProgramParent();
 }
@@ -70,7 +74,7 @@ int setUpSignals(const char *p) {
 
     newActionAll.sa_handler = generic_signal_handler; // handler to print signal received message
     sigemptyset(&newActionAll.sa_mask);
-    newActionAll.sa_flags = 0;
+    newActionAll.sa_flags = SA_RESTART; // Useful in case we interrupt a system call
     // COMBACK: Find a better way to forward this argument
     path = p;
     int r = 0;
