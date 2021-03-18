@@ -34,13 +34,9 @@ mode_t modeAddingPermissions(mode_t old_mode, mode_t new_mode) {
 
 mode_t modeSettingPartialPermissions(mode_t old_mode, mode_t new_mode) {
     // Remove the existing permissions for this user, keeping other users intact
-    if (new_mode & PERMISSIONS_OTHERS) {
-        old_mode &= (~PERMISSIONS_OTHERS);
-    } else if (new_mode & PERMISSIONS_GROUP) {
-        old_mode &= (~PERMISSIONS_GROUP);
-    } else if (new_mode & PERMISSIONS_USER) {
-        old_mode &= (~PERMISSIONS_USER);
-    }
+    if (new_mode & PERMISSIONS_OTHERS) old_mode &= (~PERMISSIONS_OTHERS);
+    else if (new_mode & PERMISSIONS_GROUP) old_mode &= (~PERMISSIONS_GROUP);
+    else if (new_mode & PERMISSIONS_USER) old_mode &= (~PERMISSIONS_USER);
     // Add the requested permissions for this user, keeping other users intact
     return old_mode | new_mode;
 }
