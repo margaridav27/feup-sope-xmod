@@ -39,7 +39,6 @@ int printFailedMessage(const char *path, mode_t new_mode) {
 }
 
 int parseModeToString(mode_t mode, char *str, unsigned int size) {
-    // COMBACK: Verify size
     if (str == NULL) return -1;
     if (size < 9) return -1;
     if (mode & S_IRUSR) str[0] = 'r';

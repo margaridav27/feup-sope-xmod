@@ -1,3 +1,5 @@
+#include "../include/utils.h"
+
 #include <unistd.h> // getpid(), getpgrp(), _exit()
 #include <stdio.h> // perror(), snprintf()
 #include <sys/stat.h> // stat()
@@ -10,7 +12,6 @@
 //  SIGPROF , SIGWINCH , SIGPOLL
 #include <signal.h>
 
-#include "../include/utils.h"
 #include "../include/log.h" // logProcessExit()
 
 
@@ -53,96 +54,97 @@ int openFile(const char *path, struct stat *buf) {
 
 int concatenateFolderFilenamePath(const char *folder_path, const char *file_name, char *dest, unsigned int size) {
     if (folder_path == NULL || file_name == NULL || dest == NULL) return -1;
-    if (size < strlen(folder_path) + strlen(file_name) + 1) return -1;
-    if (folder_path == NULL || file_name == NULL || dest == NULL) return -1;
+    if (size < strlen(folder_path) + strlen(file_name) + 1) return -1; // Destination too small for the whole path
+    //COMBACK: write()
     int n = snprintf(dest, size, "%s/%s", folder_path, file_name);
-    if (n < 0 || n >= (int) size) return -1;
+    if (n < 0 || n >= (int) size) return -1; // Failure writing
     return 0;
 }
 
 int convertIntegerToString(int n, char *dest, unsigned int size) {
-    if (dest == NULL) return -1;
+    if (dest == NULL || size == 0) return -1;
     unsigned noDigits = 0;
     if (n < 0) {
-        n *= -1;
+        // The minus sign is the first character.
         dest[0] = '-';
         ++noDigits;
+        n *= -1; // Pretend the number is positive from now on.
     }
     int temp = n;
     while (temp /= 10) ++noDigits; // Count number of digits.
-    if (noDigits > size - 1) return -1;
+    //COMBACK: Null char here, outside or not important?
+    if (noDigits > size - 1) return -1; // Not enough size to store the whole number
     do {
-        char digit = '0' + (n % 10);
-        dest[noDigits] = digit;
-        --noDigits;
-        n /= 10;
-    } while (n > 0);
+        char digit = '0' + (n % 10);    // Extract last digit
+        dest[noDigits] = digit;         // Place last digit
+        --noDigits;                     // One less digit to place
+        n /= 10;                        // Remove the last digit
+    } while (n > 0);                    // While there are digits
     return 0;
 }
 
 int convertSignalNumberToString(int sig_no, const char **dest) {
     if (dest == NULL) return -1;
-    const char *name;
-    // COMBACK: Explain why this isn't an array.
-    // COMBACK: Explain why we aren't using strsignal();
+    /* Although this mapping may seem extreme, it is the only option given two things:
+     * 1. The signal numbers change with each processor architecture (we can't use an array, as the indexes would not work)
+     * 2. The POSIX function strsignal() does not print the actual name, only a description. Plus, it is not async-signal safe.
+     */
     switch (sig_no) {
-        case SIGHUP: name = "SIGHUP";
-            break;
-        case SIGINT: name = "SIGINT";
-            break;
-        case SIGQUIT: name = "SIGQUIT";
-            break;
-        case SIGILL: name = "SIGILL";
-            break;
-        case SIGTRAP: name = "SIGTRAP";
-            break;
-        case SIGABRT: name = "SIGABRT";
-            break;
-        case SIGFPE: name = "SIGFPE";
-            break;
-        case SIGKILL: name = "SIGKILL";
-            break;
-        case SIGUSR1 : name = "SIGUSR1";
-            break;
-        case SIGSEGV: name = "SIGSEGV";
-            break;
-        case SIGUSR2 : name = "SIGUSR2";
-            break;
-        case SIGPIPE: name = "SIGPIPE";
-            break;
-        case SIGALRM: name = "SIGALRM";
-            break;
-        case SIGTERM: name = "SIGTERM";
-            break;
-        case SIGCHLD : name = "SIGCHLD";
-            break;
-        case SIGCONT : name = "SIGCONT";
-            break;
-        case SIGSTOP : name = "SIGSTOP";
-            break;
-        case SIGTSTP : name = "SIGTSTP";
-            break;
-        case SIGTTIN : name = "SIGTTIN";
-            break;
-        case SIGTTOU : name = "SIGTTOU";
-            break;
-        case SIGURG : name = "SIGURG";
-            break;
-        case SIGXCPU : name = "SIGXCPU";
-            break;
-        case SIGXFSZ : name = "SIGXFSZ";
-            break;
-        case SIGVTALRM : name = "SIGVTALRM";
-            break;
-        case SIGPROF : name = "SIGPROF";
-            break;
-        case SIGWINCH : name = "SIGWINCH";
-            break;
-        case SIGPOLL : name = "SIGPOLL";
-            break;
-        default: name = "UNKNOWN";
-            break;
+        case SIGHUP: *dest = "SIGHUP";
+            return 0;
+        case SIGINT: *dest = "SIGINT";
+            return 0;
+        case SIGQUIT: *dest = "SIGQUIT";
+            return 0;
+        case SIGILL: *dest = "SIGILL";
+            return 0;
+        case SIGTRAP: *dest = "SIGTRAP";
+            return 0;
+        case SIGABRT: *dest = "SIGABRT";
+            return 0;
+        case SIGFPE: *dest = "SIGFPE";
+            return 0;
+        case SIGKILL: *dest = "SIGKILL";
+            return 0;
+        case SIGUSR1 : *dest = "SIGUSR1";
+            return 0;
+        case SIGSEGV: *dest = "SIGSEGV";
+            return 0;
+        case SIGUSR2 : *dest = "SIGUSR2";
+            return 0;
+        case SIGPIPE: *dest = "SIGPIPE";
+            return 0;
+        case SIGALRM: *dest = "SIGALRM";
+            return 0;
+        case SIGTERM: *dest = "SIGTERM";
+            return 0;
+        case SIGCHLD : *dest = "SIGCHLD";
+            return 0;
+        case SIGCONT : *dest = "SIGCONT";
+            return 0;
+        case SIGSTOP : *dest = "SIGSTOP";
+            return 0;
+        case SIGTSTP : *dest = "SIGTSTP";
+            return 0;
+        case SIGTTIN : *dest = "SIGTTIN";
+            return 0;
+        case SIGTTOU : *dest = "SIGTTOU";
+            return 0;
+        case SIGURG : *dest = "SIGURG";
+            return 0;
+        case SIGXCPU : *dest = "SIGXCPU";
+            return 0;
+        case SIGXFSZ : *dest = "SIGXFSZ";
+            return 0;
+        case SIGVTALRM : *dest = "SIGVTALRM";
+            return 0;
+        case SIGPROF : *dest = "SIGPROF";
+            return 0;
+        case SIGWINCH : *dest = "SIGWINCH";
+            return 0;
+        case SIGPOLL : *dest = "SIGPOLL";
+            return 0;
+        default: *dest = "UNKNOWN";
+            return 0;
     }
-    *dest = name;
-    return 0;
 }

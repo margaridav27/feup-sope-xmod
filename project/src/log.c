@@ -1,7 +1,7 @@
 #include "../include/log.h"
 
 #include <errno.h> // errno
-#include <fcntl.h> // O_WRONLY, O_CLOEXEC, O_TRUNC, O_APPEND, open()
+#include <fcntl.h> // O_WRONLY, O_CLOEXEC, O_TRUNC, O_APPEND, O_CREAT, open()
 #include <signal.h> // sig_atomic_t
 #include <stdbool.h> // bool
 #include <stdio.h> // snprintf(), perror()
@@ -21,15 +21,15 @@ int openLogFile(bool truncate) {
         logFileName = getenv("LOG_FILENAME");
         if (logFileName == NULL) return -1;
     }
-    int flags = O_WRONLY | O_CLOEXEC;
-    flags |= truncate ? (O_TRUNC | O_CREAT) : O_APPEND;
+    int flags = O_WRONLY | O_CLOEXEC; // Common flags
+    flags |= truncate ? (O_TRUNC | O_CREAT) : O_APPEND; // First process/others flags
     errno = 0;
-    int fd = open(logFileName, flags, 0666);
+    int fd = open(logFileName, flags, 0666); // Try to open the logfile
     if (fd == -1) {
-        perror("Failed to open logFileName");
+        perror("Failed to open logfile");
         return -1;
     }
-    logFileAvailable = true;
+    logFileAvailable = true; // Success
     return fd;
 }
 
@@ -37,7 +37,7 @@ int closeLogFile(int fd) {
     if (!logFileAvailable) return 0;
     if (fd == -1) return -1;
     errno = 0;
-    if (close(fd) == -1) {
+    if (close(fd) == -1) { // Try to close the logfile
         perror("Error closing Logfile");
         return -1;
     }
@@ -59,6 +59,7 @@ int logChangePermission(const command_t *command, mode_t old_mode, mode_t new_mo
 int logProcessCreation(char **argv, int argc) {
     if (argv == NULL) return -1;
     char info[BUFSIZ] = {0};
+    // Copy argv into buffer
     strncat(info, argv[0], sizeof(info) - 1);
     for (int i = 1; i < argc; ++i) {
         strncat(info, " ", sizeof(info) - strlen(info) - 1);
@@ -127,6 +128,7 @@ int logCurrentStatus(const char *path, int numberOfFiles, int numberOfModifiedFi
 
 int logEvent(event_t event, char *info) {
     if (info == NULL) return -1;
+    if (!logFileAvailable) return 0;
     int fd = openLogFile(false);
     if (fd == -1) return -1;
     static const char *events[] = {"PROC_CREAT", "PROC_EXIT", "SIGNAL_RECV",

@@ -6,7 +6,7 @@
 
 #define UNRELATED_BITS S_IFMT
 
-int createNewProcess(const command_t *command, char *new_path);
+int executeNewProcess(const command_t *command, char *new_path);
 
 int changeFileMode(const command_t *command, struct stat *buf);
 
