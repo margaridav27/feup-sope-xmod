@@ -36,10 +36,9 @@ void generic_signal_handler(int sig_no) {
 }
 
 void parentSigintHandler(void) {
-    // COMBACK: Find a better solution for syncronizing this
-    int n = 0;
-    while (n < *noChildren && waitpid(0, NULL, WUNTRACED) >= 0) ++n;
-    //COMBACK: Check signal safety
+    // Wait until all children have paused
+    int noPaused = 0;
+    while (noPaused < *noChildren && waitpid(0, NULL, WUNTRACED) >= 0) ++noPaused;
     logCurrentStatus(path, *noFiles, *noModifiedFiles);
     char c = 'Y';
     do {
@@ -55,12 +54,10 @@ void parentSigintHandler(void) {
 
 void childSigintHandler(void) {
     logCurrentStatus(path, *noFiles, *noModifiedFiles);
-    int n = 0;
-    while (n < *noChildren && waitpid(0, NULL, WUNTRACED) >= 0) ++n;
+    int noPaused = 0;
+    while (noPaused < *noChildren && waitpid(0, NULL, WUNTRACED) >= 0) ++noPaused;
     logSignalSent(SIGSTOP, getpid());
     logSignalReceived(SIGSTOP);
-    //COMBACK: Try to find a way to use this to alert the parent that we are done printing. If it is not possible, 
-    // pause the thread instead
     raise(SIGSTOP);
 }
 
