@@ -26,7 +26,7 @@ void generic_signal_handler(int sig_no) {
     // Our own actions
     if (sig_no == SIGINT) {
         isParentProcess() ? parentSigintHandler() : childSigintHandler();
-    } else if (sig_no == SIGTERM && !isParentProcess()) {
+    } else if (sig_no == SIGUSR1 && !isParentProcess()) {
         leave(1);
     } else {
         // Repeat the requested actions
@@ -81,16 +81,15 @@ int setUpSignals(const char *p) {
         if (sig_no == SIGKILL || sig_no == SIGSTOP || sig_no == SIGCHLD) continue;
         r = sigaction(sig_no, &newActionAll, NULL);// r set to -1 in case sigaction return error
     }
-    // COMBACK: Stop using SIGTERM as the termination signal, convert to SIGUSR
-    if (isParentProcess() && sigaction(SIGTERM, &newActionTerm, NULL)) r = -1;
+    if (isParentProcess() && sigaction(SIGUSR1, &newActionTerm, NULL)) r = -1;
     return r;
 }
 
 void terminateProgramParent(void) {
     killpg(0, SIGCONT); // Wake up children
     logSignalSent(SIGCONT, getpgrp());
-    killpg(0, SIGTERM); // Ask children to terminate
-    logSignalSent(SIGTERM, getpgrp());
+    killpg(0, SIGUSR1); // Ask children to terminate
+    logSignalSent(SIGUSR1, getpgrp());
     leave(1); // Abnormal termination: exit code 1
 }
 
