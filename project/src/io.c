@@ -5,7 +5,8 @@
 #include "../include/io.h"
 
 int printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode, char *info, unsigned int size) {
-    if (path == NULL || info == NULL || size < 9) return -1;
+    if (path == NULL || info == NULL) return -1;
+    if (size < 9) return -1;
     char new_mode_str[] = "---------", previous_mode_str[] = "---------";
     if (parseModeToString(new_mode, new_mode_str, sizeof(new_mode_str))) return -1;
     if (parseModeToString(previous_mode, previous_mode_str, sizeof(previous_mode_str))) return -1;
@@ -17,24 +18,12 @@ int printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode, 
 }
 
 int printRetainMessage(const char *path, mode_t mode, char *info, unsigned int size) {
-    if (path == NULL || info == NULL || size < 9) return -1;
+    if (path == NULL || info == NULL) return -1;
+    if (size < 9) return -1;
     char mode_str[] = "---------";
     if (parseModeToString(mode, mode_str, sizeof(mode_str))) return -1;
     int n = snprintf(info, size - 1, "mode of '%s' retained as %#o (%s)\n", path, mode, mode_str);
     if (n < 0 || n >= (int) size - 1) return -1;
-    return 0;
-}
-
-//COMBACK: Will we be using this?
-int printFailedMessage(const char *path, mode_t new_mode) {
-    if (path == NULL) return -1;
-    char new_mode_str[] = "---------";
-    char info[BUFSIZ] = {0};
-    if (parseModeToString(new_mode, new_mode_str, sizeof(new_mode_str))) return -1;
-    int n = snprintf(info, sizeof(info) - strlen(info) - 1, "failed to change mode of '%s' changed to %#o (%s)\n", path,
-                     new_mode, new_mode_str);
-    if (n != 0) return -1;
-    if (write(STDOUT_FILENO, info, strlen(info)) == -1) return -1;
     return 0;
 }
 
@@ -50,17 +39,6 @@ int parseModeToString(mode_t mode, char *str, unsigned int size) {
     if (mode & S_IROTH) str[6] = 'r';
     if (mode & S_IWOTH) str[7] = 'w';
     if (mode & S_IXOTH) str[8] = 'x';
-    return 0;
-}
-
-//COMBACK: Will we be using this?
-int printNoPermissionMessage(const char *path) {
-    if (path == NULL) return -1;
-    char info[BUFSIZ] = {0};
-    strncpy(info, "xmod: changing permissions of '", sizeof(info) - strlen(info) - 1);
-    strncat(info, path, sizeof(info) - strlen(info) - 1);
-    strncat(info, "': Operation not permitted\n", sizeof(info) - strlen(info) - 1);
-    if (write(STDERR_FILENO, info, strlen(info)) == -1) return -1;
     return 0;
 }
 

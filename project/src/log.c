@@ -12,7 +12,6 @@
 #include "../include/time_ctrl.h" // getMillisecondsElapsed()
 #include "../include/io.h" // printMessage()
 
-//COMBACK
 sig_atomic_t logFileAvailable = false;
 static const char *logFileName;
 

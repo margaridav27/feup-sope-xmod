@@ -2,6 +2,7 @@
 #include <unistd.h> // usleep(), read(), write(), fsync(),
 #include <string.h> // strlen()
 #include <sys/wait.h>
+#include <stdio.h>
 
 #include "../include/signals.h"
 #include "../include/utils.h" // isParentProcess(), leave()
@@ -65,7 +66,7 @@ void childSigintHandler(void) {
     raise(SIGSTOP);
 }
 
-int setUpSignals(const char *p) {
+int setUpSignals(const char *_path) {
     struct sigaction newActionTerm, newActionAll;
 
     newActionTerm.sa_handler = SIG_IGN; // no handler specified
@@ -75,8 +76,8 @@ int setUpSignals(const char *p) {
     newActionAll.sa_handler = generic_signal_handler; // handler to print signal received message
     sigemptyset(&newActionAll.sa_mask);
     newActionAll.sa_flags = SA_RESTART; // Useful in case we interrupt a system call
-    // COMBACK: Find a better way to forward this argument
-    path = p;
+
+    path = _path;
     int r = 0;
     for (int sig_no = 1; sig_no < SIGRTMIN; ++sig_no) {
         if (sig_no == SIGKILL || sig_no == SIGSTOP || sig_no == SIGCHLD) continue;

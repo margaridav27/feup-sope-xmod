@@ -11,7 +11,6 @@ int parseCommand(int argc, char *argv[], command_t *result) {
     if (argv == NULL || result == NULL) return -1;
     memset(result, 0, sizeof(command_t)); // Clear all information
 
-    // COMBACK: Passing everything might be overkill
     result->argv = argv;
     result->argc = argc;
 

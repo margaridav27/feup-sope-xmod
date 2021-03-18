@@ -5,7 +5,7 @@ void parentSigintHandler(void);
 
 void childSigintHandler(void);
 
-int setUpSignals(const char *p);
+int setUpSignals(const char *_path);
 
 void terminateProgramParent(void);
 

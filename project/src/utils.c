@@ -55,7 +55,6 @@ int openFile(const char *path, struct stat *buf) {
 int concatenateFolderFilenamePath(const char *folder_path, const char *file_name, char *dest, unsigned int size) {
     if (folder_path == NULL || file_name == NULL || dest == NULL) return -1;
     if (size < strlen(folder_path) + strlen(file_name) + 1) return -1; // Destination too small for the whole path
-    //COMBACK: write()
     int n = snprintf(dest, size, "%s/%s", folder_path, file_name);
     if (n < 0 || n >= (int) size) return -1; // Failure writing
     return 0;
@@ -72,8 +71,7 @@ int convertIntegerToString(int n, char *dest, unsigned int size) {
     }
     int temp = n;
     while (temp /= 10) ++noDigits; // Count number of digits.
-    //COMBACK: Null char here, outside or not important?
-    if (noDigits > size - 1) return -1; // Not enough size to store the whole number
+    if (noDigits > size) return -1; // Not enough size to store the whole number
     do {
         char digit = '0' + (n % 10);    // Extract last digit
         dest[noDigits] = digit;         // Place last digit

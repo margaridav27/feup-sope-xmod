@@ -77,8 +77,7 @@ int changeFolderMode(const command_t *command) {
                 perror("xmod: fork");
                 continue;                       // Next file
             } else if (pid == 0) {              // Child process, new invocation with different path.
-                //COMBACK: Print error message
-                if (executeNewProcess(command, new_path)) {}
+                if (executeNewProcess(command, new_path)) _exit(-1);
             } else {                            // Parent process, keep going.
                 ++numberOfChildren;             // Another child
                 continue;                       // Next file
@@ -87,26 +86,22 @@ int changeFolderMode(const command_t *command) {
             //COMBACK: Might need to rethink function sequence
             if (printMessage(0, 0, &new_command, true)) continue; // Failure? Next file.
         } else {                                // File: change
-            //COMBACK: Print error message
             if (changeFileMode(&new_command, &buf)) continue;  // Failure? Next file.
         }
     }
-    // COMBACK: Check if this can be used as a file descriptor and closed with _exit(). If not, rethink signal handling.
-    //COMBACK: Print error message
-    if (closedir(dir)) return -1; // Try to close the folder.
+    // Try to close the folder on normal exit.
+    // In the case of a premature exit, there is no need since _exit() also closes the file descriptors.
+    if (closedir(dir)) return -1;
     return 0;
 }
 
 int changeMode(const command_t *command) {
     if (command == NULL) return -1;
     struct stat buf;
-    //COMBACK: Error message
     if (openFile(command->path, &buf)) return -1;           // Try to open the file
-    //COMBACK: Error message
     if (changeFileMode(command, &buf)) return -1;           // Try to change the file's mode
 
     if (S_ISDIR(buf.st_mode) && command->recursive) { // Recursive option + Directory? Change it.
-        //COMBACK: Error message
         if (changeFolderMode(command)) return -1;
     }
     return 0;
@@ -114,16 +109,13 @@ int changeMode(const command_t *command) {
 
 int main(int argc, char *argv[]) {
     //COMBACK: Find a better way to structure this
-    //COMBACK: Look into error return value
     int fd = openLogFile(isParentProcess()); // Try to open the logfile
     if (isParentProcess() && fd == -1)
         fprintf(stderr, "Variable LOG_FILENAME not defined.\n");
     closeLogFile(fd);
     command_t result;
     if (parseCommand(argc, argv, &result)) leave(-1); // Failure parsing: premature exit
-    // COMBACK: Print error message
     if (logProcessCreation(argv, argc)) {}
-    // COMBACK: Print error message
     if (setUpSignals(result.path)) {}
     if (changeMode(&result)) leave(-1); // Failure: exit with error code
     leave(0);

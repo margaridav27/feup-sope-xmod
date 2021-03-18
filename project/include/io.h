@@ -10,12 +10,6 @@ int printRetainMessage(const char *path, mode_t mode, char *info, unsigned int s
 
 int printSymbolicMessage(const char *path, char *info, unsigned int size);
 
-//COMBACK: Will we be using this?
-int printFailedMessage(const char *path, mode_t new_mode);
-
-//COMBACK: Will we be using this?
-int printNoPermissionMessage(const char *path);
-
 int parseModeToString(mode_t mode, char *str, unsigned int size);
 
 mode_t clearExtraBits(mode_t mode);
