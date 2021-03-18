@@ -29,21 +29,22 @@ typedef struct {
 } command_t;
 
 
-bool isParentProcess(void);
-
-void leave(int ret);
-
-int openFile(const char *path, struct stat *buf);
-
-int concatenateFolderFilenamePath(const char *folder_path, const char *file_name, char *dest, unsigned int size);
-
 mode_t modeRemovingPermissions(mode_t old_mode, mode_t new_mode);
 
 mode_t modeAddingPermissions(mode_t old_mode, mode_t new_mode);
 
 mode_t modeSettingPartialPermissions(mode_t old_mode, mode_t new_mode);
 
+int openFile(const char *path, struct stat *buf);
+
+int concatenateFolderFilenamePath(const char *folder_path, const char *file_name, char *dest, unsigned int size);
+
 int convertIntegerToString(int n, char *dest, unsigned int size);
 
 int convertSignalNumberToString(int sig_no, const char **dest);
+
+bool isParentProcess(void);
+
+void leave(int ret_val);
+
 #endif // PROJECT_INCLUDE_UTILS_H_

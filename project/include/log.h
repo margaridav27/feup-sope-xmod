@@ -18,7 +18,11 @@ int openLogFile(bool truncate);
 
 int closeLogFile(int fd);
 
+int logEvent(event_t event, char *info);
+
 int logChangePermission(const command_t *command, mode_t old_mode, mode_t new_mode, bool isLink);
+
+int logCurrentStatus(const char *path, int numberOfFiles, int numberOfModifiedFiles);
 
 int logProcessCreation(char **argv, int argc);
 
@@ -27,9 +31,5 @@ int logProcessExit(int ret);
 int logSignalReceived(int sig_no);
 
 int logSignalSent(int sig_no, pid_t target);
-
-int logCurrentStatus(const char *path, int numberOfFiles, int numberOfModifiedFiles);
-
-int logEvent(event_t event, char *info);
 
 #endif // PROJECT_INCLUDE_LOG_H_

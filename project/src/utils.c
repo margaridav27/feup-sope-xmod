@@ -19,10 +19,10 @@ bool isParentProcess(void) {
     return getpid() == getpgrp(); // The group leader has the group id as its process id.
 }
 
-void leave(int ret) {
+void leave(int ret_val) {
     while (wait(NULL) >= 0); // Wait for any remaining children
-    logProcessExit(ret); // Record exit in logfile
-    _exit(ret); // Exit, closing all active file descriptors
+    logProcessExit(ret_val); // Record exit in logfile
+    _exit(ret_val); // Exit, closing all active file descriptors
 }
 
 mode_t modeRemovingPermissions(mode_t old_mode, mode_t new_mode) {

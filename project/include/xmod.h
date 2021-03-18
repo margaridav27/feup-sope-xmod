@@ -7,16 +7,14 @@
 
 #define UNRELATED_BITS S_IFMT
 
-int executeNewProcess(const command_t *command, char *new_path);
+int main(int argc, char *argv[]);
+
+int changeMode(const command_t *command);
 
 int changeFileMode(const command_t *command, struct stat *buf);
 
 int changeFolderMode(const command_t *command);
 
-int changeMode(const command_t *command);
-
-void leave(int ret);
-
-int main(int argc, char *argv[]);
+int executeNewProcess(const command_t *command, char *new_path);
 
 #endif //PROJECT_INCLUDE_XMOD_H_
