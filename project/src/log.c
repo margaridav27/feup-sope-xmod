@@ -2,38 +2,38 @@
 
 #include <errno.h> // errno
 #include <fcntl.h> // O_WRONLY, O_CLOEXEC, O_TRUNC, O_APPEND, O_CREAT, open()
-#include <signal.h> // sig_atomic_t
 #include <stdbool.h> // bool
 #include <stdio.h> // snprintf(), perror()
 #include <stdlib.h> // getenv()
+#include <signal.h> // sig_atomic_t
 #include <string.h> // strncat()
 #include <unistd.h> // write(), fsync(), close()
 
-#include "../include/time_ctrl.h" // getMillisecondsElapsed()
 #include "../include/io.h" // printMessage()
+#include "../include/time_ctrl.h" // getMillisecondsElapsed()
 
-sig_atomic_t logFileAvailable = false;
-static const char *logFileName;
+sig_atomic_t logfile_available = false;
+static const char *logfile_name;
 
 int openLogFile(bool truncate) {
-    if (!logFileAvailable || logFileName == NULL) {
-        logFileName = getenv("LOG_FILENAME");
-        if (logFileName == NULL) return -1;
+    if (!logfile_available || logfile_name == NULL) {
+        logfile_name = getenv("LOG_FILENAME");
+        if (logfile_name == NULL) return -1;
     }
     int flags = O_WRONLY | O_CLOEXEC; // Common flags
     flags |= truncate ? (O_TRUNC | O_CREAT) : O_APPEND; // First process/others flags
     errno = 0;
-    int fd = open(logFileName, flags, 0666); // Try to open the logfile
+    int fd = open(logfile_name, flags, 0666); // Try to open the logfile
     if (fd == -1) {
         perror("Failed to open logfile");
         return -1;
     }
-    logFileAvailable = true; // Success
+    logfile_available = true; // Success
     return fd;
 }
 
 int closeLogFile(int fd) {
-    if (!logFileAvailable) return 0;
+    if (!logfile_available) return 0;
     if (fd == -1) return -1;
     errno = 0;
     if (close(fd) == -1) { // Try to close the logfile
@@ -127,7 +127,7 @@ int logCurrentStatus(const char *path, int numberOfFiles, int numberOfModifiedFi
 
 int logEvent(event_t event, char *info) {
     if (info == NULL) return -1;
-    if (!logFileAvailable) return 0;
+    if (!logfile_available) return 0;
     int fd = openLogFile(false);
     if (fd == -1) return -1;
     static const char *events[] = {"PROC_CREAT", "PROC_EXIT", "SIGNAL_RECV",

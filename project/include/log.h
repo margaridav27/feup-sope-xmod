@@ -3,6 +3,7 @@
 
 #include <stdbool.h> // bool
 #include <sys/types.h> // pid_t
+
 #include "../include/utils.h" // command_t
 
 typedef enum {
@@ -23,7 +24,7 @@ int logProcessCreation(char **argv, int argc);
 
 int logProcessExit(int ret);
 
-int logSignalReceived(int signo);
+int logSignalReceived(int sig_no);
 
 int logSignalSent(int sig_no, pid_t target);
 

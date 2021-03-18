@@ -2,6 +2,7 @@
 #define PROJECT_INCLUDE_XMOD_H_
 
 #include <sys/stat.h> // struct stat, S_IFMT
+
 #include "../include/utils.h" // command_t
 
 #define UNRELATED_BITS S_IFMT

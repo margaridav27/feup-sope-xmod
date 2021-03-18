@@ -1,19 +1,20 @@
+#include "../include/xmod.h"
+
 #include <dirent.h> // opendir(), readdir(), DT_DIR, DT_LNK
+#include <limits.h> // MAX_PATH
 #include <stdbool.h> // true, false
 #include <stdio.h> // perror(),
 #include <string.h> // strcmp()
 #include <sys/stat.h> // chmod(), struct stat
 #include <unistd.h> // execv(),
-#include <limits.h> // MAX_PATH
 
-#include "../include/xmod.h"
-#include "../include/parse.h" // parseCommand()
 #include "../include/io.h" // printMessage()
-#include "../include/utils.h"
-#include "../include/signals.h" // setUpSignals()
 #include "../include/log.h" // logChangePermission(), leave(), modeRemovingPermissions(), modeAddingPermissions(), modeSettingPartialPermissions(), concatenateFolderFilenamePath()
+#include "../include/parse.h" // parseCommand()
+#include "../include/signals.h" // setUpSignals()
+#include "../include/utils.h" //COMBACK
 
-int numberOfFilesFound = 0, numberOfModifiedFiles = 0, numberOfChildren = 0;
+int number_of_files_found = 0, number_of_modified_files = 0, number_of_children = 0;
 
 int executeNewProcess(const command_t *command, char *new_path) {
     if (command == NULL || new_path == NULL) return -1;
@@ -30,7 +31,7 @@ int executeNewProcess(const command_t *command, char *new_path) {
 
 int changeFileMode(const command_t *command, struct stat *buf) {
     if (command == NULL || buf == NULL) return -1;
-    ++numberOfFilesFound;
+    ++number_of_files_found;
     mode_t mode = buf->st_mode;
     mode_t persistent_bits = mode & UNRELATED_BITS; // Save bits unrelated to our permissions
     // Calculate a new mode
@@ -46,7 +47,7 @@ int changeFileMode(const command_t *command, struct stat *buf) {
         perror("xmod: failed to change permissions");
         return -1;
     }
-    if (new_mode != mode) ++numberOfModifiedFiles;
+    if (new_mode != mode) ++number_of_modified_files;
     if (logChangePermission(command, buf->st_mode, new_mode, false)) return -1;
     return 0;
 }
@@ -79,7 +80,7 @@ int changeFolderMode(const command_t *command) {
             } else if (pid == 0) {              // Child process, new invocation with different path.
                 if (executeNewProcess(command, new_path)) _exit(-1);
             } else {                            // Parent process, keep going.
-                ++numberOfChildren;             // Another child
+                ++number_of_children;             // Another child
                 continue;                       // Next file
             }
         } else if (d->d_type == DT_LNK) {       // Symbolic link when iterating folder: do not change

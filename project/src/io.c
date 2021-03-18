@@ -1,8 +1,8 @@
+#include "../include/io.h"
+
 #include <stdio.h> // snprintf(), BUFSIZ
 #include <string.h> // strncat()
 #include <unistd.h> // write()
-
-#include "../include/io.h"
 
 int printChangeMessage(const char *path, mode_t previous_mode, mode_t new_mode, char *info, unsigned int size) {
     if (path == NULL || info == NULL) return -1;
@@ -56,26 +56,26 @@ mode_t clearExtraBits(mode_t mode) {
 }
 
 //COMBACK: Maybe simplify this function?
-int printMessage(mode_t new_mode, mode_t old_mode, const command_t *command, bool isLink) {
+int printMessage(mode_t new_mode, mode_t old_mode, const command_t *command, bool is_link) {
     if (command == NULL) return -1;
     if (!command->verbose && !command->changes) return 0; // No need to log
-    char info[BUFSIZ] = {0};
+    char buf[BUFSIZ] = {0};
     // Clear these bits for printing
     old_mode = clearExtraBits(old_mode);
     new_mode = clearExtraBits(new_mode);
     if (command->verbose) { // Print all information
         if (new_mode == old_mode) {
-            if (isLink) {
-                if (printSymbolicMessage(command->path, info, sizeof(info) - strlen(info) - 1))
+            if (is_link) {
+                if (printSymbolicMessage(command->path, buf, sizeof(buf) - strlen(buf) - 1))
                     return -1;
-            } else if (printRetainMessage(command->path, old_mode, info,
-                                          sizeof(info) - strlen(info) - 1)) { return -1; }
-        } else if (printChangeMessage(command->path, old_mode, new_mode, info, sizeof(info) - strlen(info) - 1)) {
+            } else if (printRetainMessage(command->path, old_mode, buf,
+                                          sizeof(buf) - strlen(buf) - 1)) { return -1; }
+        } else if (printChangeMessage(command->path, old_mode, new_mode, buf, sizeof(buf) - strlen(buf) - 1)) {
             return -1;
         }
     } else if (command->changes && new_mode != old_mode) {
-        if (printChangeMessage(command->path, old_mode, new_mode, info, sizeof(info) - strlen(info) - 1)) return -1;
+        if (printChangeMessage(command->path, old_mode, new_mode, buf, sizeof(buf) - strlen(buf) - 1)) return -1;
     }
-    if (write(STDOUT_FILENO, info, strlen(info)) == -1) return -1;
+    if (write(STDOUT_FILENO, buf, strlen(buf)) == -1) return -1;
     return 0;
 }

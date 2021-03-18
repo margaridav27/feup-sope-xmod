@@ -1,3 +1,5 @@
+#include "../include/time_ctrl.h"
+
 #include <errno.h> // errno
 #include <stdio.h> // BUFSIZ
 #include <string.h> // strlen()
@@ -5,7 +7,6 @@
 #include <time.h> // clock_gettime()
 #include <unistd.h> // getpgrp()
 
-#include "../include/time_ctrl.h"
 #include "../include/utils.h" // convertIntegerToString()
 
 int getStartTime(struct timespec *dest) {
@@ -24,5 +25,5 @@ int getMillisecondsElapsed(void) {
     struct timespec now, then;
     if (getStartTime(&then)) return -1; // Get first process' start time
     if (clock_gettime(CLOCK_REALTIME, &now) == -1) return -1; // Get current time
-    return (now.tv_sec - then.tv_sec) * 1e3 + (now.tv_nsec - then.tv_nsec) * 1e-6;
+    return (int) ((double) (now.tv_sec - then.tv_sec) * 1e3 + (double) (now.tv_nsec - then.tv_nsec) * 1e-6);
 }

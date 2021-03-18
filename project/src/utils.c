@@ -1,16 +1,16 @@
 #include "../include/utils.h"
 
-#include <unistd.h> // getpid(), getpgrp(), _exit()
-#include <stdio.h> // perror(), snprintf()
-#include <sys/stat.h> // stat()
-#include <sys/wait.h> // wait()
-#include <limits.h> // PATH_MAX
-#include <stdbool.h> // bool
-#include <string.h> // strlen()
+#include <limits.h> // PATH_MAX //COMBACK
 //  SIGHUP, SIGINT, SIGQUIT, SIGILL, SIGTRAP, SIGABRT, SIGFPE, SIGKILL, SIGUSR1 , SIGSEGV, SIGUSR2 , SIGPIPE, SIGALRM,
 //  SIGTERM, SIGCHLD , SIGCONT , SIGSTOP , SIGTSTP , SIGTTIN , SIGTTOU , SIGURG , SIGXCPU , SIGXFSZ , SIGVTALRM,
 //  SIGPROF , SIGWINCH , SIGPOLL
 #include <signal.h>
+#include <stdbool.h> // bool
+#include <stdio.h> // perror(), snprintf()
+#include <string.h> // strlen()
+#include <sys/stat.h> // stat()
+#include <sys/wait.h> // wait()
+#include <unistd.h> // getpid(), getpgrp(), _exit()
 
 #include "../include/log.h" // logProcessExit()
 
@@ -62,20 +62,20 @@ int concatenateFolderFilenamePath(const char *folder_path, const char *file_name
 
 int convertIntegerToString(int n, char *dest, unsigned int size) {
     if (dest == NULL || size == 0) return -1;
-    unsigned noDigits = 0;
+    unsigned number_of_digits = 0;
     if (n < 0) {
         // The minus sign is the first character.
         dest[0] = '-';
-        ++noDigits;
+        ++number_of_digits;
         n *= -1; // Pretend the number is positive from now on.
     }
-    int temp = n;
-    while (temp /= 10) ++noDigits; // Count number of digits.
-    if (noDigits > size) return -1; // Not enough size to store the whole number
+    int _n = n;
+    while (_n /= 10) ++number_of_digits; // Count number of digits.
+    if (number_of_digits > size) return -1; // Not enough size to store the whole number
     do {
-        char digit = '0' + (n % 10);    // Extract last digit
-        dest[noDigits] = digit;         // Place last digit
-        --noDigits;                     // One less digit to place
+        char digit = (char) ('0' + (n % 10));    // Extract last digit
+        dest[number_of_digits] = digit;         // Place last digit
+        --number_of_digits;                     // One less digit to place
         n /= 10;                        // Remove the last digit
     } while (n > 0);                    // While there are digits
     return 0;
