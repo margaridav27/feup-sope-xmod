@@ -16,7 +16,7 @@ int printFailedMessage(const char *path, mode_t new_mode);
 //COMBACK: Will we be using this?
 int printNoPermissionMessage(const char *path);
 
-int parseModeToString(mode_t mode, char *str);
+int parseModeToString(mode_t mode, char *str, unsigned int size);
 
 mode_t clearExtraBits(mode_t mode);
 
