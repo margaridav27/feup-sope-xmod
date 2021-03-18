@@ -9,7 +9,7 @@ void parentSigintHandler(void);
 
 void childSigintHandler(void);
 
-void terminateProgramParent(void);
+int terminateProgramParent(void);
 
 int continueProgramParent(void);
 

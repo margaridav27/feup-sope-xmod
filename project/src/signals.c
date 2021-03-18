@@ -87,13 +87,14 @@ int setUpSignals(const char *_path) {
     return r;
 }
 
-void terminateProgramParent(void) {
+int terminateProgramParent(void) {
     pid_t pgrp = getpgrp();
-    killpg(0, SIGCONT); // Wake up children
-    logSignalSent(SIGCONT, pgrp);
-    killpg(0, SIGUSR1); // Ask children to terminate
-    logSignalSent(SIGUSR1, pgrp);
+    if (killpg(0, SIGCONT)) return -1; // Wake up children
+    if (logSignalSent(SIGCONT, pgrp)) return -1;
+    if (killpg(0, SIGUSR1)) return -1; // Ask children to terminate
+    if (logSignalSent(SIGUSR1, pgrp)) return -1;
     leave(1); // Abnormal termination: exit code 1
+    return 0;
 }
 
 int continueProgramParent(void) {
