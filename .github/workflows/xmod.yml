@@ -1,0 +1,19 @@
+name: Test xmod
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+jobs:
+  xmod:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./project
+    steps:
+      - uses: actions/checkout@v2
+      - name: Make
+        run: make
+      - name: Run Tests
+        run: ./test bare_minimum bare_minumum/file2.txt
