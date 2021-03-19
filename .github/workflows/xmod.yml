@@ -16,4 +16,4 @@ jobs:
       - name: Make
         run: make
       - name: Run Tests
-        run: ./test.sh bare_minimum bare_minumum/file2.txt
+        run: ./test.sh bare_minimum bare_minimum/file2.txt
