@@ -2,3 +2,13 @@
 -v u+r
 -vR 555
 -v a=w
+-cR 777
+-c u+r
+-cR 555
+-c a=w
+-vR u-w
+-vR a-w
+-cR u-w
+-cR a-w
+-cR u+x
+-cR a+x
