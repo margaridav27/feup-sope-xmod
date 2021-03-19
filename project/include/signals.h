@@ -3,7 +3,7 @@
 
 int setUpSignals(const char *_path);
 
-void generic_signal_handler(int sig_no);
+void genericSignalHandler(int sig_no);
 
 void parentSigintHandler(void);
 

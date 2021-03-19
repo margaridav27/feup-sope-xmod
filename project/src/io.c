@@ -29,7 +29,6 @@ int printRetainMessage(const char *path, mode_t mode, char *info, unsigned int s
     return 0;
 }
 
-
 int printSymbolicMessage(const char *path, char *info, unsigned int size) {
     if (path == NULL || info == NULL || size == 0) return -1;
     strncat(info, "neither symbolic link '", size - 1);

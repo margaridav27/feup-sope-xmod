@@ -17,7 +17,7 @@ const int *const _number_of_children = &number_of_children;
 
 sig_atomic_t prompt = false;
 
-void generic_signal_handler(int sig_no) {
+void genericSignalHandler(int sig_no) {
     logSignalReceived(sig_no);
 
     struct sigaction newAction;
@@ -93,7 +93,7 @@ int setUpSignals(const char *_path) {
     sigemptyset(&terminate_action.sa_mask);
     terminate_action.sa_flags = 0;
 
-    generic_action.sa_handler = generic_signal_handler; // handler to print signal received message
+    generic_action.sa_handler = genericSignalHandler; // handler to print signal received message
     sigemptyset(&generic_action.sa_mask);
     generic_action.sa_flags = SA_RESTART; // Useful in case we interrupt a system call
 
