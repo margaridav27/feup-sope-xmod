@@ -69,6 +69,11 @@ int changeFolderMode(const command_t *command) {
         new_command.path = new_path;
 
         struct stat buf;
+        if (d->d_type == DT_LNK) {       // Symbolic link when iterating folder: do not change
+            if (printMessage(0, 0, &new_command, true)) continue; // Failure? Next file.
+            continue; // Next.
+        }
+
         if (openFile(new_path, &buf)) continue; // Failed to open this file, next.
         if (d->d_type == DT_DIR) {              // Directory -> new process
             pid_t pid = fork();
@@ -81,8 +86,6 @@ int changeFolderMode(const command_t *command) {
                 ++number_of_children;             // Another child
                 continue;                       // Next file
             }
-        } else if (d->d_type == DT_LNK) {       // Symbolic link when iterating folder: do not change
-            if (printMessage(0, 0, &new_command, true)) continue; // Failure? Next file.
         } else {                                // File: change
             if (changeFileMode(&new_command, &buf)) continue;  // Failure? Next file.
         }
