@@ -30,7 +30,7 @@ int executeNewProcess(const command_t *command, char *new_path) {
 }
 
 int changeFileMode(const command_t *command, struct stat *buf) {
-    if (command == NULL || buf == NULL) return -1;
+    if (command == NULL) return -1;
     ++number_of_files_found;
     mode_t mode = buf->st_mode;
     mode_t persistent_bits = mode & UNRELATED_BITS; // Save bits unrelated to our permissions
@@ -57,7 +57,7 @@ int changeFolderMode(const command_t *command) {
     // Read the folder
     DIR *dir = opendir(command->path);
     if (dir == NULL) {
-        fprintf(stderr, "chmod: cannot read directory '%s': %s\n", command->path, strerror(errno));
+        fprintf(stderr, "xmod: cannot read directory '%s': %s\n", command->path, strerror(errno));
         return -1;
     }
     struct dirent *d;

@@ -15,3 +15,9 @@
 -cR a-w
 -cR u+x
 -cR a+x
+-vR a+r
+-cR a+r
+-vR a=x
+-cvR o+x
+-c a-r
+-Rv o=rxw

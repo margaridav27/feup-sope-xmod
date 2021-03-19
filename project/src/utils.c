@@ -46,7 +46,7 @@ int openFile(const char *path, struct stat *buf) {
     if (path == NULL || buf == NULL) return -1;
     // Try to open the file.
     if (stat(path, buf) == -1) {
-        fprintf(stderr, "chmod : cannot access '%s': %s\n", path, strerror(errno));
+        fprintf(stderr, "xmod : cannot access '%s': %s\n", path, strerror(errno));
         return -1;
     }
     return 0;
