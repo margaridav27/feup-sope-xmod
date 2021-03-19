@@ -1,6 +1,0 @@
-./build/xmod -c 700 ./test/res
-./build/xmod -c 700 ./test/res -> sem mensagem
-./build/xmod -c 700 ./test/res/
-./build/xmod -c 777 ./test/res/linktosubfile1
-./build/xmod -vR 444 ./test/res
-./build/xmod -vR 777 ./test/res
