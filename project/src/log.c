@@ -50,7 +50,6 @@ int logChangePermission(const command_t *command, mode_t old_mode, mode_t new_mo
     snprintf(info, sizeof(info) - 1, "%s : %o : %o", command->path, old_mode, new_mode);
     if (n < 0 || n >= (int) sizeof(info) - 1) return -1;
     if (new_mode != old_mode) logEvent(FILE_MODF, info);
-    //COMBACK: Properly print this message
     if (printMessage(new_mode, old_mode, command, isLink)) return -1;
     return 0;
 }

@@ -52,15 +52,15 @@ void parentSigintHandler(void) {
     while (number_of_paused < *_number_of_children && waitpid(0, NULL, WUNTRACED) >= 0) ++number_of_paused;
     printCurrentStatus(path, *_number_of_files_found, *_number_of_modified_files);
     char c = 'Y';
+    sigaction(SIGINT, &action, &oldAction); //Ignore all SIGINT during the prompt
     do {
         const char *s = "Are you sure that you want to terminate? (Y/N) ";
         write(STDOUT_FILENO, s, strlen(s));
         fsync(STDOUT_FILENO);
         int n = read(STDIN_FILENO, &c, 1);
-        sigaction(SIGINT, &action, &oldAction); //catch all SIGINT thrown during the prompt
-        sigaction(SIGINT, &oldAction, NULL);
         if (n == -1) break;
     } while (c != 'Y' && c != 'y' && c != 'N' && c != 'n');
+    sigaction(SIGINT, &oldAction, NULL); // Re-register SIGINT
     prompt = false;
     if (c == 'Y' || c == 'y') terminateProgramParent();
     else if (c == 'N' || c == 'n')
@@ -71,7 +71,7 @@ void childSigintHandler(void) {
 
     struct sigaction action, oldAction;
 
-    action.sa_handler = SIG_IGN; // no handler specified
+    action.sa_handler = SIG_IGN;
     sigemptyset(&action.sa_mask);
     action.sa_flags = 0;
 
@@ -82,8 +82,8 @@ void childSigintHandler(void) {
     logSignalReceived(SIGSTOP);
     raise(SIGSTOP);
 
-    sigaction(SIGINT, &action, &oldAction);
-    sigaction(SIGINT, &oldAction, NULL);
+    sigaction(SIGINT, &action, &oldAction); // Ignore SIGINT during the parent's prompt
+    sigaction(SIGINT, &oldAction, NULL); // Re-register SIGINT
 }
 
 int setUpSignals(const char *_path) {

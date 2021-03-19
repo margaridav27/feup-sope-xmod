@@ -42,7 +42,6 @@ mode_t clearExtraBits(mode_t mode) {
     return mode & ~(S_IFMT);
 }
 
-//COMBACK: Maybe simplify this function?
 int printMessage(mode_t new_mode, mode_t old_mode, const command_t *command, bool is_link) {
     if (command == NULL) return -1;
     if (!command->verbose && !command->changes) return 0; // No need to log

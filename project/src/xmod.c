@@ -12,7 +12,6 @@
 #include "../include/log.h" // logChangePermission(), leave(), modeRemovingPermissions(), modeAddingPermissions(), modeSettingPartialPermissions(), concatenateFolderFilenamePath()
 #include "../include/parse.h" // parseCommand()
 #include "../include/signals.h" // setUpSignals()
-#include "../include/utils.h" //COMBACK
 
 int number_of_files_found = 0, number_of_modified_files = 0, number_of_children = 0;
 
@@ -62,7 +61,6 @@ int changeFolderMode(const command_t *command) {
     }
     struct dirent *d;
     while ((d = readdir(dir)) != NULL) {
-        sleep(1); //TODO: Uncomment me to check signal handling
         // Skip the current and previous directory: those were handled in previous calls
         if (strcmp(d->d_name, ".") == 0 || strcmp(d->d_name, "..") == 0) continue;
         char new_path[PATH_MAX] = {0};
@@ -84,7 +82,6 @@ int changeFolderMode(const command_t *command) {
                 continue;                       // Next file
             }
         } else if (d->d_type == DT_LNK) {       // Symbolic link when iterating folder: do not change
-            //COMBACK: Might need to rethink function sequence
             if (printMessage(0, 0, &new_command, true)) continue; // Failure? Next file.
         } else {                                // File: change
             if (changeFileMode(&new_command, &buf)) continue;  // Failure? Next file.
@@ -109,7 +106,6 @@ int changeMode(const command_t *command) {
 }
 
 int main(int argc, char *argv[]) {
-    //COMBACK: Find a better way to structure this
     int fd = openLogFile(isParentProcess()); // Try to open the logfile
     if (isParentProcess() && fd == -1)
         fprintf(stderr, "Variable LOG_FILENAME not defined.\n");
