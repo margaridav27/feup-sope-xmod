@@ -18,4 +18,4 @@ jobs:
     - name: make
       run: make
     - name: test
-      run: ./test.sh bare_minimum bare_minimum/level0_1/file5.txt
+      run: echo $PWD
