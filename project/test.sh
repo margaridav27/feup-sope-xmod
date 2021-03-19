@@ -70,5 +70,6 @@ while [ $i -lt "$no_tests" ]; do
   no_failed+=$?
   ((++i))
 done
+chmod -R 777 "$TEMP_DIR"
 rm -rf "$TEMP_DIR" &>/dev/null
 exit $no_failed
