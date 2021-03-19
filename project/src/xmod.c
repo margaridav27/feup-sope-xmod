@@ -1,190 +1,123 @@
-#include <dirent.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <signal.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <sys/time.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <unistd.h>
-#include <limits.h>
-
-#include "../include/io.h"
-#include "../include/log.h"
-#include "../include/parse.h"
-#include "../include/time_ctrl.h"
 #include "../include/xmod.h"
 
-int createNewProcess(const command_t *command, char *new_path) {
-    static char *new_argv[_POSIX_ARG_MAX] = {};
-    for (int i = 0; i < command->argc; ++i) new_argv[i] = command->argv[i];
-    new_argv[command->argc - 1] = new_path;
-    if (execv(new_argv[0], new_argv)) {
+#include <dirent.h> // opendir(), readdir(), DT_DIR, DT_LNK
+#include <limits.h> // MAX_PATH
+#include <stdbool.h> // true, false
+#include <stdio.h> // perror(),
+#include <string.h> // strcmp()
+#include <sys/stat.h> // chmod(), struct stat
+#include <unistd.h> // execv(),
+
+#include "../include/io.h" // printMessage()
+#include "../include/log.h" // logChangePermission(), leave(), modeRemovingPermissions(), modeAddingPermissions(), modeSettingPartialPermissions(), concatenateFolderFilenamePath()
+#include "../include/parse.h" // parseCommand()
+#include "../include/signals.h" // setUpSignals()
+#include "../include/utils.h" //COMBACK
+
+int number_of_files_found = 0, number_of_modified_files = 0, number_of_children = 0;
+
+int executeNewProcess(const command_t *command, char *new_path) {
+    if (command == NULL || new_path == NULL) return -1;
+    static char *new_argv[_POSIX_ARG_MAX];
+    for (int i = 0; i < command->argc; ++i) new_argv[i] = command->argv[i]; // Copy arguments
+    new_argv[command->argc - 1] = new_path;                                     // Set path
+    logProcessCreation(new_argv, command->argc);
+    if (execv(new_argv[0], new_argv) == -1) {
         perror("xmod: exec");
-        return 1;
+        return -1;
     }
     return 0;
 }
 
-int concatenateFolderFilenamePath(const char *folder_path, const char *file_name, char *dest) {
-    if (folder_path == NULL || file_name == NULL || dest == NULL) return 1;
-    snprintf(dest, PATH_MAX, "%s/%s", folder_path, file_name);
-    return 0;
-}
-
-int openFile(const char *path, struct stat *buf) {
-    if (path == NULL || buf == NULL) return 1;
-    int r = stat(path, buf);
-    if (r == -1) {
-        perror("xmod: failed to open file");
-        return 1;
-    }
-    return 0;
-}
-
-mode_t removePermissions(mode_t old_mode, mode_t new_mode) {
-    return old_mode & ~(new_mode); // Remove the relevant bits, keeping others
-}
-
-mode_t addPermissions(mode_t old_mode, mode_t new_mode) {
-    return old_mode | new_mode; // Add the relevant bits, keeping others
-}
-
-
-mode_t setPartialPermissions(mode_t old_mode, mode_t new_mode) {
-    if (new_mode & S_IRWXO) {
-        old_mode &= (~S_IRWXO);
-    } else if (new_mode & S_IRWXG) {
-        old_mode &= (~S_IRWXG);
-    } else if (new_mode & S_IRWXU) {
-        old_mode &= (~S_IRWXU);
-    }
-    return old_mode | new_mode;
-}
-
-int logChangePermission(const command_t *command, mode_t old_mode, mode_t new_mode, bool isLink) {
-    char info[2048] = {};
-    snprintf(info, sizeof(info), "%s : %o : %o", command->path, old_mode, new_mode);
-    if (new_mode != old_mode) logEvent(getpid(), FILE_MODF, info);
-    //COMBACK: Properly print this message
-    printMessage(new_mode, old_mode, command, isLink);
-    return 0;
-}
-
-int logProcessCreation(char **argv, int argc) {
-    char info[2048] = {};
-    snprintf(info, sizeof(info), "%s", argv[0]);
-    for (int i = 1; i < argc; ++i) {
-        if (i != argc) snprintf(info + strlen(info), sizeof(info) - strlen(info), " ");
-        snprintf(info + strlen(info), sizeof(info) - strlen(info), "%s", argv[i]);
-    }
-    logEvent(getpid(), PROC_CREAT, info);
-    return 0;
-}
-
-int logProcessExit(int ret) {
-    char info[2048] = {};
-    snprintf(info, sizeof(info), "%d", ret);
-    logEvent(getpid(), PROC_EXIT, info);
-    return 0;
-}
-
-int changeFileMode(const command_t *command, struct stat *buf, bool isLink) {
+int changeFileMode(const command_t *command, struct stat *buf) {
+    if (command == NULL || buf == NULL) return -1;
+    ++number_of_files_found;
     mode_t mode = buf->st_mode;
-    mode_t persistent_bits = mode & S_IFMT;
+    mode_t persistent_bits = mode & UNRELATED_BITS; // Save bits unrelated to our permissions
+    // Calculate a new mode
     mode_t new_mode;
-    if (command->action == ACTION_REMOVE) {
-        new_mode = removePermissions(mode, command->mode);
-    } else if (command->action == ACTION_ADD) {
-        new_mode = addPermissions(mode, command->mode);
-    } else if (command->action == ACTION_PARTIAL_SET) {
-        new_mode = setPartialPermissions(mode, command->mode);
-    } else if (command->action == ACTION_SET) {
-        new_mode = command->mode | persistent_bits;
-    } else {
-        return 1;
-    }
+    if (command->action == ACTION_REMOVE) new_mode = modeRemovingPermissions(mode, command->mode);
+    else if (command->action == ACTION_ADD) new_mode = modeAddingPermissions(mode, command->mode);
+    else if (command->action == ACTION_PARTIAL_SET) new_mode = modeSettingPartialPermissions(mode, command->mode);
+    else if (command->action == ACTION_SET) new_mode = command->mode | persistent_bits;
+    else return 1; // Invalid action
+
+    // Try to change the permissions
     if (chmod(command->path, new_mode) == -1) {
         perror("xmod: failed to change permissions");
-        return 1;
+        return -1;
     }
-    logChangePermission(command, buf->st_mode, new_mode, isLink);
+    if (new_mode != mode) ++number_of_modified_files;
+    if (logChangePermission(command, buf->st_mode, new_mode, false)) return -1;
     return 0;
 }
 
 int changeFolderMode(const command_t *command) {
+    if (command == NULL) return -1;
     // Read the folder
     DIR *dir = opendir(command->path);
     if (dir == NULL) {
         perror("xmod: failed to open folder");
-        return 1;
+        return -1;
     }
     struct dirent *d;
     while ((d = readdir(dir)) != NULL) {
-        //COMBACK: This might be a good place to install our handler (in case there are many subfolders)
+        sleep(1); //TODO: Uncomment me to check signal handling
+        // Skip the current and previous directory: those were handled in previous calls
         if (strcmp(d->d_name, ".") == 0 || strcmp(d->d_name, "..") == 0) continue;
-        char new_path[PATH_MAX];
+        char new_path[PATH_MAX] = {0};
         command_t new_command = *command;
-        concatenateFolderFilenamePath(command->path, d->d_name, new_path);
+        if (concatenateFolderFilenamePath(command->path, d->d_name, new_path, sizeof(new_path))) continue;
         new_command.path = new_path;
 
         struct stat buf;
-        if (openFile(new_path, &buf)) continue;
-        if (d->d_type == DT_DIR) {
+        if (openFile(new_path, &buf)) continue; // Failed to open this file, next.
+        if (d->d_type == DT_DIR) {              // Directory -> new process
             pid_t pid = fork();
-            if (pid < 0) {
+            if (pid < 0) {                      // Fork error
                 perror("xmod: fork");
-                continue;
-            } else if (pid == 0) {
-                createNewProcess(command, new_path);
-            } else {
-                continue;
+                continue;                       // Next file
+            } else if (pid == 0) {              // Child process, new invocation with different path.
+                if (executeNewProcess(command, new_path)) _exit(-1);
+            } else {                            // Parent process, keep going.
+                ++number_of_children;             // Another child
+                continue;                       // Next file
             }
-        } else {
-            bool link = d->d_type == DT_LNK;
-            changeFileMode(&new_command, &buf, link);
+        } else if (d->d_type == DT_LNK) {       // Symbolic link when iterating folder: do not change
+            //COMBACK: Might need to rethink function sequence
+            if (printMessage(0, 0, &new_command, true)) continue; // Failure? Next file.
+        } else {                                // File: change
+            if (changeFileMode(&new_command, &buf)) continue;  // Failure? Next file.
         }
     }
-    closedir(dir);
-    //COMBACK: This might also be a good place to install our handler (small folders fork fast)
-    //COMBACK: Properly wait for children: this solution won't allow us to receive SIGINT from here on
-    int ret;
-    while (wait(&ret) > 0) {}
+    // Try to close the folder on normal exit.
+    // In the case of a premature exit, there is no need since _exit() also closes the file descriptors.
+    if (closedir(dir)) return -1;
     return 0;
 }
 
 int changeMode(const command_t *command) {
+    if (command == NULL) return -1;
     struct stat buf;
-    if (openFile(command->path, &buf)) return 1;
-    if (changeFileMode(command, &buf, 0)) return 1;
+    if (openFile(command->path, &buf)) return -1;           // Try to open the file
+    if (changeFileMode(command, &buf)) return -1;           // Try to change the file's mode
 
-    if (S_ISDIR(buf.st_mode) && command->recursive) {
-        if (changeFolderMode(command)) return 1;
+    if (S_ISDIR(buf.st_mode) && command->recursive) { // Recursive option + Directory? Change it.
+        if (changeFolderMode(command)) return -1;
     }
     return 0;
 }
 
-bool isParentProcess(void) {
-    return getpid() == getpgid(0);
-}
-
-void leave(int ret) {
-    logProcessExit(ret);
-    exit(ret);
-}
-
 int main(int argc, char *argv[]) {
-    getStartTime();
-    isParentProcess() ? openLogFile("w") : openLogFile("a");
-    closeLogFile();
+    //COMBACK: Find a better way to structure this
+    int fd = openLogFile(isParentProcess()); // Try to open the logfile
+    if (isParentProcess() && fd == -1)
+        fprintf(stderr, "Variable LOG_FILENAME not defined.\n");
+    closeLogFile(fd);
     command_t result;
-    if (parseCommand(argc, argv, &result)) leave(1);
-    logProcessCreation(argv, argc);
-    changeMode(&result);
+    if (parseCommand(argc, argv, &result)) leave(-1); // Failure parsing: premature exit
+    if (logProcessCreation(argv, argc)) {}
+    if (setUpSignals(result.path)) {}
+    if (changeMode(&result)) leave(-1); // Failure: exit with error code
     leave(0);
-    return 0;
 }

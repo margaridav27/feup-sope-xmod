@@ -27,7 +27,7 @@ INCLUDE_FLAGS := $(addprefix -I, $(INCLUDE_DIRECTORIES))
 CPPFLAGS := $(INCLUDE_FLAGS) -MMD -MP
 
 # Compiler flags
-CFLAGS := -Wall -Werror
+CFLAGS := -Wall -Werror -Wpedantic -Wextra -std=gnu11
 
 # Linker flags
 # LDFLAGS := 
@@ -38,11 +38,11 @@ all: $(TARGET_EXECUTABLE)
 $(BUILD_DIRECTORY)/%.c.o: %.c
 	@echo "Building: " $< 
 	@mkdir -p $(dir $@)
-	@$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+	@$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@ -g
 
 $(TARGET_EXECUTABLE): $(OBJECT_FILES)
 	@echo "Linking: " $@
-	@$(CC) $(OBJECT_FILES) -o $@ $(LDFLAGS)
+	@$(CC) $(OBJECT_FILES) -o $@ $(LDFLAGS) -g
 
 .PHONY: clean
 clean:

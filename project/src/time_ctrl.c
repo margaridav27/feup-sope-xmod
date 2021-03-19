@@ -1,32 +1,29 @@
 #include "../include/time_ctrl.h"
 
-#include <errno.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <time.h>
-#include <unistd.h>
+#include <errno.h> // errno
+#include <stdio.h> // BUFSIZ
+#include <string.h> // strlen()
+#include <sys/stat.h> // stat()
+#include <time.h> // clock_gettime()
+#include <unistd.h> // getpgrp()
 
-static bool start_time_available = false;
-static struct timespec startTime;
+#include "../include/utils.h" // convertIntegerToString()
 
-int getStartTime() {
-    char path[2048] = "/proc/";
-    int ret = snprintf(path + strlen(path), sizeof(path) - strlen(path), "%d", getpgid(0));
-    if (ret < 0) return 1;
+int getStartTime(struct timespec *dest) {
+    if (dest == NULL) return -1;
+    char path[BUFSIZ] = "/proc/";
+    if (convertIntegerToString(getpgrp(), path + strlen(path), sizeof(path) - strlen(path))) return -1;
     struct stat buf;
     errno = 0;
-    ret = stat(path, &buf);
-    if (ret == -1) return 1;
-    startTime = buf.st_atim;
-    start_time_available = true;
+    // Try to read process file's info
+    if (stat(path, &buf) == -1) return -1;
+    *dest = buf.st_atim; // Store the result
     return 0;
 }
 
-double getMillisecondsElapsed() {
-    if (!start_time_available) return -1;
-    struct timespec now;
-    clock_gettime(CLOCK_REALTIME, &now);
-    return (now.tv_sec - startTime.tv_sec) * 1e3 + (now.tv_nsec - startTime.tv_nsec) * 1e-6;
+int getMillisecondsElapsed(void) {
+    struct timespec now, then;
+    if (getStartTime(&then)) return -1; // Get first process' start time
+    if (clock_gettime(CLOCK_REALTIME, &now) == -1) return -1; // Get current time
+    return (int) ((double) (now.tv_sec - then.tv_sec) * 1e3 + (double) (now.tv_nsec - then.tv_nsec) * 1e-6);
 }
