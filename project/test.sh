@@ -7,7 +7,7 @@ fi
 
 DIR_NAME=$1
 FILE_NAME=$2
-find "$DIR_NAME" "$FILE_NAME" &> /dev/null|| exit 1
+find "$DIR_NAME" "$FILE_NAME" &> /dev/null || exit 1
 ROOT=$PWD
 OUR_EXEC=$ROOT/xmod
 CHMOD_EXEC="chmod"
@@ -22,22 +22,26 @@ cp "$FILE_NAME" "$OUR_DIR" || exit 1
 cp -R "$DIR_NAME" "$CHMOD_DIR" || exit 1
 cp "$FILE_NAME" "$CHMOD_DIR" || exit 1
 
-readarray -t tests < options.txt | exit 1
+readarray -t tests < options.txt || exit 1
 no_tests=${#tests[@]}
 
 cd "$OUR_DIR" || exit 1
 i=0
+echo "-------XMOD-------"
 while [ $i -lt "$no_tests" ]; do
-  $OUR_EXEC ${tests[$i]} "$DIR_NAME" | sort -b 1>results/output_directory_test_$i
+  echo  ${tests[$i]}
   $OUR_EXEC ${tests[$i]} "$FILE_NAME" | sort -b 1>results/file_test_$i
+  $OUR_EXEC ${tests[$i]} "$DIR_NAME" | sort -b 1>results/output_directory_test_$i
   ((++i))
 done
 
 cd "$CHMOD_DIR" || exit 1
 i=0
+echo "-------CHMOD-------"
 while [ $i -lt "$no_tests" ]; do
-  $CHMOD_EXEC ${tests[$i]} "$DIR_NAME" | sort -b 1>results/output_directory_test_$i
+  echo  ${tests[$i]}
   $CHMOD_EXEC ${tests[$i]} "$FILE_NAME" | sort -b 1>results/file_test_$i
+  $CHMOD_EXEC ${tests[$i]} "$DIR_NAME" | sort -b 1>results/output_directory_test_$i
   ((++i))
 done
 
