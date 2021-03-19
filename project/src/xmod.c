@@ -7,6 +7,7 @@
 #include <string.h> // strcmp()
 #include <sys/stat.h> // chmod(), struct stat
 #include <unistd.h> // execv(),
+#include <errno.h>
 
 #include "../include/io.h" // printMessage()
 #include "../include/log.h" // logChangePermission(), leave(), modeRemovingPermissions(), modeAddingPermissions(), modeSettingPartialPermissions(), concatenateFolderFilenamePath()
@@ -56,7 +57,7 @@ int changeFolderMode(const command_t *command) {
     // Read the folder
     DIR *dir = opendir(command->path);
     if (dir == NULL) {
-        perror("xmod: failed to open folder");
+        fprintf(stderr, "chmod: cannot read directory '%s': %s\n", command->path, strerror(errno));
         return -1;
     }
     struct dirent *d;

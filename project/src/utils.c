@@ -10,6 +10,7 @@
 #include <sys/stat.h> // stat()
 #include <sys/wait.h> // wait()
 #include <unistd.h> // getpid(), getpgrp(), _exit()
+#include <errno.h>
 
 #include "../include/log.h" // logProcessExit()
 
@@ -45,7 +46,7 @@ int openFile(const char *path, struct stat *buf) {
     if (path == NULL || buf == NULL) return -1;
     // Try to open the file.
     if (stat(path, buf) == -1) {
-        perror("xmod : failed to open file");
+        fprintf(stderr, "chmod : cannot access '%s': %s\n", path, strerror(errno));
         return -1;
     }
     return 0;
