@@ -9,6 +9,9 @@
 -vR u-w
 -vR a-w
 -cR u-w
+-vR u=r
+-vR a-r
+-cR u-r
 -cR a-w
 -cR u+x
 -cR a+x
