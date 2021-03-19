@@ -7,7 +7,7 @@ fi
 
 DIR_NAME=$1
 FILE_NAME=$2
-find "$DIR_NAME" "$FILE_NAME" &> /dev/null || exit 1
+find "$DIR_NAME" "$FILE_NAME" || exit 1
 ROOT=$PWD
 OUR_EXEC=$ROOT/xmod
 CHMOD_EXEC="chmod"
@@ -15,7 +15,7 @@ CHMOD_EXEC="chmod"
 TEMP_DIR=$ROOT/temp
 OUR_DIR=$TEMP_DIR/xmod
 CHMOD_DIR=$TEMP_DIR/chmod
-rm -rf "$TEMP_DIR" &>/dev/null
+rm -rf "$TEMP_DIR"
 mkdir "$TEMP_DIR" "$OUR_DIR" "$CHMOD_DIR" "$OUR_DIR"/results "$CHMOD_DIR"/results || exit 1
 cp -R "$DIR_NAME" "$OUR_DIR" || exit 1
 cp "$FILE_NAME" "$OUR_DIR" || exit 1
@@ -54,5 +54,5 @@ while [ $i -lt "$no_tests" ]; do
   no_failed+=$?
   ((++i))
 done
-rm -rf "$TEMP_DIR" &>/dev/null
+rm -rf "$TEMP_DIR"
 exit $no_failed
